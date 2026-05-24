@@ -73,6 +73,7 @@ const LS_KEYS = {
   regs: 'mm.registrations',
   courses: 'mm.courses',
   schedule: 'mm.schedule',
+  users: 'mm.users',
 };
 
 const loadLS = (key, fallback) => {
@@ -91,6 +92,14 @@ const saveLS = (key, val) => {
  * Tiny helpers
  * ───────────────────────────────────────────────────────────────────── */
 const fmtBaht = (n) => `฿${n.toLocaleString('en-US')}`;
+
+async function hashPassword(plain) {
+  const buf = new TextEncoder().encode(plain);
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 const Badge = ({ children, color = 'indigo' }) => {
   const palette = {
@@ -222,23 +231,98 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
  * Login Page
  * ───────────────────────────────────────────────────────────────────── */
 const LoginPage = ({ onLogin }) => {
+  const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const submit = (e) => {
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setName('');
+    setError('');
+  };
+
+  const switchMode = (next) => {
+    setMode(next);
+    resetForm();
+  };
+
+  const submit = async (e) => {
     e.preventDefault();
     setError('');
-    const expected = DEMO[role];
-    if (email.trim().toLowerCase() === expected.email && password === expected.password) {
-      onLogin({
-        role,
-        email: expected.email,
-        name: role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียนทดสอบ',
-      });
-    } else {
-      setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองบัญชีตัวอย่างด้านล่าง');
+    setSubmitting(true);
+
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+
+      if (mode === 'signup') {
+        if (!name.trim()) {
+          setError('กรุณากรอกชื่อ-นามสกุล');
+          return;
+        }
+        if (password.length < 6) {
+          setError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('รหัสผ่านทั้งสองช่องไม่ตรงกัน');
+          return;
+        }
+
+        const users = loadLS(LS_KEYS.users, []);
+        if (users.find((u) => u.email === cleanEmail)) {
+          setError('อีเมลนี้ถูกใช้แล้ว กรุณาเข้าสู่ระบบหรือใช้อีเมลอื่น');
+          return;
+        }
+        if (cleanEmail === DEMO.student.email || cleanEmail === DEMO.admin.email) {
+          setError('อีเมลนี้สงวนไว้สำหรับบัญชีทดสอบ');
+          return;
+        }
+
+        const passwordHash = await hashPassword(password);
+        const newUser = {
+          email: cleanEmail,
+          passwordHash,
+          name: name.trim(),
+          role: 'student',
+          createdAt: Date.now(),
+        };
+        saveLS(LS_KEYS.users, [...users, newUser]);
+        onLogin({ role: 'student', email: cleanEmail, name: newUser.name });
+        return;
+      }
+
+      // Login flow — registered users first, then demo accounts
+      const users = loadLS(LS_KEYS.users, []);
+      const found = users.find((u) => u.email === cleanEmail);
+      if (found) {
+        const passwordHash = await hashPassword(password);
+        if (passwordHash === found.passwordHash) {
+          onLogin({ role: found.role, email: found.email, name: found.name });
+          return;
+        }
+        setError('รหัสผ่านไม่ถูกต้อง');
+        return;
+      }
+
+      const expected = DEMO[role];
+      if (cleanEmail === expected.email && password === expected.password) {
+        onLogin({
+          role,
+          email: expected.email,
+          name: role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียนทดสอบ',
+        });
+        return;
+      }
+      setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -278,34 +362,77 @@ const LoginPage = ({ onLogin }) => {
             </div>
           </div>
 
-          {/* Login card */}
+          {/* Login / Signup card */}
           <div className="relative animate-fade-in">
             <div className="rounded-3xl border border-navy/10 bg-white/95 p-8 shadow-2xl backdrop-blur">
-              <div className="mb-6 text-center">
-                <div className="font-display text-2xl font-bold text-navy">ยินดีต้อนรับกลับ</div>
-                <div className="text-sm text-navy/60">เข้าสู่ระบบเพื่อเดินทางต่อ</div>
-              </div>
-
-              {/* Role toggle */}
-              <div className="mb-5 flex rounded-xl border border-navy/10 bg-navy/5 p-1">
-                {['student', 'admin'].map((r) => (
+              {/* Mode tabs */}
+              <div className="mb-6 flex rounded-xl border border-navy/10 bg-navy/5 p-1">
+                {[
+                  { key: 'login',  label: 'เข้าสู่ระบบ' },
+                  { key: 'signup', label: 'สมัครสมาชิก' },
+                ].map((m) => (
                   <button
-                    key={r}
+                    key={m.key}
                     type="button"
-                    onClick={() => setRole(r)}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-                      role === r
+                    onClick={() => switchMode(m.key)}
+                    className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                      mode === m.key
                         ? 'bg-navy text-white shadow'
                         : 'text-navy/60 hover:text-navy'
                     }`}
                   >
-                    {r === 'admin' ? <Shield size={16} /> : <GraduationCap size={16} />}
-                    {r === 'admin' ? 'ผู้ดูแล' : 'นักเรียน'}
+                    {m.label}
                   </button>
                 ))}
               </div>
 
+              <div className="mb-6 text-center">
+                <div className="font-display text-2xl font-bold text-navy">
+                  {mode === 'login' ? 'ยินดีต้อนรับกลับ' : 'สร้างบัญชีใหม่'}
+                </div>
+                <div className="text-sm text-navy/60">
+                  {mode === 'login' ? 'เข้าสู่ระบบเพื่อเดินทางต่อ' : 'สมัครสมาชิกฟรีเพื่อเริ่มเรียน'}
+                </div>
+              </div>
+
+              {/* Role toggle — login mode only */}
+              {mode === 'login' && (
+                <div className="mb-5 flex rounded-xl border border-navy/10 bg-navy/5 p-1">
+                  {['student', 'admin'].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                        role === r
+                          ? 'bg-navy text-white shadow'
+                          : 'text-navy/60 hover:text-navy'
+                      }`}
+                    >
+                      {r === 'admin' ? <Shield size={16} /> : <GraduationCap size={16} />}
+                      {r === 'admin' ? 'ผู้ดูแล' : 'นักเรียน'}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <form onSubmit={submit} className="space-y-4">
+                {mode === 'signup' && (
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
+                      ชื่อ-นามสกุล
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                      placeholder="สมชาย ใจดี"
+                      required
+                    />
+                  </div>
+                )}
+
                 <div>
                   <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
                     อีเมล
@@ -319,9 +446,10 @@ const LoginPage = ({ onLogin }) => {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
-                    รหัสผ่าน
+                    รหัสผ่าน {mode === 'signup' && <span className="text-navy/40 normal-case">(อย่างน้อย 6 ตัวอักษร)</span>}
                   </label>
                   <input
                     type="password"
@@ -329,9 +457,26 @@ const LoginPage = ({ onLogin }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
                     placeholder="••••••"
+                    minLength={mode === 'signup' ? 6 : undefined}
                     required
                   />
                 </div>
+
+                {mode === 'signup' && (
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
+                      ยืนยันรหัสผ่าน
+                    </label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                      placeholder="••••••"
+                      required
+                    />
+                  </div>
+                )}
 
                 {error && (
                   <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
@@ -341,32 +486,49 @@ const LoginPage = ({ onLogin }) => {
 
                 <button
                   type="submit"
-                  className="group flex w-full items-center justify-center gap-2 rounded-xl bg-navy py-3 font-semibold text-white shadow-lg shadow-navy/20 transition hover:bg-indigo"
+                  disabled={submitting}
+                  className="group flex w-full items-center justify-center gap-2 rounded-xl bg-navy py-3 font-semibold text-white shadow-lg shadow-navy/20 transition hover:bg-indigo disabled:opacity-60"
                 >
-                  เข้าสู่ระบบในฐานะ{role === 'admin' ? 'ผู้ดูแล' : 'นักเรียน'}
-                  <ChevronRight size={18} className="transition group-hover:translate-x-0.5" />
+                  {submitting ? (
+                    'กำลังดำเนินการ...'
+                  ) : mode === 'login' ? (
+                    <>
+                      เข้าสู่ระบบในฐานะ{role === 'admin' ? 'ผู้ดูแล' : 'นักเรียน'}
+                      <ChevronRight size={18} className="transition group-hover:translate-x-0.5" />
+                    </>
+                  ) : (
+                    <>
+                      สมัครสมาชิก
+                      <ChevronRight size={18} className="transition group-hover:translate-x-0.5" />
+                    </>
+                  )}
                 </button>
               </form>
 
-              {/* Demo creds */}
-              <div className="mt-6 rounded-xl border border-dashed border-indigo/30 bg-indigo/5 p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="text-xs font-bold uppercase tracking-wider text-indigo">
-                    บัญชีทดสอบ
+              {mode === 'login' ? (
+                <div className="mt-6 rounded-xl border border-dashed border-indigo/30 bg-indigo/5 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="text-xs font-bold uppercase tracking-wider text-indigo">
+                      บัญชีทดสอบ
+                    </div>
+                    <button
+                      type="button"
+                      onClick={fillDemo}
+                      className="text-xs font-semibold text-indigo hover:underline"
+                    >
+                      กรอกอัตโนมัติ
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={fillDemo}
-                    className="text-xs font-semibold text-indigo hover:underline"
-                  >
-                    กรอกอัตโนมัติ
-                  </button>
+                  <ul className="space-y-1 font-mono text-xs text-navy/70">
+                    <li>👤 student@math.com / 1234</li>
+                    <li>🛡 admin@math.com / admin</li>
+                  </ul>
                 </div>
-                <ul className="space-y-1 font-mono text-xs text-navy/70">
-                  <li>👤 student@math.com / 1234</li>
-                  <li>🛡 admin@math.com / admin</li>
-                </ul>
-              </div>
+              ) : (
+                <p className="mt-6 text-center text-xs text-navy/50">
+                  เมื่อสมัครสมาชิก คุณยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัวของ MathMaster Academy
+                </p>
+              )}
             </div>
           </div>
         </div>
