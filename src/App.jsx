@@ -636,14 +636,29 @@ const HeroBanner = () => (
 /* ─────────────────────────────────────────────────────────────────────
  * Courses Page (Student-facing list)
  * ───────────────────────────────────────────────────────────────────── */
-const CourseCard = ({ course, onRegister }) => {
+const CourseCard = ({ course, allCourses = [], onRegister }) => {
   const full = course.enrolled >= course.slots;
   const pct = Math.min(100, Math.round((course.enrolled / course.slots) * 100));
+  const bundle = isBundleCourse(course);
+  const bundleChildren = bundle
+    ? course.bundleCourseIds.map((id) => allCourses.find((c) => c.id === id)).filter(Boolean)
+    : [];
+  const bundleSavings = bundle
+    ? bundleChildren.reduce((s, c) => s + (c.price || 0), 0) - course.price
+    : 0;
+
   return (
-    <div className="card-lift flex flex-col rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+    <div className={`card-lift flex flex-col rounded-2xl border p-6 shadow-sm ${
+      bundle
+        ? 'border-gold/40 bg-gradient-to-br from-gold/5 to-indigo/5 dark:from-gold/10 dark:to-indigo/10 dark:border-gold/30'
+        : 'border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800'
+    }`}>
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <Badge color="indigo">{course.level}</Badge>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge color="indigo">{course.level}</Badge>
+            {bundle && <Badge color="gold">📦 คอร์สรวม</Badge>}
+          </div>
           <h3 className="mt-2 font-display text-xl font-bold text-navy dark:text-white">
             {course.title}
           </h3>
@@ -652,9 +667,32 @@ const CourseCard = ({ course, onRegister }) => {
           <div className="font-mono text-lg font-bold text-navy dark:text-white">
             {fmtBaht(course.price)}
           </div>
-          <div className="text-xs text-navy/50 dark:text-slate-500">รวม</div>
+          <div className="text-xs text-navy/50 dark:text-slate-500">
+            {bundle ? 'ราคาแพ็คเกจ' : 'รวม'}
+          </div>
         </div>
       </div>
+
+      {bundle && bundleChildren.length > 0 && (
+        <div className="mb-3 rounded-xl border border-gold/30 bg-white/60 dark:bg-slate-800/60 p-3">
+          <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+            ✨ รวมทั้งหมด {bundleChildren.length} วิชา
+          </div>
+          <ul className="space-y-1 text-xs text-navy/80 dark:text-slate-300">
+            {bundleChildren.map((c) => (
+              <li key={c.id} className="flex items-center gap-1.5">
+                <CheckCircle2 size={12} className="text-emerald-600 flex-shrink-0" />
+                <span className="truncate">{c.title}</span>
+              </li>
+            ))}
+          </ul>
+          {bundleSavings > 0 && (
+            <div className="mt-2 font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+              ประหยัด {fmtBaht(bundleSavings)}!
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mb-3 flex flex-wrap gap-1.5">
         {course.tags.map((t) => (
@@ -784,7 +822,7 @@ const CoursesPage = ({ courses, onRegister }) => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((c) => (
-              <CourseCard key={c.id} course={c} onRegister={onRegister} />
+              <CourseCard key={c.id} course={c} allCourses={courses} onRegister={onRegister} />
             ))}
           </div>
         )}
@@ -1104,10 +1142,21 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
 
   const myRegs = registrations.filter((r) => r.studentEmail === currentUser.email);
 
+  // Expand bundle registrations to include all sub-course IDs
+  const myCourseIds = new Set();
+  myRegs.forEach((r) => {
+    const c = courses.find((cc) => cc.id === r.courseId);
+    if (isBundleCourse(c)) {
+      c.bundleCourseIds.forEach((id) => myCourseIds.add(id));
+    } else {
+      myCourseIds.add(r.courseId);
+    }
+  });
+
   const studentEvents = days.map((d) => {
     return schedule
       .filter((s) => s.day === d)
-      .filter((s) => myRegs.some((r) => r.courseId === s.courseId))
+      .filter((s) => myCourseIds.has(s.courseId))
       .map((s) => {
         const course = courses.find((c) => c.id === s.courseId);
         return { ...s, course };
@@ -1386,7 +1435,11 @@ const emptyCourseDraft = {
   teacher: '',
   slots: 10,
   enrolled: 0,
+  bundleCourseIds: [],
 };
+
+const isBundleCourse = (course) =>
+  Array.isArray(course?.bundleCourseIds) && course.bundleCourseIds.length > 0;
 
 const AdminDashboard = ({ courses, setCourses, registrations }) => {
   const [editing, setEditing] = useState(null);
@@ -1409,6 +1462,9 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
         typeof draft.tags === 'string'
           ? draft.tags.split(',').map((t) => t.trim()).filter(Boolean)
           : draft.tags,
+      bundleCourseIds: Array.isArray(draft.bundleCourseIds)
+        ? draft.bundleCourseIds.map(Number).filter((n) => !Number.isNaN(n))
+        : [],
     };
     setCourses((cs) => {
       if (normalized.id) return cs.map((c) => (c.id === normalized.id ? normalized : c));
@@ -1466,7 +1522,14 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
                 return (
                   <tr key={c.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-navy dark:text-white">{c.title}</div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-navy dark:text-white">{c.title}</span>
+                        {isBundleCourse(c) && (
+                          <span className="rounded-md bg-gold/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                            📦 รวม {c.bundleCourseIds.length} วิชา
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-0.5 flex flex-wrap gap-1">
                         {c.tags.map((t) => (
                           <span key={t} className="text-[10px] font-medium text-indigo">#{t}</span>
@@ -1511,6 +1574,7 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
       {editing && (
         <CourseEditor
           draft={editing}
+          allCourses={courses}
           onChange={setEditing}
           onClose={() => setEditing(null)}
           onSave={saveDraft}
@@ -1532,12 +1596,19 @@ const Stat = ({ label, value, icon: Icon, mono }) => (
   </div>
 );
 
-const CourseEditor = ({ draft, onChange, onClose, onSave }) => {
+const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => {
   const upd = (k, v) => onChange({ ...draft, [k]: v });
   const isNew = !draft.id;
+  const bundleIds = Array.isArray(draft.bundleCourseIds) ? draft.bundleCourseIds.map(Number) : [];
+  const isBundle = bundleIds.length > 0;
+  const toggleBundleCourse = (id) => {
+    const has = bundleIds.includes(id);
+    upd('bundleCourseIds', has ? bundleIds.filter((x) => x !== id) : [...bundleIds, id]);
+  };
+
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
             {isNew ? 'เพิ่มคอร์สใหม่' : 'แก้ไขคอร์ส'}
@@ -1578,6 +1649,58 @@ const CourseEditor = ({ draft, onChange, onClose, onSave }) => {
             <input type="number" className="input font-mono" value={draft.enrolled} onChange={(e) => upd('enrolled', e.target.value)} />
           </Field>
         </div>
+
+        {/* Bundle (package) selection */}
+        <div className="mt-6 rounded-2xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 dark:border-indigo/30 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <div>
+              <div className="text-sm font-bold text-navy dark:text-white flex items-center gap-1.5">
+                📦 คอร์สรวม (Bundle)
+                {isBundle && <Badge color="indigo">{bundleIds.length} วิชา</Badge>}
+              </div>
+              <div className="text-xs text-navy/60 dark:text-slate-400">
+                เลือกคอร์สย่อยที่ต้องการรวมเป็นแพ็คเกจในราคาเดียว (ถ้าไม่เลือก จะเป็นคอร์สปกติ)
+              </div>
+            </div>
+          </div>
+          {allCourses.filter((c) => c.id !== draft.id && !isBundleCourse(c)).length === 0 ? (
+            <div className="rounded-lg border border-dashed border-navy/15 dark:border-slate-600 p-4 text-center text-xs text-navy/50 dark:text-slate-500">
+              ยังไม่มีคอร์สอื่นในระบบ ลองเพิ่มคอร์สปกติก่อน
+            </div>
+          ) : (
+            <div className="grid max-h-48 gap-1.5 overflow-y-auto md:grid-cols-2">
+              {allCourses
+                .filter((c) => c.id !== draft.id && !isBundleCourse(c))
+                .map((c) => {
+                  const checked = bundleIds.includes(c.id);
+                  return (
+                    <label
+                      key={c.id}
+                      className={`flex cursor-pointer items-start gap-2 rounded-lg border p-2 text-xs transition ${
+                        checked
+                          ? 'border-indigo bg-indigo/10 dark:bg-indigo/20'
+                          : 'border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-indigo'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleBundleCourse(c.id)}
+                        className="mt-0.5 accent-indigo"
+                      />
+                      <div className="flex-1">
+                        <div className="font-semibold text-navy dark:text-white">{c.title}</div>
+                        <div className="font-mono text-[10px] text-navy/50 dark:text-slate-400">
+                          {c.teacher} · {fmtBaht(c.price)}
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+
         <div className="mt-6 flex justify-end gap-2">
           <button onClick={onClose} className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:text-white">
             ยกเลิก
