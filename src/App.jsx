@@ -22,6 +22,7 @@ import {
   Trash2,
   Pencil,
   Plus,
+  UserCog,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -160,9 +161,10 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
     { key: 'schedule', label: 'ตารางเรียนของฉัน',    icon: Calendar },
   ];
   const adminMenu = [
-    { key: 'admin-dashboard', label: 'จัดการคอร์ส',    icon: LayoutDashboard },
-    { key: 'schedule',        label: 'ตารางสอนรวม',    icon: Calendar },
-    { key: 'admin-users',     label: 'ผู้ลงทะเบียน',   icon: Users },
+    { key: 'admin-dashboard',  label: 'จัดการคอร์ส',   icon: LayoutDashboard },
+    { key: 'schedule',         label: 'ตารางสอนรวม',   icon: Calendar },
+    { key: 'admin-users',      label: 'ผู้ลงทะเบียน',  icon: Users },
+    { key: 'admin-accounts',   label: 'จัดการบัญชี',   icon: UserCog },
   ];
   const menu = currentUser?.role === 'admin' ? adminMenu : studentMenu;
 
@@ -1554,6 +1556,106 @@ const CourseEditor = ({ draft, onChange, onClose, onSave }) => {
 };
 
 /* ─────────────────────────────────────────────────────────────────────
+ * Admin → Manage Accounts
+ * ───────────────────────────────────────────────────────────────────── */
+const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => {
+  const adminCount = users.filter((u) => u.role === 'admin').length;
+
+  const promote = (email) => {
+    setUsers((us) => us.map((u) => u.email === email ? { ...u, role: 'admin' } : u));
+    if (currentUser.email === email) setCurrentUser((u) => ({ ...u, role: 'admin' }));
+  };
+
+  const demote = (email) => {
+    if (adminCount <= 1 && users.find((u) => u.email === email)?.role === 'admin') {
+      alert('ไม่สามารถลดตำแหน่งได้ — ต้องมีผู้ดูแลอย่างน้อย 1 คน');
+      return;
+    }
+    setUsers((us) => us.map((u) => u.email === email ? { ...u, role: 'student' } : u));
+    if (currentUser.email === email) setCurrentUser((u) => ({ ...u, role: 'student' }));
+  };
+
+  return (
+    <div className="mx-auto max-w-5xl animate-fade-in px-6 py-10">
+      <h1 className="font-display text-4xl font-bold text-navy">จัดการบัญชีผู้ใช้</h1>
+      <p className="mt-1 text-navy/60">เลื่อนตำแหน่งหรือลดตำแหน่งบัญชีสมาชิกในระบบ</p>
+
+      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm">
+        {users.length === 0 ? (
+          <div className="p-16 text-center">
+            <div className="font-mono text-5xl text-navy/30">∅</div>
+            <div className="mt-3 font-display text-2xl text-navy">ยังไม่มีสมาชิกในระบบ</div>
+            <div className="mt-1 text-sm text-navy/50">เมื่อมีผู้สมัครสมาชิกจะปรากฏที่นี่</div>
+          </div>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="bg-navy/[0.03] text-navy/60">
+              <tr>
+                <th className="px-4 py-3 font-semibold">ชื่อ-นามสกุล</th>
+                <th className="px-4 py-3 font-semibold">อีเมล</th>
+                <th className="px-4 py-3 font-semibold">บทบาท</th>
+                <th className="px-4 py-3 font-semibold">วันที่สมัคร</th>
+                <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-navy/5">
+              {users.map((u) => {
+                const isMe = u.email === currentUser.email;
+                const isAdmin = u.role === 'admin';
+                return (
+                  <tr key={u.email} className="hover:bg-indigo/[0.03]">
+                    <td className="px-4 py-3 font-semibold text-navy">
+                      {u.name}
+                      {isMe && (
+                        <span className="ml-2 text-[11px] font-normal text-navy/40">(คุณ)</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-navy/70">{u.email}</td>
+                    <td className="px-4 py-3">
+                      <Badge color={isAdmin ? 'gold' : 'indigo'}>
+                        {isAdmin ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-navy/50">
+                      {u.createdAt
+                        ? new Date(u.createdAt).toLocaleDateString('th-TH', {
+                            day: 'numeric', month: 'short', year: 'numeric',
+                          })
+                        : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {isAdmin ? (
+                        <button
+                          onClick={() => demote(u.email)}
+                          className="rounded-lg border border-navy/10 bg-white px-3 py-1 text-xs font-semibold text-navy/70 hover:border-rose-300 hover:text-rose-600"
+                        >
+                          ลดเป็นนักเรียน
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => promote(u.email)}
+                          className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-gold/20"
+                        >
+                          🛡 เลื่อนเป็น Admin
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="mt-4 rounded-xl border border-indigo/20 bg-indigo/5 px-4 py-3 text-sm text-navy/70">
+        💡 บัญชีทดสอบ <span className="font-mono">admin@math.com</span> และ <span className="font-mono">student@math.com</span> ไม่ปรากฏในรายการนี้ — จัดการได้เฉพาะบัญชีที่สมัครผ่านหน้าเว็บ
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────
  * Admin → Registered Users
  * ───────────────────────────────────────────────────────────────────── */
 const statusLabel = { pending: 'รอดำเนินการ', approved: 'อนุมัติแล้ว', rejected: 'ปฏิเสธ' };
@@ -1641,6 +1743,7 @@ export default function App() {
   const [courses, setCourses] = useState(() => loadLS(LS_KEYS.courses, mockCourses));
   const [registrations, setRegistrations] = useState(() => loadLS(LS_KEYS.regs, []));
   const [schedule, setSchedule] = useState(() => loadLS(LS_KEYS.schedule, defaultSchedule));
+  const [users, setUsers] = useState(() => loadLS(LS_KEYS.users, []));
   const [preselectCourse, setPreselectCourse] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
 
@@ -1648,6 +1751,7 @@ export default function App() {
   useEffect(() => saveLS(LS_KEYS.regs, registrations), [registrations]);
   useEffect(() => saveLS(LS_KEYS.courses, courses), [courses]);
   useEffect(() => saveLS(LS_KEYS.schedule, schedule), [schedule]);
+  useEffect(() => saveLS(LS_KEYS.users, users), [users]);
 
   useEffect(() => {
     if (!currentUser && activePage !== 'login') setActivePage('login');
@@ -1740,6 +1844,14 @@ export default function App() {
               registrations={registrations}
               courses={courses}
               setRegistrations={setRegistrations}
+            />
+          )}
+          {activePage === 'admin-accounts' && currentUser.role === 'admin' && (
+            <AdminAccountsPage
+              users={users}
+              setUsers={setUsers}
+              currentUser={currentUser}
+              setCurrentUser={setCurrentUser}
             />
           )}
         </main>
