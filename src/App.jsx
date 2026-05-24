@@ -25,6 +25,8 @@ import {
   UserCog,
   User,
   Camera,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -77,6 +79,7 @@ const LS_KEYS = {
   courses: 'mm.courses',
   schedule: 'mm.schedule',
   users: 'mm.users',
+  theme: 'mm.theme',
 };
 
 const loadLS = (key, fallback) => {
@@ -108,9 +111,9 @@ const Badge = ({ children, color = 'indigo' }) => {
   const palette = {
     indigo: 'bg-indigo/10 text-indigo border-indigo/30',
     gold: 'bg-gold/15 text-amber-700 border-gold/40',
-    navy: 'bg-navy/10 text-navy border-navy/20',
-    green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    red: 'bg-rose-50 text-rose-700 border-rose-200',
+    navy: 'bg-navy/10 text-navy border-navy/20 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600',
+    green: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700',
+    red: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-700',
   }[color];
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${palette}`}>
@@ -156,7 +159,7 @@ const FloatingSymbols = () => {
 /* ─────────────────────────────────────────────────────────────────────
  * Navbar
  * ───────────────────────────────────────────────────────────────────── */
-const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
+const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, toggleDark }) => {
   const studentMenu = [
     { key: 'courses',  label: 'คอร์สทั้งหมด',       icon: BookOpen },
     { key: 'register', label: 'ลงทะเบียน',           icon: ClipboardList },
@@ -172,7 +175,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
   const menu = currentUser?.role === 'admin' ? adminMenu : studentMenu;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-navy/10 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-navy/10 dark:border-slate-700 bg-white/80 dark:bg-slate-900/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         <button
           onClick={() => setActivePage(currentUser?.role === 'admin' ? 'admin-dashboard' : 'courses')}
@@ -181,7 +184,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-navy text-gold shadow-sm">
             <Sigma size={20} strokeWidth={2.4} />
           </span>
-          <span className="font-display text-xl font-bold tracking-tight text-navy">
+          <span className="font-display text-xl font-bold tracking-tight text-navy dark:text-white">
             บ้านครูทราย
           </span>
         </button>
@@ -193,8 +196,8 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
               onClick={() => setActivePage(key)}
               className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
                 activePage === key
-                  ? 'bg-navy text-white shadow'
-                  : 'text-navy/70 hover:bg-navy/5 hover:text-navy'
+                  ? 'bg-navy text-white shadow dark:bg-indigo'
+                  : 'text-navy/70 hover:bg-navy/5 hover:text-navy dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               <Icon size={16} />
@@ -204,15 +207,24 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
         </nav>
 
         <div className="flex items-center gap-3">
+          {/* Day/night toggle */}
+          <button
+            onClick={toggleDark}
+            title={darkMode ? 'โหมดกลางวัน' : 'โหมดกลางคืน'}
+            className="grid h-9 w-9 place-items-center rounded-lg border border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-300 hover:bg-navy/5 dark:hover:bg-slate-700 transition"
+          >
+            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+
           <div className="hidden items-center gap-2 sm:flex">
             <div className="text-right leading-tight">
-              <div className="text-sm font-semibold text-navy flex items-center gap-1 justify-end">
+              <div className="text-sm font-semibold text-navy dark:text-white flex items-center gap-1 justify-end">
                 {currentUser?.role === 'admin' && (
                   <Shield size={14} className="text-gold" fill="#FBBF24" />
                 )}
                 {currentUser?.nickname || currentUser?.name || (currentUser?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน')}
               </div>
-              <div className="text-[11px] uppercase tracking-wider text-navy/50">
+              <div className="text-[11px] uppercase tracking-wider text-navy/50 dark:text-slate-500">
                 {currentUser?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน'}
               </div>
             </div>
@@ -230,7 +242,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
           </div>
           <button
             onClick={onLogout}
-            className="flex items-center gap-1.5 rounded-lg border border-navy/10 bg-white px-3 py-2 text-sm font-medium text-navy/80 transition hover:border-rose-300 hover:text-rose-600"
+            className="flex items-center gap-1.5 rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-navy/80 dark:text-slate-300 transition hover:border-rose-300 hover:text-rose-600"
           >
             <LogOut size={16} /> ออกจากระบบ
           </button>
@@ -243,7 +255,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
 /* ─────────────────────────────────────────────────────────────────────
  * Login Page
  * ───────────────────────────────────────────────────────────────────── */
-const LoginPage = ({ onLogin }) => {
+const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
@@ -363,6 +375,15 @@ const LoginPage = ({ onLogin }) => {
   return (
     <div className="relative min-h-screen graph-paper">
       <FloatingSymbols />
+      {/* Day/night toggle on login screen */}
+      <button
+        onClick={toggleDark}
+        title={darkMode ? 'โหมดกลางวัน' : 'โหมดกลางคืน'}
+        className="absolute right-6 top-6 z-10 grid h-9 w-9 place-items-center rounded-lg border border-navy/10 dark:border-slate-600 bg-white/80 dark:bg-slate-800/80 text-navy/60 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 transition backdrop-blur"
+      >
+        {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+      </button>
+
       <div className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 py-12">
         <div className="grid w-full gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Brand panel */}
@@ -371,16 +392,16 @@ const LoginPage = ({ onLogin }) => {
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-navy text-gold shadow-lg">
                 <Sigma size={26} strokeWidth={2.4} />
               </span>
-              <span className="font-display text-3xl font-bold text-navy">
+              <span className="font-display text-3xl font-bold text-navy dark:text-white">
                 บ้านครูทราย
               </span>
             </div>
-            <h1 className="font-display text-5xl font-bold leading-tight text-navy">
+            <h1 className="font-display text-5xl font-bold leading-tight text-navy dark:text-white">
               ที่ซึ่งตัวเลข <span className="text-indigo">กลายเป็น</span>
               <br />
               <span className="italic">ศิลปะ</span>
             </h1>
-            <p className="mt-6 max-w-md text-navy/70">
+            <p className="mt-6 max-w-md text-navy/70 dark:text-slate-300">
               สถาบันติวคณิตศาสตร์ระดับพรีเมียม สำหรับนักเรียนที่มุ่งมั่นสู่ความเป็นเลิศ
               จากเลขคณิตพื้นฐานถึงแคลคูลัสขั้นสูง ครูผู้เชี่ยวชาญของเราพร้อมสร้างความชัดเจน
               ความลึกซึ้ง และความมั่นใจให้คุณ
@@ -392,9 +413,9 @@ const LoginPage = ({ onLogin }) => {
 
           {/* Login / Signup card */}
           <div className="relative animate-fade-in">
-            <div className="rounded-3xl border border-navy/10 bg-white/95 p-8 shadow-2xl backdrop-blur">
+            <div className="rounded-3xl border border-navy/10 dark:border-slate-700 bg-white/95 dark:bg-slate-800 p-8 shadow-2xl backdrop-blur">
               {/* Mode tabs */}
-              <div className="mb-6 flex rounded-xl border border-navy/10 bg-navy/5 p-1">
+              <div className="mb-6 flex rounded-xl border border-navy/10 dark:border-slate-600 bg-navy/5 dark:bg-slate-700/50 p-1">
                 {[
                   { key: 'login',  label: 'เข้าสู่ระบบ' },
                   { key: 'signup', label: 'สมัครสมาชิก' },
@@ -406,7 +427,7 @@ const LoginPage = ({ onLogin }) => {
                     className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
                       mode === m.key
                         ? 'bg-navy text-white shadow'
-                        : 'text-navy/60 hover:text-navy'
+                        : 'text-navy/60 hover:text-navy dark:text-slate-400 dark:hover:text-white'
                     }`}
                   >
                     {m.label}
@@ -415,17 +436,17 @@ const LoginPage = ({ onLogin }) => {
               </div>
 
               <div className="mb-6 text-center">
-                <div className="font-display text-2xl font-bold text-navy">
+                <div className="font-display text-2xl font-bold text-navy dark:text-white">
                   {mode === 'login' ? 'ยินดีต้อนรับกลับ' : 'สร้างบัญชีใหม่'}
                 </div>
-                <div className="text-sm text-navy/60">
+                <div className="text-sm text-navy/60 dark:text-slate-400">
                   {mode === 'login' ? 'เข้าสู่ระบบเพื่อเดินทางต่อ' : 'สมัครสมาชิกฟรีเพื่อเริ่มเรียน'}
                 </div>
               </div>
 
               {/* Role toggle — login mode only */}
               {mode === 'login' && (
-                <div className="mb-5 flex rounded-xl border border-navy/10 bg-navy/5 p-1">
+                <div className="mb-5 flex rounded-xl border border-navy/10 dark:border-slate-600 bg-navy/5 dark:bg-slate-700/50 p-1">
                   {['student', 'admin'].map((r) => (
                     <button
                       key={r}
@@ -434,7 +455,7 @@ const LoginPage = ({ onLogin }) => {
                       className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
                         role === r
                           ? 'bg-navy text-white shadow'
-                          : 'text-navy/60 hover:text-navy'
+                          : 'text-navy/60 hover:text-navy dark:text-slate-400 dark:hover:text-white'
                       }`}
                     >
                       {r === 'admin' ? <Shield size={16} /> : <GraduationCap size={16} />}
@@ -447,14 +468,14 @@ const LoginPage = ({ onLogin }) => {
               <form onSubmit={submit} className="space-y-4">
                 {mode === 'signup' && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
                       ชื่อ-นามสกุล
                     </label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                      className="w-full rounded-xl border border-navy/15 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-navy dark:text-slate-100 outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
                       placeholder="สมชาย ใจดี"
                       required
                     />
@@ -462,28 +483,28 @@ const LoginPage = ({ onLogin }) => {
                 )}
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
                     อีเมล
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                    className="w-full rounded-xl border border-navy/15 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-navy dark:text-slate-100 outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
                     placeholder="you@math.com"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
-                    รหัสผ่าน {mode === 'signup' && <span className="text-navy/40 normal-case">(8+ ตัว, a-z, 0-9)</span>}
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
+                    รหัสผ่าน {mode === 'signup' && <span className="text-navy/40 dark:text-slate-500 normal-case">(8+ ตัว, a-z, 0-9)</span>}
                   </label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                    className="w-full rounded-xl border border-navy/15 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-navy dark:text-slate-100 outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
                     placeholder="••••••"
                     minLength={mode === 'signup' ? 8 : undefined}
                     required
@@ -492,14 +513,14 @@ const LoginPage = ({ onLogin }) => {
 
                 {mode === 'signup' && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
                       ยืนยันรหัสผ่าน
                     </label>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                      className="w-full rounded-xl border border-navy/15 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-navy dark:text-slate-100 outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
                       placeholder="••••••"
                       required
                     />
@@ -507,7 +528,7 @@ const LoginPage = ({ onLogin }) => {
                 )}
 
                 {error && (
-                  <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                  <div className="rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
                     {error}
                   </div>
                 )}
@@ -534,7 +555,7 @@ const LoginPage = ({ onLogin }) => {
               </form>
 
               {mode === 'login' ? (
-                <div className="mt-6 rounded-xl border border-dashed border-indigo/30 bg-indigo/5 p-4">
+                <div className="mt-6 rounded-xl border border-dashed border-indigo/30 bg-indigo/5 dark:bg-indigo/10 p-4">
                   <div className="mb-2 flex items-center justify-between">
                     <div className="text-xs font-bold uppercase tracking-wider text-indigo">
                       บัญชีทดสอบ
@@ -547,13 +568,13 @@ const LoginPage = ({ onLogin }) => {
                       กรอกอัตโนมัติ
                     </button>
                   </div>
-                  <ul className="space-y-1 font-mono text-xs text-navy/70">
+                  <ul className="space-y-1 font-mono text-xs text-navy/70 dark:text-slate-400">
                     <li>👤 student@math.com / 1234</li>
                     <li>🛡 admin@math.com / admin</li>
                   </ul>
                 </div>
               ) : (
-                <p className="mt-6 text-center text-xs text-navy/50">
+                <p className="mt-6 text-center text-xs text-navy/50 dark:text-slate-500">
                   เมื่อสมัครสมาชิก คุณยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัวของ บ้านครูทราย
                 </p>
               )}
@@ -619,19 +640,19 @@ const CourseCard = ({ course, onRegister }) => {
   const full = course.enrolled >= course.slots;
   const pct = Math.min(100, Math.round((course.enrolled / course.slots) * 100));
   return (
-    <div className="card-lift flex flex-col rounded-2xl border border-navy/10 bg-white p-6 shadow-sm">
+    <div className="card-lift flex flex-col rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <Badge color="indigo">{course.level}</Badge>
-          <h3 className="mt-2 font-display text-xl font-bold text-navy">
+          <h3 className="mt-2 font-display text-xl font-bold text-navy dark:text-white">
             {course.title}
           </h3>
         </div>
         <div className="text-right">
-          <div className="font-mono text-lg font-bold text-navy">
+          <div className="font-mono text-lg font-bold text-navy dark:text-white">
             {fmtBaht(course.price)}
           </div>
-          <div className="text-xs text-navy/50">รวม</div>
+          <div className="text-xs text-navy/50 dark:text-slate-500">รวม</div>
         </div>
       </div>
 
@@ -639,14 +660,14 @@ const CourseCard = ({ course, onRegister }) => {
         {course.tags.map((t) => (
           <span
             key={t}
-            className="inline-flex items-center gap-1 rounded-md bg-indigo/5 px-2 py-0.5 text-[11px] font-medium text-indigo"
+            className="inline-flex items-center gap-1 rounded-md bg-indigo/5 dark:bg-indigo/10 px-2 py-0.5 text-[11px] font-medium text-indigo"
           >
             <TagIcon size={11} /> {t}
           </span>
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 text-sm text-navy/70">
+      <div className="grid grid-cols-2 gap-2 text-sm text-navy/70 dark:text-slate-400">
         <div className="flex items-center gap-1.5">
           <Clock size={14} className="text-indigo" />
           <span className="font-mono">{course.hours} ชม.</span>
@@ -657,13 +678,13 @@ const CourseCard = ({ course, onRegister }) => {
             {course.enrolled}/{course.slots}
           </span>
         </div>
-        <div className="col-span-2 text-xs text-navy/50">
-          ผู้สอน: <span className="text-navy/80">{course.teacher}</span>
+        <div className="col-span-2 text-xs text-navy/50 dark:text-slate-500">
+          ผู้สอน: <span className="text-navy/80 dark:text-slate-300">{course.teacher}</span>
         </div>
       </div>
 
       <div className="mt-3">
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-navy/5">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-navy/5 dark:bg-slate-700">
           <div
             className={`h-full rounded-full ${full ? 'bg-rose-400' : 'bg-indigo'}`}
             style={{ width: `${pct}%` }}
@@ -676,7 +697,7 @@ const CourseCard = ({ course, onRegister }) => {
         disabled={full}
         className={`mt-5 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${
           full
-            ? 'cursor-not-allowed bg-navy/10 text-navy/40'
+            ? 'cursor-not-allowed bg-navy/10 dark:bg-slate-700 text-navy/40 dark:text-slate-500'
             : 'bg-navy text-white hover:bg-indigo'
         }`}
       >
@@ -710,26 +731,26 @@ const CoursesPage = ({ courses, onRegister }) => {
 
       <div className="mx-auto max-w-7xl px-6 py-10">
         {/* Filter bar */}
-        <div className="mb-8 rounded-2xl border border-navy/10 bg-white p-4 shadow-sm">
+        <div className="mb-8 rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 text-navy/60">
+            <div className="flex items-center gap-2 text-navy/60 dark:text-slate-400">
               <Filter size={16} /> <span className="text-sm font-semibold">กรอง</span>
             </div>
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy/40" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy/40 dark:text-slate-500" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="ค้นหาวิชา..."
-                className="w-56 rounded-xl border border-navy/10 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                className="w-56 rounded-xl border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
               />
             </div>
             <div>
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
-                className="rounded-xl border border-navy/10 bg-white px-3 py-2 text-sm outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+                className="rounded-xl border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 px-3 py-2 text-sm outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/30"
               >
                 {levels.map((l) => (
                   <option key={l}>{l}</option>
@@ -737,7 +758,7 @@ const CoursesPage = ({ courses, onRegister }) => {
               </select>
             </div>
             <div className="flex flex-1 items-center gap-3 min-w-[220px]">
-              <span className="text-xs text-navy/50">ราคาสูงสุด</span>
+              <span className="text-xs text-navy/50 dark:text-slate-500">ราคาสูงสุด</span>
               <input
                 type="range"
                 min={1000}
@@ -747,7 +768,7 @@ const CoursesPage = ({ courses, onRegister }) => {
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="flex-1 accent-indigo"
               />
-              <span className="font-mono text-sm font-semibold text-navy">
+              <span className="font-mono text-sm font-semibold text-navy dark:text-white">
                 {fmtBaht(maxPrice)}
               </span>
             </div>
@@ -755,10 +776,10 @@ const CoursesPage = ({ courses, onRegister }) => {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-navy/15 bg-white p-16 text-center">
-            <div className="font-mono text-5xl text-navy/30">{'(╯°□°）╯'}</div>
-            <div className="mt-3 font-display text-2xl text-navy">ไม่พบคอร์ส</div>
-            <div className="text-sm text-navy/50">ลองขยายเงื่อนไขการค้นหา</div>
+          <div className="rounded-2xl border border-dashed border-navy/15 dark:border-slate-700 bg-white dark:bg-slate-800 p-16 text-center">
+            <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">{'(╯°□°）╯'}</div>
+            <div className="mt-3 font-display text-2xl text-navy dark:text-white">ไม่พบคอร์ส</div>
+            <div className="text-sm text-navy/50 dark:text-slate-500">ลองขยายเงื่อนไขการค้นหา</div>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -860,14 +881,14 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
     <div className="flex flex-1 items-center gap-3">
       <div
         className={`grid h-9 w-9 place-items-center rounded-full font-mono font-bold transition ${
-          step >= n ? 'bg-navy text-white' : 'bg-navy/10 text-navy/50'
+          step >= n ? 'bg-navy text-white' : 'bg-navy/10 dark:bg-slate-700 text-navy/50 dark:text-slate-400'
         }`}
       >
         {step > n ? <CheckCircle2 size={18} /> : n}
       </div>
-      <div className="hidden text-sm font-semibold text-navy md:block">{label}</div>
+      <div className="hidden text-sm font-semibold text-navy dark:text-white md:block">{label}</div>
       {n < 3 && (
-        <div className={`mx-2 hidden h-0.5 flex-1 md:block ${step > n ? 'bg-navy' : 'bg-navy/10'}`} />
+        <div className={`mx-2 hidden h-0.5 flex-1 md:block ${step > n ? 'bg-navy dark:bg-indigo' : 'bg-navy/10 dark:bg-slate-700'}`} />
       )}
     </div>
   );
@@ -875,8 +896,8 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
   return (
     <div className="animate-fade-in">
       <div className="mx-auto max-w-3xl px-6 py-12">
-        <h1 className="font-display text-4xl font-bold text-navy">ลงทะเบียนเรียน</h1>
-        <p className="mt-2 text-navy/60">เพียง 3 ขั้นตอนง่ายๆ แล้วคุณก็พร้อมเรียน</p>
+        <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ลงทะเบียนเรียน</h1>
+        <p className="mt-2 text-navy/60 dark:text-slate-400">เพียง 3 ขั้นตอนง่ายๆ แล้วคุณก็พร้อมเรียน</p>
 
         {/* Progress */}
         <div className="mt-8 flex items-center">
@@ -885,7 +906,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
           <StepDot n={3} label="ยืนยัน" />
         </div>
 
-        <div className="mt-8 rounded-3xl border border-navy/10 bg-white p-8 shadow-sm">
+        <div className="mt-8 rounded-3xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm">
           {step === 1 && (
             <div className="space-y-5 animate-fade-in">
               <div className="grid gap-4 md:grid-cols-2">
@@ -947,7 +968,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
               </Field>
 
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-navy/60">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
                   ช่วงเวลาที่สามารถเรียนได้
                 </div>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -959,7 +980,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
                       className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
                         form.slot === slot
                           ? 'border-indigo bg-indigo text-white shadow'
-                          : 'border-navy/10 bg-white text-navy/70 hover:border-indigo hover:text-indigo'
+                          : 'border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 text-navy/70 dark:text-slate-300 hover:border-indigo hover:text-indigo'
                       }`}
                     >
                       {slot}
@@ -975,8 +996,8 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
 
           {step === 3 && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-2xl font-bold text-navy">ยืนยันข้อมูล</h2>
-              <p className="text-sm text-navy/60">กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนยืนยัน</p>
+              <h2 className="font-display text-2xl font-bold text-navy dark:text-white">ยืนยันข้อมูล</h2>
+              <p className="text-sm text-navy/60 dark:text-slate-400">กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนยืนยัน</p>
 
               <div className="mt-5 grid gap-4 md:grid-cols-2">
                 <Summary label="ชื่อ-นามสกุล" value={`${form.firstName} ${form.lastName}`} />
@@ -1001,7 +1022,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
             <button
               onClick={back}
               disabled={step === 1}
-              className="flex items-center gap-1.5 rounded-xl border border-navy/10 bg-white px-4 py-2 text-sm font-semibold text-navy/70 transition hover:border-navy hover:text-navy disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-xl border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 transition hover:border-navy hover:text-navy dark:hover:border-slate-400 dark:hover:text-white disabled:opacity-40"
             >
               <ChevronLeft size={16} /> ย้อนกลับ
             </button>
@@ -1026,14 +1047,14 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
 
       {showSuccess && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
+          <div className="relative w-full max-w-md rounded-3xl bg-white dark:bg-slate-800 p-8 text-center shadow-2xl">
             <Confetti />
-            <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+            <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600">
               <CheckCircle2 size={36} />
             </div>
-            <h3 className="font-display text-3xl font-bold text-navy">สำเร็จแล้ว! 🎉</h3>
-            <p className="mt-2 text-navy/60">
-              การลงทะเบียนสำหรับ <span className="font-semibold text-navy">{selectedCourse?.title}</span> ได้รับการบันทึกแล้ว
+            <h3 className="font-display text-3xl font-bold text-navy dark:text-white">สำเร็จแล้ว! 🎉</h3>
+            <p className="mt-2 text-navy/60 dark:text-slate-400">
+              การลงทะเบียนสำหรับ <span className="font-semibold text-navy dark:text-white">{selectedCourse?.title}</span> ได้รับการบันทึกแล้ว
             </p>
             <button
               onClick={() => {
@@ -1054,7 +1075,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
 const Field = ({ label, error, children }) => (
   <label className="block">
     <div className="mb-1 flex items-center justify-between">
-      <span className="text-xs font-semibold uppercase tracking-wider text-navy/60">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">{label}</span>
       {error && <span className="text-xs font-semibold text-rose-600">{error}</span>}
     </div>
     {children}
@@ -1062,11 +1083,11 @@ const Field = ({ label, error, children }) => (
 );
 
 const Summary = ({ label, value, mono, highlight }) => (
-  <div className="rounded-xl border border-navy/10 bg-navy/[0.02] p-4">
-    <div className="text-[11px] font-semibold uppercase tracking-wider text-navy/50">{label}</div>
+  <div className="rounded-xl border border-navy/10 dark:border-slate-700 bg-navy/[0.02] dark:bg-slate-700/30 p-4">
+    <div className="text-[11px] font-semibold uppercase tracking-wider text-navy/50 dark:text-slate-500">{label}</div>
     <div
       className={`mt-1 font-semibold ${mono ? 'font-mono' : ''} ${
-        highlight ? 'text-gold text-xl' : 'text-navy'
+        highlight ? 'text-gold text-xl' : 'text-navy dark:text-white'
       }`}
     >
       {value || '-'}
@@ -1127,10 +1148,10 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-navy">
+          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">
             {isAdmin ? 'ตารางสอนรวม' : 'ตารางเรียนรายสัปดาห์'}
           </h1>
-          <p className="mt-1 text-navy/60">
+          <p className="mt-1 text-navy/60 dark:text-slate-400">
             {isAdmin
               ? 'คอร์สทั้งหมดในแต่ละสัปดาห์ — กดปุ่ม + เพื่อเพิ่ม หรือคลิกการ์ดเพื่อแก้ไข'
               : 'แผนการเรียนส่วนตัวของคุณสำหรับสัปดาห์นี้'}
@@ -1154,26 +1175,26 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
       </div>
 
       {!isAdmin && !hasAny ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-navy/15 bg-white p-16 text-center">
-          <div className="font-mono text-5xl text-navy/30">∅</div>
-          <div className="mt-3 font-display text-2xl text-navy">ยังไม่มีคลาสเรียน</div>
-          <div className="text-sm text-navy/50">ลงทะเบียนคอร์สเพื่อดูตารางเรียนที่นี่</div>
+        <div className="mt-10 rounded-2xl border border-dashed border-navy/15 dark:border-slate-700 bg-white dark:bg-slate-800 p-16 text-center">
+          <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
+          <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีคลาสเรียน</div>
+          <div className="text-sm text-navy/50 dark:text-slate-500">ลงทะเบียนคอร์สเพื่อดูตารางเรียนที่นี่</div>
         </div>
       ) : (
         <div className="mt-8 grid gap-3 md:grid-cols-7">
           {days.map((d, i) => (
             <div
               key={d}
-              className="rounded-2xl border border-navy/10 bg-white p-3 shadow-sm"
+              className="rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-sm"
             >
               <div className="mb-3 flex items-center justify-between">
-                <div className="font-display text-lg font-bold text-navy">{d}</div>
+                <div className="font-display text-lg font-bold text-navy dark:text-white">{d}</div>
                 <div className="flex items-center gap-1">
                   <Badge color="indigo">{events[i].length}</Badge>
                   {isAdmin && (
                     <button
                       onClick={() => setEditing({ courseId: '', day: d, time: '', room: '' })}
-                      className="grid h-6 w-6 place-items-center rounded-full border border-navy/10 text-navy/60 transition hover:border-indigo hover:text-indigo"
+                      className="grid h-6 w-6 place-items-center rounded-full border border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-400 transition hover:border-indigo hover:text-indigo"
                       title="เพิ่มรายการ"
                     >
                       <Plus size={12} />
@@ -1183,23 +1204,23 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
               </div>
               <div className="space-y-2">
                 {events[i].length === 0 && (
-                  <div className="rounded-lg border border-dashed border-navy/10 py-6 text-center text-xs text-navy/40">
+                  <div className="rounded-lg border border-dashed border-navy/10 dark:border-slate-700 py-6 text-center text-xs text-navy/40 dark:text-slate-600">
                     ว่าง
                   </div>
                 )}
                 {events[i].map((ev) => (
                   <div
                     key={ev.id}
-                    className={`group relative rounded-xl border border-indigo/20 bg-indigo/5 p-3 ${
+                    className={`group relative rounded-xl border border-indigo/20 dark:border-indigo/30 bg-indigo/5 dark:bg-indigo/10 p-3 ${
                       isAdmin ? 'cursor-pointer transition hover:border-indigo' : ''
                     }`}
                     onClick={() => isAdmin && setEditing(ev)}
                   >
                     <div className="text-[11px] font-mono text-indigo">{ev.time || '—'}</div>
-                    <div className="mt-0.5 line-clamp-2 text-sm font-semibold text-navy">
+                    <div className="mt-0.5 line-clamp-2 text-sm font-semibold text-navy dark:text-white">
                       {ev.course?.title || '⚠ ไม่พบคอร์ส'}
                     </div>
-                    <div className="mt-1 flex items-center justify-between text-[11px] text-navy/60">
+                    <div className="mt-1 flex items-center justify-between text-[11px] text-navy/60 dark:text-slate-400">
                       <span>{ev.course?.teacher}</span>
                       <span className="font-mono">📍 {ev.room}</span>
                     </div>
@@ -1209,7 +1230,7 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
                           e.stopPropagation();
                           removeEntry(ev.id);
                         }}
-                        className="absolute right-1.5 top-1.5 hidden rounded-md border border-rose-200 bg-white p-1 text-rose-600 hover:bg-rose-50 group-hover:block"
+                        className="absolute right-1.5 top-1.5 hidden rounded-md border border-rose-200 bg-white dark:bg-slate-800 p-1 text-rose-600 hover:bg-rose-50 group-hover:block"
                         title="ลบรายการ"
                       >
                         <Trash2 size={11} />
@@ -1234,9 +1255,9 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
       )}
 
       {isAdmin && (
-        <div className="mt-10 rounded-2xl border border-navy/10 bg-white p-6 shadow-sm">
-          <h2 className="font-display text-2xl font-bold text-navy">ภาพรวมการลงทะเบียน</h2>
-          <p className="text-sm text-navy/60">จำนวนผู้ลงทะเบียนในแต่ละคอร์ส</p>
+        <div className="mt-10 rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+          <h2 className="font-display text-2xl font-bold text-navy dark:text-white">ภาพรวมการลงทะเบียน</h2>
+          <p className="text-sm text-navy/60 dark:text-slate-400">จำนวนผู้ลงทะเบียนในแต่ละคอร์ส</p>
           <div className="mt-5 space-y-4">
             {courses.map((c) => {
               const liveEnrolled =
@@ -1245,12 +1266,12 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
               return (
                 <div key={c.id}>
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <div className="font-semibold text-navy">{c.title}</div>
-                    <div className="font-mono text-navy/70">
+                    <div className="font-semibold text-navy dark:text-white">{c.title}</div>
+                    <div className="font-mono text-navy/70 dark:text-slate-400">
                       {liveEnrolled}/{c.slots}
                     </div>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-navy/5">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-navy/5 dark:bg-slate-700">
                     <div
                       className={`h-full ${pct >= 100 ? 'bg-rose-400' : 'bg-indigo'}`}
                       style={{ width: `${pct}%` }}
@@ -1276,12 +1297,12 @@ const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-display text-2xl font-bold text-navy">
+          <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
             {isNew ? 'เพิ่มรายการตารางสอน' : 'แก้ไขรายการตารางสอน'}
           </h3>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-navy/60 hover:bg-navy/5">
+          <button onClick={onClose} className="rounded-lg p-1.5 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700">
             <X size={18} />
           </button>
         </div>
@@ -1336,7 +1357,7 @@ const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
         <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="rounded-xl border border-navy/10 px-4 py-2 text-sm font-semibold text-navy/70 hover:border-navy hover:text-navy"
+            className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:border-slate-400 dark:hover:text-white"
           >
             ยกเลิก
           </button>
@@ -1400,8 +1421,8 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-navy">แผงควบคุมผู้ดูแล</h1>
-          <p className="mt-1 text-navy/60">จัดการรายการคอร์สของสถาบัน</p>
+          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">แผงควบคุมผู้ดูแล</h1>
+          <p className="mt-1 text-navy/60 dark:text-slate-400">จัดการรายการคอร์สของสถาบัน</p>
         </div>
         <button
           onClick={() => setEditing({ ...emptyCourseDraft })}
@@ -1425,10 +1446,10 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
         />
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm">
+      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
         <div className="thin-scroll overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-navy/[0.03] text-navy/60">
+            <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-semibold">คอร์ส</th>
                 <th className="px-4 py-3 font-semibold">ระดับ</th>
@@ -1439,13 +1460,13 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
                 <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-navy/5">
+            <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
               {courses.map((c) => {
                 const live = c.enrolled + registrations.filter((r) => r.courseId === c.id).length;
                 return (
-                  <tr key={c.id} className="hover:bg-indigo/[0.03]">
+                  <tr key={c.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-navy">{c.title}</div>
+                      <div className="font-semibold text-navy dark:text-white">{c.title}</div>
                       <div className="mt-0.5 flex flex-wrap gap-1">
                         {c.tags.map((t) => (
                           <span key={t} className="text-[10px] font-medium text-indigo">#{t}</span>
@@ -1453,11 +1474,11 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
                       </div>
                     </td>
                     <td className="px-4 py-3"><Badge>{c.level}</Badge></td>
-                    <td className="px-4 py-3 text-navy/80">{c.teacher}</td>
-                    <td className="px-4 py-3 font-mono text-navy/70">{c.hours} ชม.</td>
-                    <td className="px-4 py-3 font-mono font-semibold text-navy">{fmtBaht(c.price)}</td>
+                    <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{c.teacher}</td>
+                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{c.hours} ชม.</td>
+                    <td className="px-4 py-3 font-mono font-semibold text-navy dark:text-white">{fmtBaht(c.price)}</td>
                     <td className="px-4 py-3 font-mono">
-                      <span className={live >= c.slots ? 'text-rose-600' : 'text-navy'}>
+                      <span className={live >= c.slots ? 'text-rose-600' : 'text-navy dark:text-white'}>
                         {live}/{c.slots}
                       </span>
                     </td>
@@ -1465,14 +1486,14 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
                       <div className="flex justify-end gap-1">
                         <button
                           onClick={() => setEditing({ ...c, tags: c.tags.join(', ') })}
-                          className="rounded-lg border border-navy/10 p-1.5 text-navy/70 hover:border-indigo hover:text-indigo"
+                          className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-indigo hover:text-indigo"
                           title="แก้ไข"
                         >
                           <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => remove(c.id)}
-                          className="rounded-lg border border-navy/10 p-1.5 text-navy/70 hover:border-rose-300 hover:text-rose-600"
+                          className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-rose-300 hover:text-rose-600"
                           title="ลบ"
                         >
                           <Trash2 size={14} />
@@ -1500,12 +1521,12 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
 };
 
 const Stat = ({ label, value, icon: Icon, mono }) => (
-  <div className="rounded-2xl border border-navy/10 bg-white p-4 shadow-sm">
+  <div className="rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
     <div className="flex items-center justify-between">
-      <div className="text-xs font-semibold uppercase tracking-wider text-navy/50">{label}</div>
+      <div className="text-xs font-semibold uppercase tracking-wider text-navy/50 dark:text-slate-400">{label}</div>
       <Icon size={16} className="text-indigo" />
     </div>
-    <div className={`mt-2 text-2xl font-bold text-navy ${mono ? 'font-mono' : 'font-display'}`}>
+    <div className={`mt-2 text-2xl font-bold text-navy dark:text-white ${mono ? 'font-mono' : 'font-display'}`}>
       {value}
     </div>
   </div>
@@ -1516,12 +1537,12 @@ const CourseEditor = ({ draft, onChange, onClose, onSave }) => {
   const isNew = !draft.id;
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-display text-2xl font-bold text-navy">
+          <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
             {isNew ? 'เพิ่มคอร์สใหม่' : 'แก้ไขคอร์ส'}
           </h3>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-navy/60 hover:bg-navy/5">
+          <button onClick={onClose} className="rounded-lg p-1.5 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700">
             <X size={18} />
           </button>
         </div>
@@ -1558,7 +1579,7 @@ const CourseEditor = ({ draft, onChange, onClose, onSave }) => {
           </Field>
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl border border-navy/10 px-4 py-2 text-sm font-semibold text-navy/70 hover:border-navy hover:text-navy">
+          <button onClick={onClose} className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:text-white">
             ยกเลิก
           </button>
           <button
@@ -1672,10 +1693,10 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
 
   return (
     <div className="mx-auto max-w-3xl animate-fade-in px-6 py-10">
-      <h1 className="font-display text-4xl font-bold text-navy">โปรไฟล์ของฉัน</h1>
-      <p className="mt-1 text-navy/60">จัดการข้อมูลส่วนตัวและรูปโปรไฟล์</p>
+      <h1 className="font-display text-4xl font-bold text-navy dark:text-white">โปรไฟล์ของฉัน</h1>
+      <p className="mt-1 text-navy/60 dark:text-slate-400">จัดการข้อมูลส่วนตัวและรูปโปรไฟล์</p>
 
-      <form onSubmit={save} className="mt-8 rounded-3xl border border-navy/10 bg-white p-8 shadow-sm">
+      <form onSubmit={save} className="mt-8 rounded-3xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm">
         {/* Avatar uploader */}
         <div className="mb-8 flex flex-col items-center gap-4">
           <div className="relative">
@@ -1686,7 +1707,7 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
                 className="h-32 w-32 rounded-full border-4 border-indigo/20 object-cover shadow-lg"
               />
             ) : (
-              <div className="grid h-32 w-32 place-items-center rounded-full border-4 border-dashed border-navy/15 bg-navy/[0.02] text-navy/30">
+              <div className="grid h-32 w-32 place-items-center rounded-full border-4 border-dashed border-navy/15 dark:border-slate-600 bg-navy/[0.02] dark:bg-slate-700/30 text-navy/30 dark:text-slate-600">
                 <User size={48} />
               </div>
             )}
@@ -1694,7 +1715,7 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="absolute bottom-0 right-0 grid h-10 w-10 place-items-center rounded-full bg-navy text-white shadow-lg ring-4 ring-white transition hover:bg-indigo disabled:opacity-60"
+              className="absolute bottom-0 right-0 grid h-10 w-10 place-items-center rounded-full bg-navy text-white shadow-lg ring-4 ring-white dark:ring-slate-800 transition hover:bg-indigo disabled:opacity-60"
               title="อัปโหลดรูป"
             >
               <Camera size={16} />
@@ -1706,7 +1727,7 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="rounded-lg border border-navy/10 bg-white px-3 py-1.5 text-xs font-semibold text-navy/70 hover:border-indigo hover:text-indigo disabled:opacity-60"
+              className="rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-semibold text-navy/70 dark:text-slate-300 hover:border-indigo hover:text-indigo disabled:opacity-60"
             >
               {uploading ? 'กำลังประมวลผล...' : avatar ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}
             </button>
@@ -1714,7 +1735,7 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
               <button
                 type="button"
                 onClick={removeAvatar}
-                className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                className="rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-900/30 dark:border-rose-700 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100"
               >
                 ลบรูป
               </button>
@@ -1727,7 +1748,7 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
             onChange={handleFile}
             className="hidden"
           />
-          <p className="text-xs text-navy/40">รองรับ JPG, PNG, WebP ไม่เกิน 5 MB</p>
+          <p className="text-xs text-navy/40 dark:text-slate-500">รองรับ JPG, PNG, WebP ไม่เกิน 5 MB</p>
         </div>
 
         {/* Fields */}
@@ -1771,13 +1792,13 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
         </div>
 
         {error && (
-          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <div className="mt-4 rounded-lg border border-rose-200 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/30 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
             {error}
           </div>
         )}
 
         {saved && (
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
             <CheckCircle2 size={16} /> บันทึกข้อมูลเรียบร้อย
           </div>
         )}
@@ -1817,19 +1838,19 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
 
   return (
     <div className="mx-auto max-w-5xl animate-fade-in px-6 py-10">
-      <h1 className="font-display text-4xl font-bold text-navy">จัดการบัญชีผู้ใช้</h1>
-      <p className="mt-1 text-navy/60">เลื่อนตำแหน่งหรือลดตำแหน่งบัญชีสมาชิกในระบบ</p>
+      <h1 className="font-display text-4xl font-bold text-navy dark:text-white">จัดการบัญชีผู้ใช้</h1>
+      <p className="mt-1 text-navy/60 dark:text-slate-400">เลื่อนตำแหน่งหรือลดตำแหน่งบัญชีสมาชิกในระบบ</p>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm">
+      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
         {users.length === 0 ? (
           <div className="p-16 text-center">
-            <div className="font-mono text-5xl text-navy/30">∅</div>
-            <div className="mt-3 font-display text-2xl text-navy">ยังไม่มีสมาชิกในระบบ</div>
-            <div className="mt-1 text-sm text-navy/50">เมื่อมีผู้สมัครสมาชิกจะปรากฏที่นี่</div>
+            <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
+            <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีสมาชิกในระบบ</div>
+            <div className="mt-1 text-sm text-navy/50 dark:text-slate-500">เมื่อมีผู้สมัครสมาชิกจะปรากฏที่นี่</div>
           </div>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="bg-navy/[0.03] text-navy/60">
+            <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-semibold">ชื่อ-นามสกุล</th>
                 <th className="px-4 py-3 font-semibold">อีเมล</th>
@@ -1838,25 +1859,25 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
                 <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-navy/5">
+            <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
               {users.map((u) => {
                 const isMe = u.email === currentUser.email;
                 const isAdmin = u.role === 'admin';
                 return (
-                  <tr key={u.email} className="hover:bg-indigo/[0.03]">
-                    <td className="px-4 py-3 font-semibold text-navy">
+                  <tr key={u.email} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                    <td className="px-4 py-3 font-semibold text-navy dark:text-white">
                       {u.name}
                       {isMe && (
-                        <span className="ml-2 text-[11px] font-normal text-navy/40">(คุณ)</span>
+                        <span className="ml-2 text-[11px] font-normal text-navy/40 dark:text-slate-500">(คุณ)</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono text-navy/70">{u.email}</td>
+                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{u.email}</td>
                     <td className="px-4 py-3">
                       <Badge color={isAdmin ? 'gold' : 'indigo'}>
                         {isAdmin ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-navy/50">
+                    <td className="px-4 py-3 font-mono text-xs text-navy/50 dark:text-slate-500">
                       {u.createdAt
                         ? new Date(u.createdAt).toLocaleDateString('th-TH', {
                             day: 'numeric', month: 'short', year: 'numeric',
@@ -1867,7 +1888,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
                       {isAdmin ? (
                         <button
                           onClick={() => demote(u.email)}
-                          className="rounded-lg border border-navy/10 bg-white px-3 py-1 text-xs font-semibold text-navy/70 hover:border-rose-300 hover:text-rose-600"
+                          className="rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1 text-xs font-semibold text-navy/70 dark:text-slate-300 hover:border-rose-300 hover:text-rose-600"
                         >
                           ลดเป็นนักเรียน
                         </button>
@@ -1888,7 +1909,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
         )}
       </div>
 
-      <div className="mt-4 rounded-xl border border-indigo/20 bg-indigo/5 px-4 py-3 text-sm text-navy/70">
+      <div className="mt-4 rounded-xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 dark:border-indigo/20 px-4 py-3 text-sm text-navy/70 dark:text-slate-300">
         💡 บัญชีทดสอบ <span className="font-mono">admin@math.com</span> และ <span className="font-mono">student@math.com</span> ไม่ปรากฏในรายการนี้ — จัดการได้เฉพาะบัญชีที่สมัครผ่านหน้าเว็บ
       </div>
     </div>
@@ -1908,18 +1929,18 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
-      <h1 className="font-display text-4xl font-bold text-navy">ผู้ลงทะเบียน</h1>
-      <p className="mt-1 text-navy/60">ตรวจสอบและอนุมัติการลงทะเบียน</p>
+      <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
+      <p className="mt-1 text-navy/60 dark:text-slate-400">ตรวจสอบและอนุมัติการลงทะเบียน</p>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm">
+      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
         {registrations.length === 0 ? (
           <div className="p-16 text-center">
-            <div className="font-mono text-5xl text-navy/30">∅</div>
-            <div className="mt-3 font-display text-2xl text-navy">ยังไม่มีการลงทะเบียน</div>
+            <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
+            <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีการลงทะเบียน</div>
           </div>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="bg-navy/[0.03] text-navy/60">
+            <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-semibold">นักเรียน</th>
                 <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
@@ -1930,18 +1951,18 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
                 <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-navy/5">
+            <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
               {registrations.map((r) => {
                 const course = courses.find((c) => c.id === r.courseId);
                 return (
-                  <tr key={r.id} className="hover:bg-indigo/[0.03]">
-                    <td className="px-4 py-3 font-semibold text-navy">
+                  <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                    <td className="px-4 py-3 font-semibold text-navy dark:text-white">
                       {r.firstName} {r.lastName}
                     </td>
-                    <td className="px-4 py-3 font-mono text-navy/70">{r.phone}</td>
+                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
                     <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
-                    <td className="px-4 py-3 text-navy/80">{course?.title || '—'}</td>
-                    <td className="px-4 py-3 font-mono text-navy/70">{r.slot}</td>
+                    <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{course?.title || '—'}</td>
+                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.slot}</td>
                     <td className="px-4 py-3">
                       <Badge color={r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : 'gold'}>
                         {statusLabel[r.status] || statusLabel.pending}
@@ -1951,13 +1972,13 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
                       <div className="flex justify-end gap-1">
                         <button
                           onClick={() => approve(r.id)}
-                          className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                          className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/30 dark:border-emerald-700 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
                         >
                           อนุมัติ
                         </button>
                         <button
                           onClick={() => reject(r.id)}
-                          className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                          className="rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-900/30 dark:border-rose-700 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100"
                         >
                           ปฏิเสธ
                         </button>
@@ -1986,16 +2007,20 @@ export default function App() {
   const [users, setUsers] = useState(() => loadLS(LS_KEYS.users, []));
   const [preselectCourse, setPreselectCourse] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => loadLS(LS_KEYS.theme, false));
 
   useEffect(() => saveLS(LS_KEYS.user, currentUser), [currentUser]);
   useEffect(() => saveLS(LS_KEYS.regs, registrations), [registrations]);
   useEffect(() => saveLS(LS_KEYS.courses, courses), [courses]);
   useEffect(() => saveLS(LS_KEYS.schedule, schedule), [schedule]);
   useEffect(() => saveLS(LS_KEYS.users, users), [users]);
+  useEffect(() => saveLS(LS_KEYS.theme, darkMode), [darkMode]);
 
   useEffect(() => {
     if (!currentUser && activePage !== 'login') setActivePage('login');
   }, [currentUser, activePage]);
+
+  const toggleDark = () => setDarkMode((d) => !d);
 
   const changePage = (next) => {
     setTransitioning(true);
@@ -2032,88 +2057,94 @@ export default function App() {
     ]);
   };
 
-  if (!currentUser) return <LoginPage onLogin={handleLogin} />;
-
   return (
-    <div className="min-h-screen bg-offwhite">
-      <Navbar
-        currentUser={currentUser}
-        activePage={activePage}
-        setActivePage={changePage}
-        onLogout={handleLogout}
-      />
-
-      {transitioning ? (
-        <div className="grid place-items-center py-32">
-          <div className="text-center">
-            <Dots />
-            <div className="mt-3 font-mono text-sm text-navy/50">กำลังแก้สมการ x...</div>
-          </div>
-        </div>
+    <div className={darkMode ? 'dark' : ''}>
+      {!currentUser ? (
+        <LoginPage onLogin={handleLogin} darkMode={darkMode} toggleDark={toggleDark} />
       ) : (
-        <main>
-          {activePage === 'courses' && (
-            <CoursesPage courses={courses} onRegister={handleRegisterClick} />
-          )}
-          {activePage === 'register' && (
-            <RegisterPage
-              courses={courses}
-              preselectCourse={preselectCourse}
-              onSubmit={submitRegistration}
-              setActivePage={changePage}
-            />
-          )}
-          {activePage === 'schedule' && (
-            <SchedulePage
-              currentUser={currentUser}
-              courses={courses}
-              registrations={registrations}
-              schedule={schedule}
-              setSchedule={setSchedule}
-            />
-          )}
-          {activePage === 'admin-dashboard' && currentUser.role === 'admin' && (
-            <AdminDashboard
-              courses={courses}
-              setCourses={setCourses}
-              registrations={registrations}
-            />
-          )}
-          {activePage === 'admin-users' && currentUser.role === 'admin' && (
-            <AdminUsersPage
-              registrations={registrations}
-              courses={courses}
-              setRegistrations={setRegistrations}
-            />
-          )}
-          {activePage === 'admin-accounts' && currentUser.role === 'admin' && (
-            <AdminAccountsPage
-              users={users}
-              setUsers={setUsers}
-              currentUser={currentUser}
-              setCurrentUser={setCurrentUser}
-            />
-          )}
-          {activePage === 'profile' && (
-            <ProfilePage
-              currentUser={currentUser}
-              setCurrentUser={setCurrentUser}
-              users={users}
-              setUsers={setUsers}
-            />
-          )}
-        </main>
-      )}
+        <div className="min-h-screen bg-offwhite dark:bg-slate-900">
+          <Navbar
+            currentUser={currentUser}
+            activePage={activePage}
+            setActivePage={changePage}
+            onLogout={handleLogout}
+            darkMode={darkMode}
+            toggleDark={toggleDark}
+          />
 
-      <footer className="mt-16 border-t border-navy/10 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-xs text-navy/50">
-          <div className="flex items-center gap-2">
-            <Sigma size={14} className="text-indigo" />
-            <span className="font-display text-sm font-bold text-navy">บ้านครูทราย</span>
-          </div>
-          <div className="font-mono">© {new Date().getFullYear()} — แก้สมการสู่ความชัดเจน</div>
+          {transitioning ? (
+            <div className="grid place-items-center py-32">
+              <div className="text-center">
+                <Dots />
+                <div className="mt-3 font-mono text-sm text-navy/50 dark:text-slate-500">กำลังแก้สมการ x...</div>
+              </div>
+            </div>
+          ) : (
+            <main>
+              {activePage === 'courses' && (
+                <CoursesPage courses={courses} onRegister={handleRegisterClick} />
+              )}
+              {activePage === 'register' && (
+                <RegisterPage
+                  courses={courses}
+                  preselectCourse={preselectCourse}
+                  onSubmit={submitRegistration}
+                  setActivePage={changePage}
+                />
+              )}
+              {activePage === 'schedule' && (
+                <SchedulePage
+                  currentUser={currentUser}
+                  courses={courses}
+                  registrations={registrations}
+                  schedule={schedule}
+                  setSchedule={setSchedule}
+                />
+              )}
+              {activePage === 'admin-dashboard' && currentUser.role === 'admin' && (
+                <AdminDashboard
+                  courses={courses}
+                  setCourses={setCourses}
+                  registrations={registrations}
+                />
+              )}
+              {activePage === 'admin-users' && currentUser.role === 'admin' && (
+                <AdminUsersPage
+                  registrations={registrations}
+                  courses={courses}
+                  setRegistrations={setRegistrations}
+                />
+              )}
+              {activePage === 'admin-accounts' && currentUser.role === 'admin' && (
+                <AdminAccountsPage
+                  users={users}
+                  setUsers={setUsers}
+                  currentUser={currentUser}
+                  setCurrentUser={setCurrentUser}
+                />
+              )}
+              {activePage === 'profile' && (
+                <ProfilePage
+                  currentUser={currentUser}
+                  setCurrentUser={setCurrentUser}
+                  users={users}
+                  setUsers={setUsers}
+                />
+              )}
+            </main>
+          )}
+
+          <footer className="mt-16 border-t border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-xs text-navy/50 dark:text-slate-500">
+              <div className="flex items-center gap-2">
+                <Sigma size={14} className="text-indigo" />
+                <span className="font-display text-sm font-bold text-navy dark:text-white">บ้านครูทราย</span>
+              </div>
+              <div className="font-mono">© {new Date().getFullYear()} — แก้สมการสู่ความชัดเจน</div>
+            </div>
+          </footer>
         </div>
-      </footer>
+      )}
     </div>
   );
 }
@@ -2134,6 +2165,19 @@ const InputStyles = `
 .input:focus {
   border-color: #6366F1;
   box-shadow: 0 0 0 3px rgba(99,102,241,0.3);
+}
+.dark .input {
+  background: #1e293b;
+  border-color: rgba(148,163,184,0.2);
+  color: #f1f5f9;
+}
+.dark .input:focus {
+  border-color: #818CF8;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.3);
+}
+.dark .input option {
+  background: #1e293b;
+  color: #f1f5f9;
 }
 `;
 
