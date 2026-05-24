@@ -23,6 +23,8 @@ import {
   Pencil,
   Plus,
   UserCog,
+  User,
+  Camera,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -159,6 +161,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
     { key: 'courses',  label: 'คอร์สทั้งหมด',       icon: BookOpen },
     { key: 'register', label: 'ลงทะเบียน',           icon: ClipboardList },
     { key: 'schedule', label: 'ตารางเรียนของฉัน',    icon: Calendar },
+    { key: 'profile',  label: 'โปรไฟล์',             icon: User },
   ];
   const adminMenu = [
     { key: 'admin-dashboard',  label: 'จัดการคอร์ส',   icon: LayoutDashboard },
@@ -207,15 +210,23 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
                 {currentUser?.role === 'admin' && (
                   <Shield size={14} className="text-gold" fill="#FBBF24" />
                 )}
-                {currentUser?.name || (currentUser?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน')}
+                {currentUser?.nickname || currentUser?.name || (currentUser?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน')}
               </div>
               <div className="text-[11px] uppercase tracking-wider text-navy/50">
                 {currentUser?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน'}
               </div>
             </div>
-            <Badge color={currentUser?.role === 'admin' ? 'gold' : 'indigo'}>
-              {currentUser?.role === 'admin' ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
-            </Badge>
+            {currentUser?.avatar ? (
+              <img
+                src={currentUser.avatar}
+                alt="avatar"
+                className="h-9 w-9 rounded-full border-2 border-indigo/30 object-cover"
+              />
+            ) : (
+              <Badge color={currentUser?.role === 'admin' ? 'gold' : 'indigo'}>
+                {currentUser?.role === 'admin' ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
+              </Badge>
+            )}
           </div>
           <button
             onClick={onLogout}
@@ -314,7 +325,14 @@ const LoginPage = ({ onLogin }) => {
       if (found) {
         const passwordHash = await hashPassword(password);
         if (passwordHash === found.passwordHash) {
-          onLogin({ role: found.role, email: found.email, name: found.name });
+          onLogin({
+            role: found.role,
+            email: found.email,
+            name: found.name,
+            nickname: found.nickname || '',
+            gradeLevel: found.gradeLevel || '',
+            avatar: found.avatar || '',
+          });
           return;
         }
         setError('รหัสผ่านไม่ถูกต้อง');
@@ -1556,6 +1574,228 @@ const CourseEditor = ({ draft, onChange, onClose, onSave }) => {
 };
 
 /* ─────────────────────────────────────────────────────────────────────
+ * Profile Page (student)
+ * ───────────────────────────────────────────────────────────────────── */
+const GRADE_LEVELS = [
+  'ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6',
+  'ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6',
+  'ปวช.', 'ปวส.', 'ปริญญาตรี', 'อื่นๆ',
+];
+
+// Compress an image file to a base64 data URL (max 256px, JPEG quality 0.85)
+async function fileToCompressedDataURL(file, maxSize = 256) {
+  const dataUrl = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+  const img = await new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = dataUrl;
+  });
+  const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
+  const w = Math.round(img.width * ratio);
+  const h = Math.round(img.height * ratio);
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  return canvas.toDataURL('image/jpeg', 0.85);
+}
+
+const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
+  const initial = users.find((u) => u.email === currentUser.email) || currentUser;
+  const [name, setName] = useState(initial.name || '');
+  const [nickname, setNickname] = useState(initial.nickname || '');
+  const [gradeLevel, setGradeLevel] = useState(initial.gradeLevel || '');
+  const [avatar, setAvatar] = useState(initial.avatar || '');
+  const [uploading, setUploading] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+
+  const isDemoAccount = !users.find((u) => u.email === currentUser.email);
+
+  const handleFile = async (e) => {
+    setError('');
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('กรุณาเลือกไฟล์รูปภาพ');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('ไฟล์ใหญ่เกิน 5 MB');
+      return;
+    }
+    setUploading(true);
+    try {
+      const compressed = await fileToCompressedDataURL(file, 256);
+      setAvatar(compressed);
+    } catch {
+      setError('ไม่สามารถประมวลผลรูปได้');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeAvatar = () => setAvatar('');
+
+  const save = (e) => {
+    e.preventDefault();
+    setError('');
+    if (!name.trim()) {
+      setError('กรุณากรอกชื่อ-นามสกุล');
+      return;
+    }
+
+    const updates = {
+      name: name.trim(),
+      nickname: nickname.trim(),
+      gradeLevel,
+      avatar,
+    };
+
+    if (!isDemoAccount) {
+      setUsers((us) =>
+        us.map((u) => (u.email === currentUser.email ? { ...u, ...updates } : u)),
+      );
+    }
+    setCurrentUser((u) => ({ ...u, ...updates }));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  return (
+    <div className="mx-auto max-w-3xl animate-fade-in px-6 py-10">
+      <h1 className="font-display text-4xl font-bold text-navy">โปรไฟล์ของฉัน</h1>
+      <p className="mt-1 text-navy/60">จัดการข้อมูลส่วนตัวและรูปโปรไฟล์</p>
+
+      <form onSubmit={save} className="mt-8 rounded-3xl border border-navy/10 bg-white p-8 shadow-sm">
+        {/* Avatar uploader */}
+        <div className="mb-8 flex flex-col items-center gap-4">
+          <div className="relative">
+            {avatar ? (
+              <img
+                src={avatar}
+                alt="avatar"
+                className="h-32 w-32 rounded-full border-4 border-indigo/20 object-cover shadow-lg"
+              />
+            ) : (
+              <div className="grid h-32 w-32 place-items-center rounded-full border-4 border-dashed border-navy/15 bg-navy/[0.02] text-navy/30">
+                <User size={48} />
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute bottom-0 right-0 grid h-10 w-10 place-items-center rounded-full bg-navy text-white shadow-lg ring-4 ring-white transition hover:bg-indigo disabled:opacity-60"
+              title="อัปโหลดรูป"
+            >
+              <Camera size={16} />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="rounded-lg border border-navy/10 bg-white px-3 py-1.5 text-xs font-semibold text-navy/70 hover:border-indigo hover:text-indigo disabled:opacity-60"
+            >
+              {uploading ? 'กำลังประมวลผล...' : avatar ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}
+            </button>
+            {avatar && (
+              <button
+                type="button"
+                onClick={removeAvatar}
+                className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+              >
+                ลบรูป
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFile}
+            className="hidden"
+          />
+          <p className="text-xs text-navy/40">รองรับ JPG, PNG, WebP ไม่เกิน 5 MB</p>
+        </div>
+
+        {/* Fields */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="ชื่อ-นามสกุล">
+            <input
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="สมชาย ใจดี"
+              required
+            />
+          </Field>
+          <Field label="ชื่อเล่น">
+            <input
+              className="input"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="ชาย"
+            />
+          </Field>
+          <Field label="ระดับชั้น">
+            <select
+              className="input"
+              value={gradeLevel}
+              onChange={(e) => setGradeLevel(e.target.value)}
+            >
+              <option value="">เลือกระดับชั้น...</option>
+              {GRADE_LEVELS.map((g) => (
+                <option key={g}>{g}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="อีเมล">
+            <input
+              className="input font-mono"
+              value={currentUser.email}
+              disabled
+            />
+          </Field>
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            {error}
+          </div>
+        )}
+
+        {saved && (
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            <CheckCircle2 size={16} /> บันทึกข้อมูลเรียบร้อย
+          </div>
+        )}
+
+        <div className="mt-8 flex justify-end">
+          <button
+            type="submit"
+            className="rounded-xl bg-navy px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo"
+          >
+            บันทึก
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────
  * Admin → Manage Accounts
  * ───────────────────────────────────────────────────────────────────── */
 const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => {
@@ -1852,6 +2092,14 @@ export default function App() {
               setUsers={setUsers}
               currentUser={currentUser}
               setCurrentUser={setCurrentUser}
+            />
+          )}
+          {activePage === 'profile' && (
+            <ProfilePage
+              currentUser={currentUser}
+              setCurrentUser={setCurrentUser}
+              users={users}
+              setUsers={setUsers}
             />
           )}
         </main>
