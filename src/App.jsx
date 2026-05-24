@@ -2302,75 +2302,252 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
 const statusLabel = { pending: 'รอดำเนินการ', approved: 'อนุมัติแล้ว', rejected: 'ปฏิเสธ' };
 
 const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
+  const [viewMode, setViewMode] = useState('by-student');
+  const [expandedCourseId, setExpandedCourseId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+
   const approve = (id) =>
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
   const reject = (id) =>
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r)));
+
+  const byCourse = useMemo(() => {
+    const map = {};
+    for (const r of registrations) {
+      if (!map[r.courseId]) map[r.courseId] = [];
+      map[r.courseId].push(r);
+    }
+    return map;
+  }, [registrations]);
+
+  const coursesWithRegs = useMemo(
+    () =>
+      courses
+        .filter((c) => byCourse[c.id]?.length > 0)
+        .sort((a, b) => (byCourse[b.id]?.length || 0) - (byCourse[a.id]?.length || 0)),
+    [courses, byCourse],
+  );
+
+  const filteredRegsFor = (courseId) => {
+    const regs = byCourse[courseId] || [];
+    return statusFilter === 'all' ? regs : regs.filter((r) => r.status === statusFilter);
+  };
+
+  const statusColor = { pending: 'gold', approved: 'green', rejected: 'red' };
+
+  const ActionBtns = ({ r }) => (
+    <div className="flex justify-end gap-1">
+      <button
+        onClick={() => approve(r.id)}
+        className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/30 dark:border-emerald-700 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
+      >
+        อนุมัติ
+      </button>
+      <button
+        onClick={() => reject(r.id)}
+        className="rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-900/30 dark:border-rose-700 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100"
+      >
+        ปฏิเสธ
+      </button>
+    </div>
+  );
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
       <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
       <p className="mt-1 text-navy/60 dark:text-slate-400">ตรวจสอบและอนุมัติการลงทะเบียน</p>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-        {registrations.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
-            <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีการลงทะเบียน</div>
-          </div>
-        ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
-              <tr>
-                <th className="px-4 py-3 font-semibold">นักเรียน</th>
-                <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
-                <th className="px-4 py-3 font-semibold">ระดับ</th>
-                <th className="px-4 py-3 font-semibold">คอร์ส</th>
-                <th className="px-4 py-3 font-semibold">เวลา</th>
-                <th className="px-4 py-3 font-semibold">สถานะ</th>
-                <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
-              {registrations.map((r) => {
-                const course = courses.find((c) => c.id === r.courseId);
-                return (
-                  <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
-                    <td className="px-4 py-3 font-semibold text-navy dark:text-white">
-                      {r.firstName} {r.lastName}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
-                    <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
-                    <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{course?.title || '—'}</td>
-                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.slot}</td>
-                    <td className="px-4 py-3">
-                      <Badge color={r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : 'gold'}>
-                        {statusLabel[r.status] || statusLabel.pending}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          onClick={() => approve(r.id)}
-                          className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/30 dark:border-emerald-700 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
-                        >
-                          อนุมัติ
-                        </button>
-                        <button
-                          onClick={() => reject(r.id)}
-                          className="rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-900/30 dark:border-rose-700 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100"
-                        >
-                          ปฏิเสธ
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+      {/* View tabs */}
+      <div className="mt-6 flex w-fit gap-1 rounded-xl border border-navy/10 dark:border-slate-700 bg-navy/5 dark:bg-slate-800 p-1">
+        {[
+          { key: 'by-student', label: 'รายบุคคล' },
+          { key: 'by-course',  label: 'รายคอร์ส' },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setViewMode(tab.key)}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              viewMode === tab.key
+                ? 'bg-navy text-white shadow dark:bg-indigo'
+                : 'text-navy/60 hover:text-navy dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      {/* ── รายบุคคล ── */}
+      {viewMode === 'by-student' && (
+        <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+          {registrations.length === 0 ? (
+            <div className="p-16 text-center">
+              <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
+              <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีการลงทะเบียน</div>
+            </div>
+          ) : (
+            <table className="w-full text-left text-sm">
+              <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">นักเรียน</th>
+                  <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
+                  <th className="px-4 py-3 font-semibold">ระดับ</th>
+                  <th className="px-4 py-3 font-semibold">คอร์ส</th>
+                  <th className="px-4 py-3 font-semibold">เวลา</th>
+                  <th className="px-4 py-3 font-semibold">สถานะ</th>
+                  <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
+                {registrations.map((r) => {
+                  const course = courses.find((c) => c.id === r.courseId);
+                  return (
+                    <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                      <td className="px-4 py-3 font-semibold text-navy dark:text-white">
+                        {r.firstName} {r.lastName}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
+                      <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
+                      <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{course?.title || '—'}</td>
+                      <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.slot}</td>
+                      <td className="px-4 py-3">
+                        <Badge color={r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : 'gold'}>
+                          {statusLabel[r.status] || statusLabel.pending}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3"><ActionBtns r={r} /></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* ── รายคอร์ส ── */}
+      {viewMode === 'by-course' && (
+        <div className="mt-8 space-y-3">
+          {/* Status filter chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { key: 'all',      label: 'ทั้งหมด' },
+              { key: 'approved', label: 'อนุมัติแล้ว' },
+              { key: 'pending',  label: 'รอดำเนินการ' },
+              { key: 'rejected', label: 'ปฏิเสธ' },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setStatusFilter(f.key)}
+                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                  statusFilter === f.key
+                    ? 'border-indigo bg-indigo text-white'
+                    : 'border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {coursesWithRegs.length === 0 ? (
+            <div className="rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-16 text-center shadow-sm">
+              <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
+              <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีการลงทะเบียน</div>
+            </div>
+          ) : (
+            coursesWithRegs.map((course) => {
+              const allRegs = byCourse[course.id] || [];
+              const filtered = filteredRegsFor(course.id);
+              const approvedCount = allRegs.filter((r) => r.status === 'approved').length;
+              const pendingCount  = allRegs.filter((r) => r.status === 'pending').length;
+              const isExpanded = expandedCourseId === course.id;
+
+              if (statusFilter !== 'all' && filtered.length === 0) return null;
+
+              return (
+                <div key={course.id} className="overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+                  {/* Course header — click to expand */}
+                  <button
+                    onClick={() => setExpandedCourseId(isExpanded ? null : course.id)}
+                    className="flex w-full items-center justify-between px-6 py-4 transition hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30"
+                  >
+                    <div className="flex items-center gap-4 text-left">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-navy/5 dark:bg-slate-700">
+                        <GraduationCap size={20} className="text-indigo" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-navy dark:text-white">{course.title}</div>
+                        <div className="mt-0.5 text-xs text-navy/50 dark:text-slate-400">
+                          {course.level} · {course.teacher}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Badge color="green">{approvedCount} อนุมัติ</Badge>
+                        {pendingCount > 0 && <Badge color="gold">{pendingCount} รอ</Badge>}
+                        <Badge color="navy">{allRegs.length} คน</Badge>
+                      </div>
+                      <ChevronRight
+                        size={18}
+                        className={`text-navy/40 dark:text-slate-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Expanded student list */}
+                  {isExpanded && (
+                    <div className="border-t border-navy/5 dark:border-slate-700">
+                      {filtered.length === 0 ? (
+                        <div className="px-6 py-4 text-sm text-navy/40 dark:text-slate-500">
+                          ไม่มีข้อมูลตามตัวกรองที่เลือก
+                        </div>
+                      ) : (
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-xs text-navy/60 dark:text-slate-400">
+                            <tr>
+                              <th className="px-6 py-2.5 font-semibold">นักเรียน</th>
+                              <th className="px-4 py-2.5 font-semibold">เบอร์โทร</th>
+                              <th className="px-4 py-2.5 font-semibold">ระดับ</th>
+                              <th className="px-4 py-2.5 font-semibold">เวลา</th>
+                              <th className="px-4 py-2.5 font-semibold">วันที่สมัคร</th>
+                              <th className="px-4 py-2.5 font-semibold">สถานะ</th>
+                              <th className="px-4 py-2.5 font-semibold text-right">จัดการ</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
+                            {filtered.map((r) => (
+                              <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                                <td className="px-6 py-3">
+                                  <div className="font-semibold text-navy dark:text-white">
+                                    {r.firstName} {r.lastName}
+                                  </div>
+                                  <div className="text-xs text-navy/50 dark:text-slate-400">{r.studentEmail}</div>
+                                </td>
+                                <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
+                                <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
+                                <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.slot}</td>
+                                <td className="px-4 py-3 text-navy/60 dark:text-slate-400">{fmtThaiDate(r.submittedAt)}</td>
+                                <td className="px-4 py-3">
+                                  <Badge color={statusColor[r.status] || 'gold'}>
+                                    {statusLabel[r.status] || statusLabel.pending}
+                                  </Badge>
+                                </td>
+                                <td className="px-4 py-3"><ActionBtns r={r} /></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 };
