@@ -32,37 +32,159 @@ import {
 /* ─────────────────────────────────────────────────────────────────────
  * Mock data
  * ───────────────────────────────────────────────────────────────────── */
+const TEACHER = 'ครูทราย';
+const TEACHER_BIG = 'ครูพี่บิ๊ก';
+
 const mockCourses = [
-  { id: 1, title: 'คณิตศาสตร์พื้นฐาน ระดับมัธยมต้น', level: 'มัธยมต้น', hours: 40, price: 3500, tags: ['พีชคณิต', 'เรขาคณิต'], teacher: 'อ.สมชาย', slots: 15, enrolled: 8 },
-  { id: 2, title: 'แคลคูลัส ระดับมัธยมปลาย', level: 'มัธยมปลาย', hours: 60, price: 5500, tags: ['แคลคูลัส', 'ลิมิต'], teacher: 'อ.สมหญิง', slots: 12, enrolled: 12 },
-  { id: 3, title: 'สถิติและความน่าจะเป็น', level: 'มัธยมศึกษา', hours: 48, price: 4800, tags: ['สถิติ', 'ความน่าจะเป็น'], teacher: 'ผศ.วิชัย', slots: 10, enrolled: 5 },
-  { id: 4, title: 'คณิตศาสตร์ PAT1', level: 'มัธยมศึกษา', hours: 72, price: 7200, tags: ['PAT', 'ติวสอบ'], teacher: 'ผศ.นภา', slots: 20, enrolled: 18 },
-  { id: 5, title: 'พีชคณิตเชิงเส้น', level: 'มหาวิทยาลัย', hours: 90, price: 9000, tags: ['เมทริกซ์', 'เวกเตอร์'], teacher: 'รศ.ดร.ประวิทย์', slots: 8, enrolled: 3 },
-  { id: 6, title: 'คณิตศาสตร์เข้มข้น เตรียมสอบเข้า ม.1', level: 'ประถมศึกษา', hours: 30, price: 2800, tags: ['เลขคณิต', 'สอบเข้า'], teacher: 'อ.มาลี', slots: 15, enrolled: 10 },
+  // ─── ป.5-6 เสาร์บ่าย ─────────────────────────────────────────────
+  { id: 1, title: 'คอร์สเสาร์ ป.5 (เพิ่มเกรดในห้องเรียน)', level: 'ประถมศึกษา', hours: 12, price: 2000, tags: ['ป.5', 'เปิดเทอม 1', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 2, title: 'คอร์สเสาร์ ป.6 (สรุปสอบเข้า ม.1)', level: 'ประถมศึกษา', hours: 12, price: 2000, tags: ['ป.6', 'สอบเข้า ม.1', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ป.1-4 อาทิตย์เช้า ───────────────────────────────────────────
+  { id: 3, title: 'คอร์สอาทิตย์ ป.1 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.1', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 4, title: 'คอร์สอาทิตย์ ป.2 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.2', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 5, title: 'คอร์สอาทิตย์ ป.3 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.3', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 6, title: 'คอร์สอาทิตย์ ป.4 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.4', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ป.1-6 วันธรรมดา 17-19 น. ─────────────────────────────────────
+  { id: 7,  title: 'คอร์สวันธรรมดา ป.1 (จันทร์+พุธ)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.1', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 8,  title: 'คอร์สวันธรรมดา ป.2 (จันทร์+พุธ)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.2', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 9,  title: 'คอร์สวันธรรมดา ป.3 (อังคาร+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.3', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 10, title: 'คอร์สวันธรรมดา ป.4 (อังคาร+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.4', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 11, title: 'คอร์สวันธรรมดา ป.5 (พุธ+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.5', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 12, title: 'คอร์สวันธรรมดา ป.6 (พุธ+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.6', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ม.1-3 เสาร์เช้า ──────────────────────────────────────────────
+  { id: 13, title: 'คอร์สเสาร์ ม.1 (เพิ่มเกรดในห้องเรียน)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.1', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 14, title: 'คอร์สเสาร์ ม.2 (เพิ่มเกรดในห้องเรียน)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.2', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 15, title: 'คอร์สเสาร์ ม.3 (สรุปสอบเข้า ม.4)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.3', 'สอบเข้า ม.4'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ม.1 วันธรรมดา รายวิชา ────────────────────────────────────────
+  { id: 16, title: 'วิทย์ ม.1 (วันจันทร์)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'วิทย์'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 17, title: 'คณิต ม.1 (วันอังคาร)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 18, title: 'อังกฤษ ม.1 (วันพุธ)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ม.2 วันธรรมดา รายวิชา ────────────────────────────────────────
+  { id: 19, title: 'อังกฤษ ม.2 (วันจันทร์)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 20, title: 'วิทย์ ม.2 (วันอังคาร)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'วิทย์'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 21, title: 'คณิต ม.2 (วันพุธ)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ม.4 วันธรรมดา รายวิชา ────────────────────────────────────────
+  { id: 22, title: 'ฟิสิกส์ ม.4 (วันจันทร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'ฟิสิกส์'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 23, title: 'คณิต ม.4 (วันอังคาร)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 24, title: 'เคมี+ชีวะ ม.4 (วันพุธ)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'เคมี', 'ชีวะ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 25, title: 'อังกฤษ ม.4 (วันศุกร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ม.5 วันธรรมดา รายวิชา ────────────────────────────────────────
+  { id: 26, title: 'เคมี+ชีวะ ม.5 (วันจันทร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'เคมี', 'ชีวะ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 27, title: 'ฟิสิกส์ ม.5 (วันอังคาร)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'ฟิสิกส์'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 28, title: 'คณิต ม.5 (วันพุธ)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 29, title: 'อังกฤษ ม.5 (วันพฤหัส)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── ม.6 ──────────────────────────────────────────────────────────
+  { id: 30, title: 'คณิต A-LEVEL 1,2 ม.6 (วันศุกร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.6', 'A-LEVEL', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
+
+  // ─── คอร์สพิเศษ มหิดล/จุฬาภรณ์/วมว. ─────────────────────────────
+  {
+    id: 31,
+    title: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ป.4-6 (เตรียมเข้า ม.1)',
+    level: 'ประถมศึกษา', hours: 20, price: 2990, tags: ['สอบเข้า ม.1', 'มหิดล', 'จุฬาภรณ์', 'วมว.', 'Early Bird'],
+    teacher: TEACHER_BIG, slots: 12, enrolled: 0,
+    startDate: '2026-05-24', endDate: '2026-07-26',
+    earlyBirdPrice: 2500, earlyBirdUntil: '2026-05-15',
+  },
+  {
+    id: 32,
+    title: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ม.1-3 (เตรียมเข้า ม.4)',
+    level: 'มัธยมต้น', hours: 20, price: 2990, tags: ['สอบเข้า ม.4', 'มหิดล', 'จุฬาภรณ์', 'วมว.', 'Early Bird'],
+    teacher: TEACHER_BIG, slots: 12, enrolled: 0,
+    startDate: '2026-05-24', endDate: '2026-07-26',
+    earlyBirdPrice: 2500, earlyBirdUntil: '2026-05-15',
+  },
+
+  // ─── แพ็คเกจรวมวิชา (ตัวอย่าง — แอดมินสร้างเพิ่มเองได้) ──────────────
+  { id: 33, title: 'แพ็คเกจ ม.1 รวม 2 วิชา (เลือกได้ 2 จากคณิต/วิทย์/อังกฤษ)', level: 'มัธยมต้น', hours: 12, price: 1700, tags: ['ม.1', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [16, 17] },
+  { id: 34, title: 'แพ็คเกจ ม.1 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)', level: 'มัธยมต้น', hours: 18, price: 2400, tags: ['ม.1', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [16, 17, 18] },
+  { id: 35, title: 'แพ็คเกจ ม.2 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)', level: 'มัธยมต้น', hours: 18, price: 2400, tags: ['ม.2', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [19, 20, 21] },
+  { id: 36, title: 'แพ็คเกจ ม.4 รวม 4 วิชา (ฟิสิกส์+คณิต+เคมี/ชีวะ+อังกฤษ)', level: 'มัธยมปลาย', hours: 32, price: 4500, tags: ['ม.4', 'ครบทุกวิชา'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [22, 23, 24, 25] },
 ];
 
 const timeSlotOptions = [
-  'จ. 16:00–18:00',
+  'จ. 17:00–18:30',
+  'จ. 17:00–19:00',
+  'อ. 17:00–18:30',
   'อ. 17:00–19:00',
-  'พ. 16:00–18:00',
+  'พ. 17:00–18:30',
+  'พ. 17:00–19:00',
   'พฤ. 17:00–19:00',
-  'ศ. 16:00–18:00',
-  'ส. 09:00–11:00',
-  'ส. 13:00–15:00',
-  'อา. 10:00–12:00',
+  'ศ. 17:00–19:00',
+  'ส. 09:00–12:00',
+  'ส. 13:00–16:00',
+  'อา. 08:30–12:30',
+  'อา. 09:00–11:00',
+  'อา. 12:00–14:00',
 ];
 
 const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
 
 const defaultSchedule = [
-  { id: 1, courseId: 1, day: 'จันทร์',  time: '16:00–18:00', room: 'A-101' },
-  { id: 2, courseId: 2, day: 'อังคาร', time: '17:00–19:00', room: 'A-202' },
-  { id: 3, courseId: 3, day: 'พุธ',    time: '16:00–18:00', room: 'B-105' },
-  { id: 4, courseId: 4, day: 'พฤหัส', time: '17:00–19:00', room: 'B-204' },
-  { id: 5, courseId: 5, day: 'ศุกร์',  time: '16:00–18:00', room: 'C-301' },
-  { id: 6, courseId: 6, day: 'เสาร์',  time: '09:00–11:00', room: 'A-101' },
-  { id: 7, courseId: 2, day: 'เสาร์',  time: '13:00–15:00', room: 'A-202' },
-  { id: 8, courseId: 4, day: 'อาทิตย์', time: '10:00–12:00', room: 'B-204' },
+  // ─── ประถม (เสาร์บ่าย) ────────
+  { id: 1, courseId: 1, day: 'เสาร์', time: '13:00–16:00', room: 'A-101' },
+  { id: 2, courseId: 2, day: 'เสาร์', time: '13:00–16:00', room: 'A-102' },
+
+  // ─── ป.1-4 อาทิตย์เช้า ─────────
+  { id: 3, courseId: 3, day: 'อาทิตย์', time: '08:30–12:30', room: 'A-201' },
+  { id: 4, courseId: 4, day: 'อาทิตย์', time: '08:30–12:30', room: 'A-202' },
+  { id: 5, courseId: 5, day: 'อาทิตย์', time: '08:30–12:30', room: 'A-203' },
+  { id: 6, courseId: 6, day: 'อาทิตย์', time: '08:30–12:30', room: 'A-204' },
+
+  // ─── ป.1-6 วันธรรมดา ──────────
+  { id: 7,  courseId: 7,  day: 'จันทร์', time: '17:00–19:00', room: 'B-101' },
+  { id: 8,  courseId: 7,  day: 'พุธ',    time: '17:00–19:00', room: 'B-101' },
+  { id: 9,  courseId: 8,  day: 'จันทร์', time: '17:00–19:00', room: 'B-102' },
+  { id: 10, courseId: 8,  day: 'พุธ',    time: '17:00–19:00', room: 'B-102' },
+  { id: 11, courseId: 9,  day: 'อังคาร', time: '17:00–19:00', room: 'B-103' },
+  { id: 12, courseId: 9,  day: 'พฤหัส', time: '17:00–19:00', room: 'B-103' },
+  { id: 13, courseId: 10, day: 'อังคาร', time: '17:00–19:00', room: 'B-104' },
+  { id: 14, courseId: 10, day: 'พฤหัส', time: '17:00–19:00', room: 'B-104' },
+  { id: 15, courseId: 11, day: 'พุธ',    time: '17:00–19:00', room: 'B-105' },
+  { id: 16, courseId: 11, day: 'พฤหัส', time: '17:00–19:00', room: 'B-105' },
+  { id: 17, courseId: 12, day: 'พุธ',    time: '17:00–19:00', room: 'B-106' },
+  { id: 18, courseId: 12, day: 'พฤหัส', time: '17:00–19:00', room: 'B-106' },
+
+  // ─── ม.1-3 เสาร์เช้า ──────────
+  { id: 19, courseId: 13, day: 'เสาร์', time: '09:00–12:00', room: 'C-101' },
+  { id: 20, courseId: 14, day: 'เสาร์', time: '09:00–12:00', room: 'C-102' },
+  { id: 21, courseId: 15, day: 'เสาร์', time: '09:00–12:00', room: 'C-103' },
+
+  // ─── ม.1 รายวิชา ──────────────
+  { id: 22, courseId: 16, day: 'จันทร์', time: '17:00–18:30', room: 'C-201' },
+  { id: 23, courseId: 17, day: 'อังคาร', time: '17:00–18:30', room: 'C-201' },
+  { id: 24, courseId: 18, day: 'พุธ',    time: '17:00–18:30', room: 'C-201' },
+
+  // ─── ม.2 รายวิชา ──────────────
+  { id: 25, courseId: 19, day: 'จันทร์', time: '17:00–18:30', room: 'C-202' },
+  { id: 26, courseId: 20, day: 'อังคาร', time: '17:00–18:30', room: 'C-202' },
+  { id: 27, courseId: 21, day: 'พุธ',    time: '17:00–18:30', room: 'C-202' },
+
+  // ─── ม.4 รายวิชา ──────────────
+  { id: 28, courseId: 22, day: 'จันทร์', time: '17:00–19:00', room: 'D-101' },
+  { id: 29, courseId: 23, day: 'อังคาร', time: '17:00–19:00', room: 'D-101' },
+  { id: 30, courseId: 24, day: 'พุธ',    time: '17:00–19:00', room: 'D-101' },
+  { id: 31, courseId: 25, day: 'ศุกร์',  time: '17:00–19:00', room: 'D-101' },
+
+  // ─── ม.5 รายวิชา ──────────────
+  { id: 32, courseId: 26, day: 'จันทร์', time: '17:00–19:00', room: 'D-102' },
+  { id: 33, courseId: 27, day: 'อังคาร', time: '17:00–19:00', room: 'D-102' },
+  { id: 34, courseId: 28, day: 'พุธ',    time: '17:00–19:00', room: 'D-102' },
+  { id: 35, courseId: 29, day: 'พฤหัส', time: '17:00–19:00', room: 'D-102' },
+
+  // ─── ม.6 ──────────────────────
+  { id: 36, courseId: 30, day: 'ศุกร์', time: '17:00–19:00', room: 'D-201' },
+
+  // ─── คอร์สเตรียมสอบ ─────────
+  { id: 37, courseId: 31, day: 'อาทิตย์', time: '09:00–11:00', room: 'E-101' },
+  { id: 38, courseId: 32, day: 'อาทิตย์', time: '12:00–14:00', room: 'E-101' },
 ];
 
 const DEMO = {
@@ -76,8 +198,8 @@ const DEMO = {
 const LS_KEYS = {
   user: 'mm.currentUser',
   regs: 'mm.registrations',
-  courses: 'mm.courses',
-  schedule: 'mm.schedule',
+  courses: 'mm.courses.v2',
+  schedule: 'mm.schedule.v2',
   users: 'mm.users',
   theme: 'mm.theme',
 };
@@ -97,7 +219,24 @@ const saveLS = (key, val) => {
 /* ─────────────────────────────────────────────────────────────────────
  * Tiny helpers
  * ───────────────────────────────────────────────────────────────────── */
-const fmtBaht = (n) => `฿${n.toLocaleString('en-US')}`;
+const fmtBaht = (n) => `฿${Number(n || 0).toLocaleString('en-US')}`;
+
+const fmtThaiDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+const isEarlyBirdActive = (course, now = new Date()) => {
+  if (!course?.earlyBirdPrice || !course?.earlyBirdUntil) return false;
+  const deadline = new Date(course.earlyBirdUntil);
+  if (Number.isNaN(deadline.getTime())) return false;
+  return now <= deadline;
+};
+
+const effectivePrice = (course) =>
+  isEarlyBirdActive(course) ? Number(course.earlyBirdPrice) : Number(course.price || 0);
 
 async function hashPassword(plain) {
   const buf = new TextEncoder().encode(plain);
@@ -646,6 +785,8 @@ const CourseCard = ({ course, allCourses = [], onRegister }) => {
   const bundleSavings = bundle
     ? bundleChildren.reduce((s, c) => s + (c.price || 0), 0) - course.price
     : 0;
+  const earlyBird = isEarlyBirdActive(course);
+  const displayPrice = earlyBird ? course.earlyBirdPrice : course.price;
 
   return (
     <div className={`card-lift flex flex-col rounded-2xl border p-6 shadow-sm ${
@@ -658,18 +799,40 @@ const CourseCard = ({ course, allCourses = [], onRegister }) => {
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge color="indigo">{course.level}</Badge>
             {bundle && <Badge color="gold">📦 คอร์สรวม</Badge>}
+            {earlyBird && <Badge color="green">🐦 Early Bird</Badge>}
           </div>
           <h3 className="mt-2 font-display text-xl font-bold text-navy dark:text-white">
             {course.title}
           </h3>
+          {(course.startDate || course.endDate) && (
+            <div className="mt-1 font-mono text-[11px] text-navy/50 dark:text-slate-400">
+              📅 {fmtThaiDate(course.startDate)}{course.endDate ? ` – ${fmtThaiDate(course.endDate)}` : ''}
+            </div>
+          )}
         </div>
         <div className="text-right">
-          <div className="font-mono text-lg font-bold text-navy dark:text-white">
-            {fmtBaht(course.price)}
-          </div>
-          <div className="text-xs text-navy/50 dark:text-slate-500">
-            {bundle ? 'ราคาแพ็คเกจ' : 'รวม'}
-          </div>
+          {earlyBird ? (
+            <>
+              <div className="font-mono text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                {fmtBaht(displayPrice)}
+              </div>
+              <div className="font-mono text-[11px] text-navy/40 dark:text-slate-500 line-through">
+                {fmtBaht(course.price)}
+              </div>
+              <div className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                ก่อน {fmtThaiDate(course.earlyBirdUntil)}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="font-mono text-lg font-bold text-navy dark:text-white">
+                {fmtBaht(course.price)}
+              </div>
+              <div className="text-xs text-navy/50 dark:text-slate-500">
+                {bundle ? 'ราคาแพ็คเกจ' : 'รวม'}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -1454,6 +1617,10 @@ const emptyCourseDraft = {
   slots: 10,
   enrolled: 0,
   bundleCourseIds: [],
+  startDate: '',
+  endDate: '',
+  earlyBirdPrice: '',
+  earlyBirdUntil: '',
 };
 
 const isBundleCourse = (course) =>
@@ -1483,6 +1650,12 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
       bundleCourseIds: Array.isArray(draft.bundleCourseIds)
         ? draft.bundleCourseIds.map(Number).filter((n) => !Number.isNaN(n))
         : [],
+      startDate: draft.startDate || '',
+      endDate: draft.endDate || '',
+      earlyBirdPrice: draft.earlyBirdPrice === '' || draft.earlyBirdPrice == null
+        ? ''
+        : Number(draft.earlyBirdPrice),
+      earlyBirdUntil: draft.earlyBirdUntil || '',
     };
     setCourses((cs) => {
       if (normalized.id) return cs.map((c) => (c.id === normalized.id ? normalized : c));
@@ -1671,6 +1844,27 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
           <Field label="ผู้ลงทะเบียนเดิม">
             <input type="number" className="input font-mono" value={draft.enrolled} onChange={(e) => upd('enrolled', e.target.value)} />
           </Field>
+        </div>
+
+        {/* Date range + early bird (optional) */}
+        <div className="mt-6 rounded-2xl border border-navy/10 dark:border-slate-700 bg-navy/[0.02] dark:bg-slate-700/30 p-4">
+          <div className="mb-3 text-sm font-bold text-navy dark:text-white">
+            🗓️ ช่วงวันที่ + Early Bird <span className="text-xs font-normal text-navy/50 dark:text-slate-400">(ไม่จำเป็นต้องกรอก)</span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="วันเริ่มคอร์ส">
+              <input type="date" className="input font-mono" value={draft.startDate || ''} onChange={(e) => upd('startDate', e.target.value)} />
+            </Field>
+            <Field label="วันจบคอร์ส">
+              <input type="date" className="input font-mono" value={draft.endDate || ''} onChange={(e) => upd('endDate', e.target.value)} />
+            </Field>
+            <Field label="ราคา Early Bird (฿)">
+              <input type="number" className="input font-mono" placeholder="ปล่อยว่างถ้าไม่มี" value={draft.earlyBirdPrice ?? ''} onChange={(e) => upd('earlyBirdPrice', e.target.value)} />
+            </Field>
+            <Field label="Early Bird สิ้นสุดวันที่">
+              <input type="date" className="input font-mono" value={draft.earlyBirdUntil || ''} onChange={(e) => upd('earlyBirdUntil', e.target.value)} />
+            </Field>
+          </div>
         </div>
 
         {/* Bundle (package) selection */}
