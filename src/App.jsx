@@ -266,8 +266,16 @@ const LoginPage = ({ onLogin }) => {
           setError('กรุณากรอกชื่อ-นามสกุล');
           return;
         }
-        if (password.length < 6) {
-          setError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+        if (password.length < 8) {
+          setError('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+          return;
+        }
+        if (!/[a-z]/.test(password)) {
+          setError('รหัสผ่านต้องมีตัวอักษรภาษาอังกฤษพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว');
+          return;
+        }
+        if (!/[0-9]/.test(password)) {
+          setError('รหัสผ่านต้องมีตัวเลข (0-9) อย่างน้อย 1 ตัว');
           return;
         }
         if (password !== confirmPassword) {
@@ -449,7 +457,7 @@ const LoginPage = ({ onLogin }) => {
 
                 <div>
                   <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60">
-                    รหัสผ่าน {mode === 'signup' && <span className="text-navy/40 normal-case">(อย่างน้อย 6 ตัวอักษร)</span>}
+                    รหัสผ่าน {mode === 'signup' && <span className="text-navy/40 normal-case">(8+ ตัว, a-z, 0-9)</span>}
                   </label>
                   <input
                     type="password"
@@ -457,7 +465,7 @@ const LoginPage = ({ onLogin }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-navy outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
                     placeholder="••••••"
-                    minLength={mode === 'signup' ? 6 : undefined}
+                    minLength={mode === 'signup' ? 8 : undefined}
                     required
                   />
                 </div>
