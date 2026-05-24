@@ -192,12 +192,40 @@ const DEMO = {
   admin:   { email: 'admin@math.com',   password: 'admin' },
 };
 
+const mockRegistrations = [
+  // ─── อนุมัติแล้ว (8) ────────────────────────────────────────────────
+  { id: 1001, studentEmail: 'phum.j@demo.com',     firstName: 'ภูมิ',   lastName: 'ใจดี',        phone: '0812345678', level: 'ประถมศึกษา', courseId: 1,  courseTitle: 'คอร์สเสาร์ ป.5 (เพิ่มเกรดในห้องเรียน)',          slot: 'ส. 13:00–16:00', status: 'approved', submittedAt: '2026-05-08T09:12:00.000Z' },
+  { id: 1002, studentEmail: 'pim.s@demo.com',      firstName: 'พิมพ์',  lastName: 'สวยงาม',      phone: '0823456789', level: 'ประถมศึกษา', courseId: 2,  courseTitle: 'คอร์สเสาร์ ป.6 (สรุปสอบเข้า ม.1)',               slot: 'ส. 13:00–16:00', status: 'approved', submittedAt: '2026-05-09T11:30:00.000Z' },
+  { id: 1003, studentEmail: 'tune.r@demo.com',     firstName: 'ตูน',    lastName: 'เรียบร้อย',   phone: '0834567890', level: 'ประถมศึกษา', courseId: 31, courseTitle: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ป.4-6 (เตรียมเข้า ม.1)', slot: 'อา. 09:00–11:00', status: 'approved', submittedAt: '2026-05-10T14:05:00.000Z' },
+  { id: 1004, studentEmail: 'namtarn.h@demo.com',  firstName: 'น้ำตาล', lastName: 'หวานใจ',      phone: '0845678901', level: 'ประถมศึกษา', courseId: 5,  courseTitle: 'คอร์สอาทิตย์ ป.3 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'approved', submittedAt: '2026-05-11T08:45:00.000Z' },
+  { id: 1005, studentEmail: 'ploy.c@demo.com',     firstName: 'พลอย',   lastName: 'ฉลาดเฉลียว',  phone: '0878901234', level: 'มัธยมต้น',   courseId: 34, courseTitle: 'แพ็คเกจ ม.1 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)',    slot: 'จ. 17:00–18:30', status: 'approved', submittedAt: '2026-05-12T15:20:00.000Z' },
+  { id: 1006, studentEmail: 'oak.r@demo.com',      firstName: 'โอ๊ค',   lastName: 'รักเรียน',    phone: '0801234567', level: 'มัธยมปลาย',  courseId: 36, courseTitle: 'แพ็คเกจ ม.4 รวม 4 วิชา (ฟิสิกส์+คณิต+เคมี/ชีวะ+อังกฤษ)', slot: 'จ. 17:00–19:00', status: 'approved', submittedAt: '2026-05-13T12:00:00.000Z' },
+  { id: 1007, studentEmail: 'win.m@demo.com',      firstName: 'วิน',    lastName: 'มั่นใจ',      phone: '0845670123', level: 'มัธยมปลาย',  courseId: 30, courseTitle: 'คณิต A-LEVEL 1,2 ม.6 (วันศุกร์)',                 slot: 'ศ. 17:00–19:00', status: 'approved', submittedAt: '2026-05-14T10:18:00.000Z' },
+  { id: 1008, studentEmail: 'mew.c@demo.com',      firstName: 'มิว',    lastName: 'ช่างสงสัย',   phone: '0867890123', level: 'มัธยมต้น',   courseId: 13, courseTitle: 'คอร์สเสาร์ ม.1 (เพิ่มเกรดในห้องเรียน)',         slot: 'ส. 09:00–12:00', status: 'approved', submittedAt: '2026-05-15T09:30:00.000Z' },
+
+  // ─── รอดำเนินการ (9) ─────────────────────────────────────────────────
+  { id: 1009, studentEmail: 'arm.k@demo.com',      firstName: 'อาร์ม',  lastName: 'ขยัน',        phone: '0889012345', level: 'มัธยมต้น',   courseId: 21, courseTitle: 'คณิต ม.2 (วันพุธ)',                                slot: 'พ. 17:00–18:30', status: 'pending',  submittedAt: '2026-05-18T13:45:00.000Z' },
+  { id: 1010, studentEmail: 'miew.t@demo.com',     firstName: 'หมิว',   lastName: 'ตั้งใจ',      phone: '0890123456', level: 'มัธยมต้น',   courseId: 32, courseTitle: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ม.1-3 (เตรียมเข้า ม.4)', slot: 'อา. 12:00–14:00', status: 'pending',  submittedAt: '2026-05-19T16:10:00.000Z' },
+  { id: 1011, studentEmail: 'prae.r@demo.com',     firstName: 'แพร',    lastName: 'เรียนเก่ง',   phone: '0812345670', level: 'มัธยมปลาย',  courseId: 23, courseTitle: 'คณิต ม.4 (วันอังคาร)',                            slot: 'อ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-20T11:25:00.000Z' },
+  { id: 1012, studentEmail: 'keng.r@demo.com',     firstName: 'เก่ง',   lastName: 'ใฝ่รู้',      phone: '0823456701', level: 'มัธยมปลาย',  courseId: 27, courseTitle: 'ฟิสิกส์ ม.5 (วันอังคาร)',                          slot: 'อ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-20T14:38:00.000Z' },
+  { id: 1013, studentEmail: 'aan.c@demo.com',      firstName: 'แอน',    lastName: 'เฉียบขาด',    phone: '0834567012', level: 'มัธยมปลาย',  courseId: 26, courseTitle: 'เคมี+ชีวะ ม.5 (วันจันทร์)',                          slot: 'จ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-21T09:50:00.000Z' },
+  { id: 1014, studentEmail: 'pluem.r@demo.com',    firstName: 'ปลื้ม',  lastName: 'รัก',         phone: '0856701234', level: 'ประถมศึกษา', courseId: 3,  courseTitle: 'คอร์สอาทิตย์ ป.1 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'pending',  submittedAt: '2026-05-21T17:00:00.000Z' },
+  { id: 1015, studentEmail: 'jib.n@demo.com',      firstName: 'จิ๊บ',   lastName: 'น่ารัก',      phone: '0867012345', level: 'ประถมศึกษา', courseId: 4,  courseTitle: 'คอร์สอาทิตย์ ป.2 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'pending',  submittedAt: '2026-05-22T08:15:00.000Z' },
+  { id: 1016, studentEmail: 'ice.y@demo.com',      firstName: 'ไอซ์',   lastName: 'เย็น',        phone: '0870123456', level: 'มัธยมต้น',   courseId: 35, courseTitle: 'แพ็คเกจ ม.2 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)',    slot: 'จ. 17:00–18:30', status: 'pending',  submittedAt: '2026-05-22T19:30:00.000Z' },
+  { id: 1017, studentEmail: 'fon.m@demo.com',      firstName: 'ฝน',     lastName: 'ใหม่',        phone: '0801234560', level: 'ประถมศึกษา', courseId: 11, courseTitle: 'คอร์สวันธรรมดา ป.5 (พุธ+พฤหัส)',                 slot: 'พ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-23T10:45:00.000Z' },
+
+  // ─── ปฏิเสธ (3) ──────────────────────────────────────────────────────
+  { id: 1018, studentEmail: 'om.s@demo.com',       firstName: 'โอม',    lastName: 'สุภาพ',       phone: '0812340567', level: 'มัธยมต้น',   courseId: 17, courseTitle: 'คณิต ม.1 (วันอังคาร)',                           slot: 'อ. 17:00–18:30', status: 'rejected', submittedAt: '2026-05-05T14:20:00.000Z' },
+  { id: 1019, studentEmail: 'boss.k@demo.com',     firstName: 'บอส',    lastName: 'กล้าหาญ',     phone: '0856789012', level: 'ประถมศึกษา', courseId: 6,  courseTitle: 'คอร์สอาทิตย์ ป.4 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'rejected', submittedAt: '2026-05-07T11:40:00.000Z' },
+  { id: 1020, studentEmail: 'taengmoa.s@demo.com', firstName: 'แตงโม',  lastName: 'สดใส',        phone: '0823405678', level: 'มัธยมปลาย',  courseId: 22, courseTitle: 'ฟิสิกส์ ม.4 (วันจันทร์)',                         slot: 'จ. 17:00–19:00', status: 'rejected', submittedAt: '2026-05-08T16:00:00.000Z' },
+];
+
 /* ─────────────────────────────────────────────────────────────────────
  * LocalStorage helpers
  * ───────────────────────────────────────────────────────────────────── */
 const LS_KEYS = {
   user: 'mm.currentUser',
-  regs: 'mm.registrations',
+  regs: 'mm.registrations.v2',
   courses: 'mm.courses.v2',
   schedule: 'mm.schedule.v2',
   users: 'mm.users',
@@ -2354,7 +2382,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => loadLS(LS_KEYS.user, null));
   const [activePage, setActivePage] = useState(currentUser ? (currentUser.role === 'admin' ? 'admin-dashboard' : 'courses') : 'login');
   const [courses, setCourses] = useState(() => loadLS(LS_KEYS.courses, mockCourses));
-  const [registrations, setRegistrations] = useState(() => loadLS(LS_KEYS.regs, []));
+  const [registrations, setRegistrations] = useState(() => loadLS(LS_KEYS.regs, mockRegistrations));
   const [schedule, setSchedule] = useState(() => loadLS(LS_KEYS.schedule, defaultSchedule));
   const [users, setUsers] = useState(() => loadLS(LS_KEYS.users, []));
   const [preselectCourse, setPreselectCourse] = useState(null);
