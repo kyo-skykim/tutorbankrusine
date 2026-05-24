@@ -179,7 +179,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout }) => {
             <Sigma size={20} strokeWidth={2.4} />
           </span>
           <span className="font-display text-xl font-bold tracking-tight text-navy">
-            MathMaster<span className="text-indigo">.</span>
+            บ้านครูทราย
           </span>
         </button>
 
@@ -354,7 +354,7 @@ const LoginPage = ({ onLogin }) => {
                 <Sigma size={26} strokeWidth={2.4} />
               </span>
               <span className="font-display text-3xl font-bold text-navy">
-                MathMaster<span className="text-indigo">.</span>Academy
+                บ้านครูทราย
               </span>
             </div>
             <h1 className="font-display text-5xl font-bold leading-tight text-navy">
@@ -536,7 +536,7 @@ const LoginPage = ({ onLogin }) => {
                 </div>
               ) : (
                 <p className="mt-6 text-center text-xs text-navy/50">
-                  เมื่อสมัครสมาชิก คุณยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัวของ MathMaster Academy
+                  เมื่อสมัครสมาชิก คุณยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัวของ บ้านครูทราย
                 </p>
               )}
             </div>
@@ -1861,7 +1861,7 @@ export default function App() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-xs text-navy/50">
           <div className="flex items-center gap-2">
             <Sigma size={14} className="text-indigo" />
-            <span className="font-display text-sm font-bold text-navy">MathMaster Academy</span>
+            <span className="font-display text-sm font-bold text-navy">บ้านครูทราย</span>
           </div>
           <div className="font-mono">© {new Date().getFullYear()} — แก้สมการสู่ความชัดเจน</div>
         </div>
