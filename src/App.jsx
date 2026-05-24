@@ -49,15 +49,15 @@ const timeSlotOptions = [
 
 const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
 
-const masterSchedule = [
-  { courseId: 1, day: 'จันทร์',  time: '16:00–18:00', room: 'A-101' },
-  { courseId: 2, day: 'อังคาร', time: '17:00–19:00', room: 'A-202' },
-  { courseId: 3, day: 'พุธ',    time: '16:00–18:00', room: 'B-105' },
-  { courseId: 4, day: 'พฤหัส', time: '17:00–19:00', room: 'B-204' },
-  { courseId: 5, day: 'ศุกร์',  time: '16:00–18:00', room: 'C-301' },
-  { courseId: 6, day: 'เสาร์',  time: '09:00–11:00', room: 'A-101' },
-  { courseId: 2, day: 'เสาร์',  time: '13:00–15:00', room: 'A-202' },
-  { courseId: 4, day: 'อาทิตย์', time: '10:00–12:00', room: 'B-204' },
+const defaultSchedule = [
+  { id: 1, courseId: 1, day: 'จันทร์',  time: '16:00–18:00', room: 'A-101' },
+  { id: 2, courseId: 2, day: 'อังคาร', time: '17:00–19:00', room: 'A-202' },
+  { id: 3, courseId: 3, day: 'พุธ',    time: '16:00–18:00', room: 'B-105' },
+  { id: 4, courseId: 4, day: 'พฤหัส', time: '17:00–19:00', room: 'B-204' },
+  { id: 5, courseId: 5, day: 'ศุกร์',  time: '16:00–18:00', room: 'C-301' },
+  { id: 6, courseId: 6, day: 'เสาร์',  time: '09:00–11:00', room: 'A-101' },
+  { id: 7, courseId: 2, day: 'เสาร์',  time: '13:00–15:00', room: 'A-202' },
+  { id: 8, courseId: 4, day: 'อาทิตย์', time: '10:00–12:00', room: 'B-204' },
 ];
 
 const DEMO = {
@@ -72,6 +72,7 @@ const LS_KEYS = {
   user: 'mm.currentUser',
   regs: 'mm.registrations',
   courses: 'mm.courses',
+  schedule: 'mm.schedule',
 };
 
 const loadLS = (key, fallback) => {
@@ -886,13 +887,14 @@ const Summary = ({ label, value, mono, highlight }) => (
 /* ─────────────────────────────────────────────────────────────────────
  * Schedule (Student weekly view + Admin master schedule)
  * ───────────────────────────────────────────────────────────────────── */
-const SchedulePage = ({ currentUser, courses, registrations }) => {
+const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedule }) => {
   const isAdmin = currentUser.role === 'admin';
+  const [editing, setEditing] = useState(null);
 
   const myRegs = registrations.filter((r) => r.studentEmail === currentUser.email);
 
   const studentEvents = days.map((d) => {
-    return masterSchedule
+    return schedule
       .filter((s) => s.day === d)
       .filter((s) => myRegs.some((r) => r.courseId === s.courseId))
       .map((s) => {
@@ -902,7 +904,7 @@ const SchedulePage = ({ currentUser, courses, registrations }) => {
   });
 
   const adminEvents = days.map((d) =>
-    masterSchedule.filter((s) => s.day === d).map((s) => ({
+    schedule.filter((s) => s.day === d).map((s) => ({
       ...s,
       course: courses.find((c) => c.id === s.courseId),
     })),
@@ -914,6 +916,23 @@ const SchedulePage = ({ currentUser, courses, registrations }) => {
 
   const exportPDF = () => window.print();
 
+  const removeEntry = (id) => {
+    if (!confirm('ต้องการลบรายการนี้ใช่ไหม?')) return;
+    setSchedule((s) => s.filter((e) => e.id !== id));
+  };
+
+  const saveEntry = (entry) => {
+    const normalized = {
+      ...entry,
+      courseId: Number(entry.courseId),
+    };
+    setSchedule((s) => {
+      if (normalized.id) return s.map((e) => (e.id === normalized.id ? normalized : e));
+      return [...s, { ...normalized, id: Math.max(0, ...s.map((e) => e.id)) + 1 }];
+    });
+    setEditing(null);
+  };
+
   return (
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -923,11 +942,18 @@ const SchedulePage = ({ currentUser, courses, registrations }) => {
           </h1>
           <p className="mt-1 text-navy/60">
             {isAdmin
-              ? 'คอร์สทั้งหมดในแต่ละสัปดาห์'
+              ? 'คอร์สทั้งหมดในแต่ละสัปดาห์ — กดปุ่ม + เพื่อเพิ่ม หรือคลิกการ์ดเพื่อแก้ไข'
               : 'แผนการเรียนส่วนตัวของคุณสำหรับสัปดาห์นี้'}
           </p>
         </div>
-        {!isAdmin && (
+        {isAdmin ? (
+          <button
+            onClick={() => setEditing({ courseId: '', day: 'จันทร์', time: '', room: '' })}
+            className="flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-navy shadow hover:bg-amber-300"
+          >
+            <Plus size={16} /> เพิ่มรายการ
+          </button>
+        ) : (
           <button
             onClick={exportPDF}
             className="flex items-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo print:hidden"
@@ -952,7 +978,18 @@ const SchedulePage = ({ currentUser, courses, registrations }) => {
             >
               <div className="mb-3 flex items-center justify-between">
                 <div className="font-display text-lg font-bold text-navy">{d}</div>
-                <Badge color="indigo">{events[i].length}</Badge>
+                <div className="flex items-center gap-1">
+                  <Badge color="indigo">{events[i].length}</Badge>
+                  {isAdmin && (
+                    <button
+                      onClick={() => setEditing({ courseId: '', day: d, time: '', room: '' })}
+                      className="grid h-6 w-6 place-items-center rounded-full border border-navy/10 text-navy/60 transition hover:border-indigo hover:text-indigo"
+                      title="เพิ่มรายการ"
+                    >
+                      <Plus size={12} />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="space-y-2">
                 {events[i].length === 0 && (
@@ -960,25 +997,50 @@ const SchedulePage = ({ currentUser, courses, registrations }) => {
                     ว่าง
                   </div>
                 )}
-                {events[i].map((ev, k) => (
+                {events[i].map((ev) => (
                   <div
-                    key={k}
-                    className="rounded-xl border border-indigo/20 bg-indigo/5 p-3"
+                    key={ev.id}
+                    className={`group relative rounded-xl border border-indigo/20 bg-indigo/5 p-3 ${
+                      isAdmin ? 'cursor-pointer transition hover:border-indigo' : ''
+                    }`}
+                    onClick={() => isAdmin && setEditing(ev)}
                   >
-                    <div className="text-[11px] font-mono text-indigo">{ev.time}</div>
+                    <div className="text-[11px] font-mono text-indigo">{ev.time || '—'}</div>
                     <div className="mt-0.5 line-clamp-2 text-sm font-semibold text-navy">
-                      {ev.course?.title}
+                      {ev.course?.title || '⚠ ไม่พบคอร์ส'}
                     </div>
                     <div className="mt-1 flex items-center justify-between text-[11px] text-navy/60">
                       <span>{ev.course?.teacher}</span>
                       <span className="font-mono">📍 {ev.room}</span>
                     </div>
+                    {isAdmin && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeEntry(ev.id);
+                        }}
+                        className="absolute right-1.5 top-1.5 hidden rounded-md border border-rose-200 bg-white p-1 text-rose-600 hover:bg-rose-50 group-hover:block"
+                        title="ลบรายการ"
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {editing && (
+        <ScheduleEntryEditor
+          draft={editing}
+          courses={courses}
+          onChange={setEditing}
+          onClose={() => setEditing(null)}
+          onSave={saveEntry}
+        />
       )}
 
       {isAdmin && (
@@ -1010,6 +1072,93 @@ const SchedulePage = ({ currentUser, courses, registrations }) => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Schedule Entry Editor (modal)
+ * ───────────────────────────────────────────────────────────────────── */
+const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
+  const upd = (k, v) => onChange({ ...draft, [k]: v });
+  const isNew = !draft.id;
+  const valid = draft.courseId && draft.day && draft.time.trim() && draft.room.trim();
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-display text-2xl font-bold text-navy">
+            {isNew ? 'เพิ่มรายการตารางสอน' : 'แก้ไขรายการตารางสอน'}
+          </h3>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-navy/60 hover:bg-navy/5">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <Field label="คอร์ส">
+            <select
+              className="input"
+              value={draft.courseId}
+              onChange={(e) => upd('courseId', e.target.value)}
+            >
+              <option value="">เลือกคอร์ส...</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title} — {c.teacher}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="วัน">
+            <select
+              className="input"
+              value={draft.day}
+              onChange={(e) => upd('day', e.target.value)}
+            >
+              {days.map((d) => (
+                <option key={d}>{d}</option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="เวลา (เช่น 16:00–18:00)">
+            <input
+              className="input font-mono"
+              placeholder="16:00–18:00"
+              value={draft.time}
+              onChange={(e) => upd('time', e.target.value)}
+            />
+          </Field>
+
+          <Field label="ห้องเรียน">
+            <input
+              className="input font-mono"
+              placeholder="A-101"
+              value={draft.room}
+              onChange={(e) => upd('room', e.target.value)}
+            />
+          </Field>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-navy/10 px-4 py-2 text-sm font-semibold text-navy/70 hover:border-navy hover:text-navy"
+          >
+            ยกเลิก
+          </button>
+          <button
+            onClick={() => onSave(draft)}
+            disabled={!valid}
+            className="rounded-xl bg-navy px-5 py-2 text-sm font-semibold text-white hover:bg-indigo disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            บันทึก
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1321,12 +1470,14 @@ export default function App() {
   const [activePage, setActivePage] = useState(currentUser ? (currentUser.role === 'admin' ? 'admin-dashboard' : 'courses') : 'login');
   const [courses, setCourses] = useState(() => loadLS(LS_KEYS.courses, mockCourses));
   const [registrations, setRegistrations] = useState(() => loadLS(LS_KEYS.regs, []));
+  const [schedule, setSchedule] = useState(() => loadLS(LS_KEYS.schedule, defaultSchedule));
   const [preselectCourse, setPreselectCourse] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
 
   useEffect(() => saveLS(LS_KEYS.user, currentUser), [currentUser]);
   useEffect(() => saveLS(LS_KEYS.regs, registrations), [registrations]);
   useEffect(() => saveLS(LS_KEYS.courses, courses), [courses]);
+  useEffect(() => saveLS(LS_KEYS.schedule, schedule), [schedule]);
 
   useEffect(() => {
     if (!currentUser && activePage !== 'login') setActivePage('login');
@@ -1403,6 +1554,8 @@ export default function App() {
               currentUser={currentUser}
               courses={courses}
               registrations={registrations}
+              schedule={schedule}
+              setSchedule={setSchedule}
             />
           )}
           {activePage === 'admin-dashboard' && currentUser.role === 'admin' && (
