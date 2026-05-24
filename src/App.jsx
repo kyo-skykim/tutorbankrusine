@@ -1618,15 +1618,20 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
   const upd = (k, v) => onChange({ ...draft, [k]: v });
   const isNew = !draft.id;
   const bundleIds = Array.isArray(draft.bundleCourseIds) ? draft.bundleCourseIds.map(Number) : [];
-  const isBundle = bundleIds.length > 0;
+  const [showBundle, setShowBundle] = useState(bundleIds.length > 0);
   const toggleBundleCourse = (id) => {
     const has = bundleIds.includes(id);
     upd('bundleCourseIds', has ? bundleIds.filter((x) => x !== id) : [...bundleIds, id]);
   };
+  const handleBundleToggle = (on) => {
+    setShowBundle(on);
+    if (!on) upd('bundleCourseIds', []);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy/40 backdrop-blur-sm">
+      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
             {isNew ? 'เพิ่มคอร์สใหม่' : 'แก้ไขคอร์ส'}
@@ -1669,52 +1674,63 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
         </div>
 
         {/* Bundle (package) selection */}
-        <div className="mt-6 rounded-2xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 dark:border-indigo/30 p-4">
-          <div className="mb-2 flex items-center justify-between">
+        <div className="mt-6 rounded-2xl border border-indigo/20 dark:border-indigo/30 bg-indigo/5 dark:bg-indigo/10 p-4">
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showBundle}
+              onChange={(e) => handleBundleToggle(e.target.checked)}
+              className="accent-indigo"
+            />
             <div>
               <div className="text-sm font-bold text-navy dark:text-white flex items-center gap-1.5">
-                📦 คอร์สรวม (Bundle)
-                {isBundle && <Badge color="indigo">{bundleIds.length} วิชา</Badge>}
+                📦 ทำเป็นคอร์สรวม (Bundle)
+                {showBundle && bundleIds.length > 0 && <Badge color="indigo">{bundleIds.length} วิชา</Badge>}
               </div>
               <div className="text-xs text-navy/60 dark:text-slate-400">
-                เลือกคอร์สย่อยที่ต้องการรวมเป็นแพ็คเกจในราคาเดียว (ถ้าไม่เลือก จะเป็นคอร์สปกติ)
+                นักเรียนจ่ายราคาเดียว เรียนได้หลายวิชาตามที่เลือก
               </div>
             </div>
-          </div>
-          {allCourses.filter((c) => c.id !== draft.id && !isBundleCourse(c)).length === 0 ? (
-            <div className="rounded-lg border border-dashed border-navy/15 dark:border-slate-600 p-4 text-center text-xs text-navy/50 dark:text-slate-500">
-              ยังไม่มีคอร์สอื่นในระบบ ลองเพิ่มคอร์สปกติก่อน
-            </div>
-          ) : (
-            <div className="grid max-h-48 gap-1.5 overflow-y-auto md:grid-cols-2">
-              {allCourses
-                .filter((c) => c.id !== draft.id && !isBundleCourse(c))
-                .map((c) => {
-                  const checked = bundleIds.includes(c.id);
-                  return (
-                    <label
-                      key={c.id}
-                      className={`flex cursor-pointer items-start gap-2 rounded-lg border p-2 text-xs transition ${
-                        checked
-                          ? 'border-indigo bg-indigo/10 dark:bg-indigo/20'
-                          : 'border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-indigo'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleBundleCourse(c.id)}
-                        className="mt-0.5 accent-indigo"
-                      />
-                      <div className="flex-1">
-                        <div className="font-semibold text-navy dark:text-white">{c.title}</div>
-                        <div className="font-mono text-[10px] text-navy/50 dark:text-slate-400">
-                          {c.teacher} · {fmtBaht(c.price)}
-                        </div>
-                      </div>
-                    </label>
-                  );
-                })}
+          </label>
+
+          {showBundle && (
+            <div className="mt-3">
+              {allCourses.filter((c) => c.id !== draft.id && !isBundleCourse(c)).length === 0 ? (
+                <div className="rounded-lg border border-dashed border-navy/15 dark:border-slate-600 p-3 text-center text-xs text-navy/50 dark:text-slate-500">
+                  ยังไม่มีคอร์สปกติในระบบ ลองเพิ่มคอร์สอื่นก่อน
+                </div>
+              ) : (
+                <div className="grid gap-1.5 md:grid-cols-2">
+                  {allCourses
+                    .filter((c) => c.id !== draft.id && !isBundleCourse(c))
+                    .map((c) => {
+                      const checked = bundleIds.includes(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={`flex cursor-pointer items-start gap-2 rounded-lg border p-2 text-xs transition ${
+                            checked
+                              ? 'border-indigo bg-indigo/10 dark:bg-indigo/20'
+                              : 'border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-indigo'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleBundleCourse(c.id)}
+                            className="mt-0.5 accent-indigo"
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-navy dark:text-white">{c.title}</div>
+                            <div className="font-mono text-[10px] text-navy/50 dark:text-slate-400">
+                              {c.teacher} · {fmtBaht(c.price)}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1730,6 +1746,7 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
             บันทึก
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
