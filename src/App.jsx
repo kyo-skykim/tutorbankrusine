@@ -13,7 +13,7 @@ import {
   ChevronLeft,
   CheckCircle2,
   Calendar,
-  Download,
+
   BookOpen,
   ClipboardList,
   LayoutDashboard,
@@ -882,6 +882,9 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
   }, [preselectCourse]);
 
   const selectedCourse = courses.find((c) => c.id === Number(form.courseId));
+  const selectedBundleChildren = selectedCourse && isBundleCourse(selectedCourse)
+    ? selectedCourse.bundleCourseIds.map((id) => courses.find((c) => c.id === id)).filter(Boolean)
+    : [];
 
   const validateStep = (s) => {
     const e = {};
@@ -1042,6 +1045,21 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
                 <Summary label="เบอร์โทรศัพท์" value={form.phone} mono />
                 <Summary label="ระดับชั้น" value={form.level} />
                 <Summary label="คอร์ส" value={selectedCourse?.title} />
+                {selectedBundleChildren.length > 0 && (
+                  <div className="col-span-2 rounded-xl border border-gold/30 bg-gold/5 dark:bg-gold/10 p-4">
+                    <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                      📦 วิชาที่รวมอยู่ในแพ็คเกจ ({selectedBundleChildren.length} วิชา)
+                    </div>
+                    <ul className="space-y-1">
+                      {selectedBundleChildren.map((c) => (
+                        <li key={c.id} className="flex items-center gap-1.5 text-sm text-navy dark:text-white">
+                          <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
+                          {c.title}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <Summary label="ผู้สอน" value={selectedCourse?.teacher} />
                 <Summary label="เวลาเรียน" value={form.slot} />
                 <Summary label="จำนวนชั่วโมง" value={`${selectedCourse?.hours} ชม.`} mono />
