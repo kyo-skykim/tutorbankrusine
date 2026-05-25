@@ -37,59 +37,59 @@ const TEACHER_BIG = 'ครูพี่บิ๊ก';
 
 const mockCourses = [
   // ─── ป.5-6 เสาร์บ่าย ─────────────────────────────────────────────
-  { id: 1, title: 'คอร์สเสาร์ ป.5 (เพิ่มเกรดในห้องเรียน)', level: 'ประถมศึกษา', hours: 12, price: 2000, tags: ['ป.5', 'เปิดเทอม 1', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 2, title: 'คอร์สเสาร์ ป.6 (สรุปสอบเข้า ม.1)', level: 'ประถมศึกษา', hours: 12, price: 2000, tags: ['ป.6', 'สอบเข้า ม.1', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 1, title: 'คอร์สเสาร์ ป.5 (เพิ่มเกรดในห้องเรียน)', level: 'ประถมศึกษา', hours: 12, price: 2000, tags: ['ป.5', 'เปิดเทอม 1', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'ส. 13:00–16:00' },
+  { id: 2, title: 'คอร์สเสาร์ ป.6 (สรุปสอบเข้า ม.1)', level: 'ประถมศึกษา', hours: 12, price: 2000, tags: ['ป.6', 'สอบเข้า ม.1', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'ส. 13:00–16:00' },
 
   // ─── ป.1-4 อาทิตย์เช้า ───────────────────────────────────────────
-  { id: 3, title: 'คอร์สอาทิตย์ ป.1 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.1', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 4, title: 'คอร์สอาทิตย์ ป.2 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.2', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 5, title: 'คอร์สอาทิตย์ ป.3 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.3', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 6, title: 'คอร์สอาทิตย์ ป.4 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.4', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 3, title: 'คอร์สอาทิตย์ ป.1 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.1', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อา. 08:30–12:30' },
+  { id: 4, title: 'คอร์สอาทิตย์ ป.2 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.2', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อา. 08:30–12:30' },
+  { id: 5, title: 'คอร์สอาทิตย์ ป.3 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.3', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อา. 08:30–12:30' },
+  { id: 6, title: 'คอร์สอาทิตย์ ป.4 (คณิต/วิทย์/อังกฤษ/ไทย)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.4', '4 วิชา', 'รายเดือน'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อา. 08:30–12:30' },
 
   // ─── ป.1-6 วันธรรมดา 17-19 น. ─────────────────────────────────────
-  { id: 7,  title: 'คอร์สวันธรรมดา ป.1 (จันทร์+พุธ)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.1', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 8,  title: 'คอร์สวันธรรมดา ป.2 (จันทร์+พุธ)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.2', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 9,  title: 'คอร์สวันธรรมดา ป.3 (อังคาร+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.3', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 10, title: 'คอร์สวันธรรมดา ป.4 (อังคาร+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.4', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 11, title: 'คอร์สวันธรรมดา ป.5 (พุธ+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.5', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 12, title: 'คอร์สวันธรรมดา ป.6 (พุธ+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.6', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 7,  title: 'คอร์สวันธรรมดา ป.1 (จันทร์+พุธ)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.1', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ.+พ. 17:00–19:00' },
+  { id: 8,  title: 'คอร์สวันธรรมดา ป.2 (จันทร์+พุธ)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.2', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ.+พ. 17:00–19:00' },
+  { id: 9,  title: 'คอร์สวันธรรมดา ป.3 (อังคาร+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.3', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อ.+พฤ. 17:00–19:00' },
+  { id: 10, title: 'คอร์สวันธรรมดา ป.4 (อังคาร+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.4', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อ.+พฤ. 17:00–19:00' },
+  { id: 11, title: 'คอร์สวันธรรมดา ป.5 (พุธ+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.5', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'พ.+พฤ. 17:00–19:00' },
+  { id: 12, title: 'คอร์สวันธรรมดา ป.6 (พุธ+พฤหัส)', level: 'ประถมศึกษา', hours: 16, price: 2000, tags: ['ป.6', 'วันธรรมดา', '4 วิชา'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'พ.+พฤ. 17:00–19:00' },
 
   // ─── ม.1-3 เสาร์เช้า ──────────────────────────────────────────────
-  { id: 13, title: 'คอร์สเสาร์ ม.1 (เพิ่มเกรดในห้องเรียน)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.1', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 14, title: 'คอร์สเสาร์ ม.2 (เพิ่มเกรดในห้องเรียน)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.2', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 15, title: 'คอร์สเสาร์ ม.3 (สรุปสอบเข้า ม.4)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.3', 'สอบเข้า ม.4'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 13, title: 'คอร์สเสาร์ ม.1 (เพิ่มเกรดในห้องเรียน)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.1', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'ส. 09:00–12:00' },
+  { id: 14, title: 'คอร์สเสาร์ ม.2 (เพิ่มเกรดในห้องเรียน)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.2', 'คณิต-วิทย์-อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'ส. 09:00–12:00' },
+  { id: 15, title: 'คอร์สเสาร์ ม.3 (สรุปสอบเข้า ม.4)', level: 'มัธยมต้น', hours: 12, price: 1800, tags: ['ม.3', 'สอบเข้า ม.4'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'ส. 09:00–12:00' },
 
   // ─── ม.1 วันธรรมดา รายวิชา ────────────────────────────────────────
-  { id: 16, title: 'วิทย์ ม.1 (วันจันทร์)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'วิทย์'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 17, title: 'คณิต ม.1 (วันอังคาร)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 18, title: 'อังกฤษ ม.1 (วันพุธ)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 16, title: 'วิทย์ ม.1 (วันจันทร์)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'วิทย์'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ. 17:00–18:30' },
+  { id: 17, title: 'คณิต ม.1 (วันอังคาร)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อ. 17:00–18:30' },
+  { id: 18, title: 'อังกฤษ ม.1 (วันพุธ)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.1', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'พ. 17:00–18:30' },
 
   // ─── ม.2 วันธรรมดา รายวิชา ────────────────────────────────────────
-  { id: 19, title: 'อังกฤษ ม.2 (วันจันทร์)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 20, title: 'วิทย์ ม.2 (วันอังคาร)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'วิทย์'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 21, title: 'คณิต ม.2 (วันพุธ)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 19, title: 'อังกฤษ ม.2 (วันจันทร์)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ. 17:00–18:30' },
+  { id: 20, title: 'วิทย์ ม.2 (วันอังคาร)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'วิทย์'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อ. 17:00–18:30' },
+  { id: 21, title: 'คณิต ม.2 (วันพุธ)', level: 'มัธยมต้น', hours: 6, price: 1000, tags: ['ม.2', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'พ. 17:00–18:30' },
 
   // ─── ม.4 วันธรรมดา รายวิชา ────────────────────────────────────────
-  { id: 22, title: 'ฟิสิกส์ ม.4 (วันจันทร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'ฟิสิกส์'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 23, title: 'คณิต ม.4 (วันอังคาร)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 24, title: 'เคมี+ชีวะ ม.4 (วันพุธ)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'เคมี', 'ชีวะ'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 25, title: 'อังกฤษ ม.4 (วันศุกร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 22, title: 'ฟิสิกส์ ม.4 (วันจันทร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'ฟิสิกส์'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ. 17:00–19:00' },
+  { id: 23, title: 'คณิต ม.4 (วันอังคาร)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อ. 17:00–19:00' },
+  { id: 24, title: 'เคมี+ชีวะ ม.4 (วันพุธ)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'เคมี', 'ชีวะ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'พ. 17:00–19:00' },
+  { id: 25, title: 'อังกฤษ ม.4 (วันศุกร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.4', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'ศ. 17:00–19:00' },
 
   // ─── ม.5 วันธรรมดา รายวิชา ────────────────────────────────────────
-  { id: 26, title: 'เคมี+ชีวะ ม.5 (วันจันทร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'เคมี', 'ชีวะ'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 27, title: 'ฟิสิกส์ ม.5 (วันอังคาร)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'ฟิสิกส์'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 28, title: 'คณิต ม.5 (วันพุธ)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
-  { id: 29, title: 'อังกฤษ ม.5 (วันพฤหัส)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 26, title: 'เคมี+ชีวะ ม.5 (วันจันทร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'เคมี', 'ชีวะ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ. 17:00–19:00' },
+  { id: 27, title: 'ฟิสิกส์ ม.5 (วันอังคาร)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'ฟิสิกส์'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'อ. 17:00–19:00' },
+  { id: 28, title: 'คณิต ม.5 (วันพุธ)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'พ. 17:00–19:00' },
+  { id: 29, title: 'อังกฤษ ม.5 (วันพฤหัส)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.5', 'อังกฤษ'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'พฤ. 17:00–19:00' },
 
   // ─── ม.6 ──────────────────────────────────────────────────────────
-  { id: 30, title: 'คณิต A-LEVEL 1,2 ม.6 (วันศุกร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.6', 'A-LEVEL', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0 },
+  { id: 30, title: 'คณิต A-LEVEL 1,2 ม.6 (วันศุกร์)', level: 'มัธยมปลาย', hours: 8, price: 1500, tags: ['ม.6', 'A-LEVEL', 'คณิต'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'ศ. 17:00–19:00' },
 
   // ─── คอร์สพิเศษ มหิดล/จุฬาภรณ์/วมว. ─────────────────────────────
   {
     id: 31,
     title: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ป.4-6 (เตรียมเข้า ม.1)',
     level: 'ประถมศึกษา', hours: 20, price: 2990, tags: ['สอบเข้า ม.1', 'มหิดล', 'จุฬาภรณ์', 'วมว.', 'Early Bird'],
-    teacher: TEACHER_BIG, slots: 12, enrolled: 0,
+    teacher: TEACHER_BIG, slots: 12, enrolled: 0, timeSlot: 'อา. 09:00–11:00',
     startDate: '2026-05-24', endDate: '2026-07-26',
     earlyBirdPrice: 2500, earlyBirdUntil: '2026-05-15',
   },
@@ -97,16 +97,16 @@ const mockCourses = [
     id: 32,
     title: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ม.1-3 (เตรียมเข้า ม.4)',
     level: 'มัธยมต้น', hours: 20, price: 2990, tags: ['สอบเข้า ม.4', 'มหิดล', 'จุฬาภรณ์', 'วมว.', 'Early Bird'],
-    teacher: TEACHER_BIG, slots: 12, enrolled: 0,
+    teacher: TEACHER_BIG, slots: 12, enrolled: 0, timeSlot: 'อา. 12:00–14:00',
     startDate: '2026-05-24', endDate: '2026-07-26',
     earlyBirdPrice: 2500, earlyBirdUntil: '2026-05-15',
   },
 
-  // ─── แพ็คเกจรวมวิชา (ตัวอย่าง — แอดมินสร้างเพิ่มเองได้) ──────────────
-  { id: 33, title: 'แพ็คเกจ ม.1 รวม 2 วิชา (เลือกได้ 2 จากคณิต/วิทย์/อังกฤษ)', level: 'มัธยมต้น', hours: 12, price: 1700, tags: ['ม.1', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [16, 17] },
-  { id: 34, title: 'แพ็คเกจ ม.1 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)', level: 'มัธยมต้น', hours: 18, price: 2400, tags: ['ม.1', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [16, 17, 18] },
-  { id: 35, title: 'แพ็คเกจ ม.2 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)', level: 'มัธยมต้น', hours: 18, price: 2400, tags: ['ม.2', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [19, 20, 21] },
-  { id: 36, title: 'แพ็คเกจ ม.4 รวม 4 วิชา (ฟิสิกส์+คณิต+เคมี/ชีวะ+อังกฤษ)', level: 'มัธยมปลาย', hours: 32, price: 4500, tags: ['ม.4', 'ครบทุกวิชา'], teacher: TEACHER, slots: 10, enrolled: 0, bundleCourseIds: [22, 23, 24, 25] },
+  // ─── แพ็คเกจรวมวิชา ──────────────────────────────────────────────
+  { id: 33, title: 'แพ็คเกจ ม.1 รวม 2 วิชา (เลือกได้ 2 จากคณิต/วิทย์/อังกฤษ)', level: 'มัธยมต้น', hours: 12, price: 1700, tags: ['ม.1', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ.+อ. 17:00–18:30', bundleCourseIds: [16, 17] },
+  { id: 34, title: 'แพ็คเกจ ม.1 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)', level: 'มัธยมต้น', hours: 18, price: 2400, tags: ['ม.1', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ.+อ.+พ. 17:00–18:30', bundleCourseIds: [16, 17, 18] },
+  { id: 35, title: 'แพ็คเกจ ม.2 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)', level: 'มัธยมต้น', hours: 18, price: 2400, tags: ['ม.2', 'ประหยัด'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ.+อ.+พ. 17:00–18:30', bundleCourseIds: [19, 20, 21] },
+  { id: 36, title: 'แพ็คเกจ ม.4 รวม 4 วิชา (ฟิสิกส์+คณิต+เคมี/ชีวะ+อังกฤษ)', level: 'มัธยมปลาย', hours: 32, price: 4500, tags: ['ม.4', 'ครบทุกวิชา'], teacher: TEACHER, slots: 10, enrolled: 0, timeSlot: 'จ.+อ.+พ.+ศ. 17:00–19:00', bundleCourseIds: [22, 23, 24, 25] },
 ];
 
 const timeSlotOptions = [
@@ -194,30 +194,30 @@ const DEMO = {
 
 const mockRegistrations = [
   // ─── อนุมัติแล้ว (8) ────────────────────────────────────────────────
-  { id: 1001, studentEmail: 'phum.j@demo.com',     firstName: 'ภูมิ',   lastName: 'ใจดี',        phone: '0812345678', level: 'ประถมศึกษา', courseId: 1,  courseTitle: 'คอร์สเสาร์ ป.5 (เพิ่มเกรดในห้องเรียน)',          slot: 'ส. 13:00–16:00', status: 'approved', submittedAt: '2026-05-08T09:12:00.000Z' },
-  { id: 1002, studentEmail: 'pim.s@demo.com',      firstName: 'พิมพ์',  lastName: 'สวยงาม',      phone: '0823456789', level: 'ประถมศึกษา', courseId: 2,  courseTitle: 'คอร์สเสาร์ ป.6 (สรุปสอบเข้า ม.1)',               slot: 'ส. 13:00–16:00', status: 'approved', submittedAt: '2026-05-09T11:30:00.000Z' },
-  { id: 1003, studentEmail: 'tune.r@demo.com',     firstName: 'ตูน',    lastName: 'เรียบร้อย',   phone: '0834567890', level: 'ประถมศึกษา', courseId: 31, courseTitle: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ป.4-6 (เตรียมเข้า ม.1)', slot: 'อา. 09:00–11:00', status: 'approved', submittedAt: '2026-05-10T14:05:00.000Z' },
-  { id: 1004, studentEmail: 'namtarn.h@demo.com',  firstName: 'น้ำตาล', lastName: 'หวานใจ',      phone: '0845678901', level: 'ประถมศึกษา', courseId: 5,  courseTitle: 'คอร์สอาทิตย์ ป.3 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'approved', submittedAt: '2026-05-11T08:45:00.000Z' },
-  { id: 1005, studentEmail: 'ploy.c@demo.com',     firstName: 'พลอย',   lastName: 'ฉลาดเฉลียว',  phone: '0878901234', level: 'มัธยมต้น',   courseId: 34, courseTitle: 'แพ็คเกจ ม.1 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)',    slot: 'จ. 17:00–18:30', status: 'approved', submittedAt: '2026-05-12T15:20:00.000Z' },
-  { id: 1006, studentEmail: 'oak.r@demo.com',      firstName: 'โอ๊ค',   lastName: 'รักเรียน',    phone: '0801234567', level: 'มัธยมปลาย',  courseId: 36, courseTitle: 'แพ็คเกจ ม.4 รวม 4 วิชา (ฟิสิกส์+คณิต+เคมี/ชีวะ+อังกฤษ)', slot: 'จ. 17:00–19:00', status: 'approved', submittedAt: '2026-05-13T12:00:00.000Z' },
-  { id: 1007, studentEmail: 'win.m@demo.com',      firstName: 'วิน',    lastName: 'มั่นใจ',      phone: '0845670123', level: 'มัธยมปลาย',  courseId: 30, courseTitle: 'คณิต A-LEVEL 1,2 ม.6 (วันศุกร์)',                 slot: 'ศ. 17:00–19:00', status: 'approved', submittedAt: '2026-05-14T10:18:00.000Z' },
-  { id: 1008, studentEmail: 'mew.c@demo.com',      firstName: 'มิว',    lastName: 'ช่างสงสัย',   phone: '0867890123', level: 'มัธยมต้น',   courseId: 13, courseTitle: 'คอร์สเสาร์ ม.1 (เพิ่มเกรดในห้องเรียน)',         slot: 'ส. 09:00–12:00', status: 'approved', submittedAt: '2026-05-15T09:30:00.000Z' },
+  { id: 1001, studentEmail: 'phum.j@demo.com',     firstName: 'ภูมิ',   lastName: 'ใจดี',        phone: '0812345678', level: 'ประถมศึกษา', courseId: 1,  courseTitle: 'คอร์สเสาร์ ป.5 (เพิ่มเกรดในห้องเรียน)',          status: 'approved', submittedAt: '2026-05-08T09:12:00.000Z', paymentMethod: 'transfer', paymentSlip: null },
+  { id: 1002, studentEmail: 'pim.s@demo.com',      firstName: 'พิมพ์',  lastName: 'สวยงาม',      phone: '0823456789', level: 'ประถมศึกษา', courseId: 2,  courseTitle: 'คอร์สเสาร์ ป.6 (สรุปสอบเข้า ม.1)',               status: 'approved', submittedAt: '2026-05-09T11:30:00.000Z', paymentMethod: 'cash',     paymentSlip: null },
+  { id: 1003, studentEmail: 'tune.r@demo.com',     firstName: 'ตูน',    lastName: 'เรียบร้อย',   phone: '0834567890', level: 'ประถมศึกษา', courseId: 31, courseTitle: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ป.4-6 (เตรียมเข้า ม.1)', status: 'approved', submittedAt: '2026-05-10T14:05:00.000Z', paymentMethod: 'transfer', paymentSlip: null },
+  { id: 1004, studentEmail: 'namtarn.h@demo.com',  firstName: 'น้ำตาล', lastName: 'หวานใจ',      phone: '0845678901', level: 'ประถมศึกษา', courseId: 5,  courseTitle: 'คอร์สอาทิตย์ ป.3 (คณิต/วิทย์/อังกฤษ/ไทย)',       status: 'approved', submittedAt: '2026-05-11T08:45:00.000Z', paymentMethod: 'cash',     paymentSlip: null },
+  { id: 1005, studentEmail: 'ploy.c@demo.com',     firstName: 'พลอย',   lastName: 'ฉลาดเฉลียว',  phone: '0878901234', level: 'มัธยมต้น',   courseId: 34, courseTitle: 'แพ็คเกจ ม.1 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)',    status: 'approved', submittedAt: '2026-05-12T15:20:00.000Z', paymentMethod: 'transfer', paymentSlip: null },
+  { id: 1006, studentEmail: 'oak.r@demo.com',      firstName: 'โอ๊ค',   lastName: 'รักเรียน',    phone: '0801234567', level: 'มัธยมปลาย',  courseId: 36, courseTitle: 'แพ็คเกจ ม.4 รวม 4 วิชา (ฟิสิกส์+คณิต+เคมี/ชีวะ+อังกฤษ)', status: 'approved', submittedAt: '2026-05-13T12:00:00.000Z', paymentMethod: 'cash',     paymentSlip: null },
+  { id: 1007, studentEmail: 'win.m@demo.com',      firstName: 'วิน',    lastName: 'มั่นใจ',      phone: '0845670123', level: 'มัธยมปลาย',  courseId: 30, courseTitle: 'คณิต A-LEVEL 1,2 ม.6 (วันศุกร์)',                 status: 'approved', submittedAt: '2026-05-14T10:18:00.000Z', paymentMethod: 'transfer', paymentSlip: null },
+  { id: 1008, studentEmail: 'mew.c@demo.com',      firstName: 'มิว',    lastName: 'ช่างสงสัย',   phone: '0867890123', level: 'มัธยมต้น',   courseId: 13, courseTitle: 'คอร์สเสาร์ ม.1 (เพิ่มเกรดในห้องเรียน)',         status: 'approved', submittedAt: '2026-05-15T09:30:00.000Z', paymentMethod: 'cash',     paymentSlip: null },
 
   // ─── รอดำเนินการ (9) ─────────────────────────────────────────────────
-  { id: 1009, studentEmail: 'arm.k@demo.com',      firstName: 'อาร์ม',  lastName: 'ขยัน',        phone: '0889012345', level: 'มัธยมต้น',   courseId: 21, courseTitle: 'คณิต ม.2 (วันพุธ)',                                slot: 'พ. 17:00–18:30', status: 'pending',  submittedAt: '2026-05-18T13:45:00.000Z' },
-  { id: 1010, studentEmail: 'miew.t@demo.com',     firstName: 'หมิว',   lastName: 'ตั้งใจ',      phone: '0890123456', level: 'มัธยมต้น',   courseId: 32, courseTitle: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ม.1-3 (เตรียมเข้า ม.4)', slot: 'อา. 12:00–14:00', status: 'pending',  submittedAt: '2026-05-19T16:10:00.000Z' },
-  { id: 1011, studentEmail: 'prae.r@demo.com',     firstName: 'แพร',    lastName: 'เรียนเก่ง',   phone: '0812345670', level: 'มัธยมปลาย',  courseId: 23, courseTitle: 'คณิต ม.4 (วันอังคาร)',                            slot: 'อ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-20T11:25:00.000Z' },
-  { id: 1012, studentEmail: 'keng.r@demo.com',     firstName: 'เก่ง',   lastName: 'ใฝ่รู้',      phone: '0823456701', level: 'มัธยมปลาย',  courseId: 27, courseTitle: 'ฟิสิกส์ ม.5 (วันอังคาร)',                          slot: 'อ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-20T14:38:00.000Z' },
-  { id: 1013, studentEmail: 'aan.c@demo.com',      firstName: 'แอน',    lastName: 'เฉียบขาด',    phone: '0834567012', level: 'มัธยมปลาย',  courseId: 26, courseTitle: 'เคมี+ชีวะ ม.5 (วันจันทร์)',                          slot: 'จ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-21T09:50:00.000Z' },
-  { id: 1014, studentEmail: 'pluem.r@demo.com',    firstName: 'ปลื้ม',  lastName: 'รัก',         phone: '0856701234', level: 'ประถมศึกษา', courseId: 3,  courseTitle: 'คอร์สอาทิตย์ ป.1 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'pending',  submittedAt: '2026-05-21T17:00:00.000Z' },
-  { id: 1015, studentEmail: 'jib.n@demo.com',      firstName: 'จิ๊บ',   lastName: 'น่ารัก',      phone: '0867012345', level: 'ประถมศึกษา', courseId: 4,  courseTitle: 'คอร์สอาทิตย์ ป.2 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'pending',  submittedAt: '2026-05-22T08:15:00.000Z' },
-  { id: 1016, studentEmail: 'ice.y@demo.com',      firstName: 'ไอซ์',   lastName: 'เย็น',        phone: '0870123456', level: 'มัธยมต้น',   courseId: 35, courseTitle: 'แพ็คเกจ ม.2 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)',    slot: 'จ. 17:00–18:30', status: 'pending',  submittedAt: '2026-05-22T19:30:00.000Z' },
-  { id: 1017, studentEmail: 'fon.m@demo.com',      firstName: 'ฝน',     lastName: 'ใหม่',        phone: '0801234560', level: 'ประถมศึกษา', courseId: 11, courseTitle: 'คอร์สวันธรรมดา ป.5 (พุธ+พฤหัส)',                 slot: 'พ. 17:00–19:00', status: 'pending',  submittedAt: '2026-05-23T10:45:00.000Z' },
+  { id: 1009, studentEmail: 'arm.k@demo.com',      firstName: 'อาร์ม',  lastName: 'ขยัน',        phone: '0889012345', level: 'มัธยมต้น',   courseId: 21, courseTitle: 'คณิต ม.2 (วันพุธ)',                                status: 'pending',  submittedAt: '2026-05-18T13:45:00.000Z', paymentMethod: 'transfer', paymentSlip: null },
+  { id: 1010, studentEmail: 'miew.t@demo.com',     firstName: 'หมิว',   lastName: 'ตั้งใจ',      phone: '0890123456', level: 'มัธยมต้น',   courseId: 32, courseTitle: 'เตรียมสอบคณิต มหิดล/จุฬาภรณ์/วมว. ม.1-3 (เตรียมเข้า ม.4)', status: 'pending',  submittedAt: '2026-05-19T16:10:00.000Z', paymentMethod: null,       paymentSlip: null },
+  { id: 1011, studentEmail: 'prae.r@demo.com',     firstName: 'แพร',    lastName: 'เรียนเก่ง',   phone: '0812345670', level: 'มัธยมปลาย',  courseId: 23, courseTitle: 'คณิต ม.4 (วันอังคาร)',                            status: 'pending',  submittedAt: '2026-05-20T11:25:00.000Z', paymentMethod: 'cash',     paymentSlip: null },
+  { id: 1012, studentEmail: 'keng.r@demo.com',     firstName: 'เก่ง',   lastName: 'ใฝ่รู้',      phone: '0823456701', level: 'มัธยมปลาย',  courseId: 27, courseTitle: 'ฟิสิกส์ ม.5 (วันอังคาร)',                          status: 'pending',  submittedAt: '2026-05-20T14:38:00.000Z', paymentMethod: null,       paymentSlip: null },
+  { id: 1013, studentEmail: 'aan.c@demo.com',      firstName: 'แอน',    lastName: 'เฉียบขาด',    phone: '0834567012', level: 'มัธยมปลาย',  courseId: 26, courseTitle: 'เคมี+ชีวะ ม.5 (วันจันทร์)',                          status: 'pending',  submittedAt: '2026-05-21T09:50:00.000Z', paymentMethod: 'transfer', paymentSlip: null },
+  { id: 1014, studentEmail: 'pluem.r@demo.com',    firstName: 'ปลื้ม',  lastName: 'รัก',         phone: '0856701234', level: 'ประถมศึกษา', courseId: 3,  courseTitle: 'คอร์สอาทิตย์ ป.1 (คณิต/วิทย์/อังกฤษ/ไทย)',       status: 'pending',  submittedAt: '2026-05-21T17:00:00.000Z', paymentMethod: null,       paymentSlip: null },
+  { id: 1015, studentEmail: 'jib.n@demo.com',      firstName: 'จิ๊บ',   lastName: 'น่ารัก',      phone: '0867012345', level: 'ประถมศึกษา', courseId: 4,  courseTitle: 'คอร์สอาทิตย์ ป.2 (คณิต/วิทย์/อังกฤษ/ไทย)',       status: 'pending',  submittedAt: '2026-05-22T08:15:00.000Z', paymentMethod: 'cash',     paymentSlip: null },
+  { id: 1016, studentEmail: 'ice.y@demo.com',      firstName: 'ไอซ์',   lastName: 'เย็น',        phone: '0870123456', level: 'มัธยมต้น',   courseId: 35, courseTitle: 'แพ็คเกจ ม.2 รวม 3 วิชา (คณิต+วิทย์+อังกฤษ)',    status: 'pending',  submittedAt: '2026-05-22T19:30:00.000Z', paymentMethod: 'transfer', paymentSlip: null },
+  { id: 1017, studentEmail: 'fon.m@demo.com',      firstName: 'ฝน',     lastName: 'ใหม่',        phone: '0801234560', level: 'ประถมศึกษา', courseId: 11, courseTitle: 'คอร์สวันธรรมดา ป.5 (พุธ+พฤหัส)',                 status: 'pending',  submittedAt: '2026-05-23T10:45:00.000Z', paymentMethod: null,       paymentSlip: null },
 
   // ─── ปฏิเสธ (3) ──────────────────────────────────────────────────────
-  { id: 1018, studentEmail: 'om.s@demo.com',       firstName: 'โอม',    lastName: 'สุภาพ',       phone: '0812340567', level: 'มัธยมต้น',   courseId: 17, courseTitle: 'คณิต ม.1 (วันอังคาร)',                           slot: 'อ. 17:00–18:30', status: 'rejected', submittedAt: '2026-05-05T14:20:00.000Z' },
-  { id: 1019, studentEmail: 'boss.k@demo.com',     firstName: 'บอส',    lastName: 'กล้าหาญ',     phone: '0856789012', level: 'ประถมศึกษา', courseId: 6,  courseTitle: 'คอร์สอาทิตย์ ป.4 (คณิต/วิทย์/อังกฤษ/ไทย)',       slot: 'อา. 08:30–12:30', status: 'rejected', submittedAt: '2026-05-07T11:40:00.000Z' },
-  { id: 1020, studentEmail: 'taengmoa.s@demo.com', firstName: 'แตงโม',  lastName: 'สดใส',        phone: '0823405678', level: 'มัธยมปลาย',  courseId: 22, courseTitle: 'ฟิสิกส์ ม.4 (วันจันทร์)',                         slot: 'จ. 17:00–19:00', status: 'rejected', submittedAt: '2026-05-08T16:00:00.000Z' },
+  { id: 1018, studentEmail: 'om.s@demo.com',       firstName: 'โอม',    lastName: 'สุภาพ',       phone: '0812340567', level: 'มัธยมต้น',   courseId: 17, courseTitle: 'คณิต ม.1 (วันอังคาร)',                           status: 'rejected', submittedAt: '2026-05-05T14:20:00.000Z', paymentMethod: null, paymentSlip: null },
+  { id: 1019, studentEmail: 'boss.k@demo.com',     firstName: 'บอส',    lastName: 'กล้าหาญ',     phone: '0856789012', level: 'ประถมศึกษา', courseId: 6,  courseTitle: 'คอร์สอาทิตย์ ป.4 (คณิต/วิทย์/อังกฤษ/ไทย)',       status: 'rejected', submittedAt: '2026-05-07T11:40:00.000Z', paymentMethod: null, paymentSlip: null },
+  { id: 1020, studentEmail: 'taengmoa.s@demo.com', firstName: 'แตงโม',  lastName: 'สดใส',        phone: '0823405678', level: 'มัธยมปลาย',  courseId: 22, courseTitle: 'ฟิสิกส์ ม.4 (วันจันทร์)',                         status: 'rejected', submittedAt: '2026-05-08T16:00:00.000Z', paymentMethod: null, paymentSlip: null },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -225,8 +225,8 @@ const mockRegistrations = [
  * ───────────────────────────────────────────────────────────────────── */
 const LS_KEYS = {
   user: 'mm.currentUser',
-  regs: 'mm.registrations.v2',
-  courses: 'mm.courses.v2',
+  regs: 'mm.registrations.v3',
+  courses: 'mm.courses.v3',
   schedule: 'mm.schedule.v2',
   users: 'mm.users',
   theme: 'mm.theme',
@@ -910,6 +910,12 @@ const CourseCard = ({ course, allCourses = [], onRegister }) => {
         <div className="col-span-2 text-xs text-navy/50 dark:text-slate-500">
           ผู้สอน: <span className="text-navy/80 dark:text-slate-300">{course.teacher}</span>
         </div>
+        {course.timeSlot && (
+          <div className="col-span-2 flex items-center gap-1.5 text-xs text-navy/60 dark:text-slate-400">
+            <Calendar size={12} className="text-indigo" />
+            <span className="font-mono">{course.timeSlot}</span>
+          </div>
+        )}
       </div>
 
       <div className="mt-3">
@@ -937,20 +943,25 @@ const CourseCard = ({ course, allCourses = [], onRegister }) => {
   );
 };
 
+const GRADE_ORDER = ['ป.1','ป.2','ป.3','ป.4','ป.5','ป.6','ม.1','ม.2','ม.3','ม.4','ม.5','ม.6'];
+
 const CoursesPage = ({ courses, onRegister }) => {
-  const [level, setLevel] = useState('ทั้งหมด');
-  const [maxPrice, setMaxPrice] = useState(10000);
+  const [grade, setGrade] = useState('ทั้งหมด');
   const [query, setQuery] = useState('');
 
-  const levels = useMemo(
-    () => ['ทั้งหมด', ...Array.from(new Set(courses.map((c) => c.level)))],
-    [courses],
-  );
+  const gradeOptions = useMemo(() => {
+    const found = new Set();
+    for (const c of courses) {
+      for (const tag of c.tags) {
+        if (GRADE_ORDER.includes(tag)) found.add(tag);
+      }
+    }
+    return ['ทั้งหมด', ...GRADE_ORDER.filter((g) => found.has(g))];
+  }, [courses]);
 
   const filtered = courses.filter(
     (c) =>
-      (level === 'ทั้งหมด' || c.level === level) &&
-      c.price <= maxPrice &&
+      (grade === 'ทั้งหมด' || c.tags.includes(grade)) &&
       (query.trim() === '' || c.title.toLowerCase().includes(query.toLowerCase())),
   );
 
@@ -975,32 +986,21 @@ const CoursesPage = ({ courses, onRegister }) => {
                 className="w-56 rounded-xl border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
               />
             </div>
-            <div>
-              <select
-                value={level}
-                onChange={(e) => setLevel(e.target.value)}
-                className="rounded-xl border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 px-3 py-2 text-sm outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {gradeOptions.map((g) => (
+              <button
+                key={g}
+                onClick={() => setGrade(g)}
+                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                  grade === g
+                    ? 'border-indigo bg-indigo text-white shadow'
+                    : 'border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 text-navy/70 dark:text-slate-300 hover:border-indigo hover:text-indigo'
+                }`}
               >
-                {levels.map((l) => (
-                  <option key={l}>{l}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-1 items-center gap-3 min-w-[220px]">
-              <span className="text-xs text-navy/50 dark:text-slate-500">ราคาสูงสุด</span>
-              <input
-                type="range"
-                min={1000}
-                max={10000}
-                step={500}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="flex-1 accent-indigo"
-              />
-              <span className="font-mono text-sm font-semibold text-navy dark:text-white">
-                {fmtBaht(maxPrice)}
-              </span>
-            </div>
+                {g}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -1061,10 +1061,12 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
     phone: '',
     level: '',
     courseId: preselectCourse?.id || '',
-    slot: '',
+    paymentMethod: '',
+    paymentSlip: null,
   });
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const slipRef = useRef(null);
 
   useEffect(() => {
     if (preselectCourse) {
@@ -1087,7 +1089,9 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
     }
     if (s === 2) {
       if (!form.courseId) e.courseId = 'กรุณาเลือกคอร์ส';
-      if (!form.slot) e.slot = 'กรุณาเลือกเวลา';
+    }
+    if (s === 3) {
+      if (!form.paymentMethod) e.paymentMethod = 'กรุณาเลือกวิธีชำระเงิน';
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -1097,7 +1101,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const submit = () => {
-    if (!validateStep(2)) return;
+    if (!validateStep(3)) return;
     onSubmit({
       ...form,
       courseId: Number(form.courseId),
@@ -1108,6 +1112,13 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
   };
 
   const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSlipUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const compressed = await fileToCompressedDataURL(file, 800);
+    update('paymentSlip', compressed);
+  };
 
   const StepDot = ({ n, label }) => (
     <div className="flex flex-1 items-center gap-3">
@@ -1134,8 +1145,8 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
         {/* Progress */}
         <div className="mt-8 flex items-center">
           <StepDot n={1} label="ข้อมูลส่วนตัว" />
-          <StepDot n={2} label="คอร์สและเวลา" />
-          <StepDot n={3} label="ยืนยัน" />
+          <StepDot n={2} label="เลือกคอร์ส" />
+          <StepDot n={3} label="ชำระเงิน" />
         </div>
 
         <div className="mt-8 rounded-3xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm">
@@ -1199,68 +1210,139 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
                 </select>
               </Field>
 
-              <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
-                  ช่วงเวลาที่สามารถเรียนได้
+              {selectedCourse && (
+                <div className="rounded-xl border border-indigo/20 dark:border-indigo/30 bg-indigo/5 dark:bg-indigo/10 p-4 space-y-1">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-navy dark:text-white">
+                    <Calendar size={14} className="text-indigo" />
+                    เวลาเรียน: <span className="font-mono">{selectedCourse.timeSlot}</span>
+                  </div>
+                  <div className="text-xs text-navy/60 dark:text-slate-400">
+                    ผู้สอน: {selectedCourse.teacher} · {selectedCourse.hours} ชม. ·{' '}
+                    <span className="font-mono font-bold text-gold">{fmtBaht(effectivePrice(selectedCourse))}</span>
+                  </div>
+                  {selectedBundleChildren.length > 0 && (
+                    <div className="mt-2 rounded-lg border border-gold/30 bg-white/60 dark:bg-slate-700/40 p-2">
+                      <div className="text-[11px] font-bold text-amber-700 dark:text-amber-400 mb-1">
+                        📦 รวม {selectedBundleChildren.length} วิชา
+                      </div>
+                      <ul className="space-y-0.5">
+                        {selectedBundleChildren.map((c) => (
+                          <li key={c.id} className="flex items-center gap-1 text-xs text-navy dark:text-white">
+                            <CheckCircle2 size={11} className="text-emerald-600 flex-shrink-0" />
+                            {c.title}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                  {timeSlotOptions.map((slot) => (
-                    <button
-                      key={slot}
-                      type="button"
-                      onClick={() => update('slot', slot)}
-                      className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
-                        form.slot === slot
-                          ? 'border-indigo bg-indigo text-white shadow'
-                          : 'border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 text-navy/70 dark:text-slate-300 hover:border-indigo hover:text-indigo'
-                      }`}
-                    >
-                      {slot}
-                    </button>
-                  ))}
-                </div>
-                {errors.slot && (
-                  <div className="mt-1 text-xs font-semibold text-rose-600">{errors.slot}</div>
-                )}
-              </div>
+              )}
             </div>
           )}
 
           {step === 3 && (
-            <div className="animate-fade-in">
-              <h2 className="font-display text-2xl font-bold text-navy dark:text-white">ยืนยันข้อมูล</h2>
-              <p className="text-sm text-navy/60 dark:text-slate-400">กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนยืนยัน</p>
-
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                <Summary label="ชื่อ-นามสกุล" value={`${form.firstName} ${form.lastName}`} />
-                <Summary label="เบอร์โทรศัพท์" value={form.phone} mono />
-                <Summary label="ระดับชั้น" value={form.level} />
-                <Summary label="คอร์ส" value={selectedCourse?.title} />
-                {selectedBundleChildren.length > 0 && (
-                  <div className="col-span-2 rounded-xl border border-gold/30 bg-gold/5 dark:bg-gold/10 p-4">
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                      📦 วิชาที่รวมอยู่ในแพ็คเกจ ({selectedBundleChildren.length} วิชา)
-                    </div>
-                    <ul className="space-y-1">
-                      {selectedBundleChildren.map((c) => (
-                        <li key={c.id} className="flex items-center gap-1.5 text-sm text-navy dark:text-white">
-                          <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
-                          {c.title}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <Summary label="ผู้สอน" value={selectedCourse?.teacher} />
-                <Summary label="เวลาเรียน" value={form.slot} />
-                <Summary label="จำนวนชั่วโมง" value={`${selectedCourse?.hours} ชม.`} mono />
-                <Summary
-                  label="ราคา"
-                  value={selectedCourse ? fmtBaht(selectedCourse.price) : '-'}
-                  mono
-                  highlight
-                />
+            <div className="space-y-6 animate-fade-in">
+              {/* Course summary */}
+              <div className="rounded-xl border border-navy/10 dark:border-slate-700 bg-navy/[0.02] dark:bg-slate-700/30 p-4">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-navy/50 dark:text-slate-500 mb-2">
+                  สรุปการลงทะเบียน
+                </div>
+                <div className="font-semibold text-navy dark:text-white">{selectedCourse?.title}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-navy/60 dark:text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Calendar size={11} className="text-indigo" />
+                    <span className="font-mono">{selectedCourse?.timeSlot}</span>
+                  </span>
+                  <span>·</span>
+                  <span>{form.firstName} {form.lastName}</span>
+                  <span>·</span>
+                  <span className="font-mono font-bold text-gold">{fmtBaht(effectivePrice(selectedCourse))}</span>
+                </div>
               </div>
+
+              {/* Payment method */}
+              <div>
+                <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
+                  วิธีชำระเงิน
+                </div>
+                {errors.paymentMethod && (
+                  <div className="mb-2 text-xs font-semibold text-rose-600">{errors.paymentMethod}</div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: 'transfer', label: '💳 โอนเงิน',  desc: 'โอนเงินผ่านธนาคาร' },
+                    { key: 'cash',     label: '💵 จ่ายสด',   desc: 'ชำระ ณ วันเรียนครั้งแรก' },
+                  ].map((m) => (
+                    <button
+                      key={m.key}
+                      type="button"
+                      onClick={() => update('paymentMethod', m.key)}
+                      className={`rounded-xl border p-4 text-left transition ${
+                        form.paymentMethod === m.key
+                          ? 'border-indigo bg-indigo/5 dark:bg-indigo/10 ring-2 ring-indigo/30'
+                          : 'border-navy/10 dark:border-slate-600 hover:border-indigo'
+                      }`}
+                    >
+                      <div className="font-semibold text-navy dark:text-white">{m.label}</div>
+                      <div className="mt-0.5 text-xs text-navy/60 dark:text-slate-400">{m.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Transfer: bank account + slip upload */}
+              {form.paymentMethod === 'transfer' && (
+                <div className="rounded-xl border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 p-4 space-y-3">
+                  <div className="text-sm font-bold text-emerald-800 dark:text-emerald-300">ข้อมูลบัญชีธนาคาร</div>
+                  <div className="space-y-1 text-sm text-navy dark:text-white">
+                    <div>🏦 ธนาคารกสิกรไทย (KBANK)</div>
+                    <div className="font-mono font-bold">เลขที่บัญชี: 123-4-56789-0</div>
+                    <div>ชื่อบัญชี: นางสาว ทราย ใจดี</div>
+                    <div className="text-xs text-emerald-700 dark:text-emerald-400">
+                      กรุณาโอนเงิน{' '}
+                      <span className="font-mono font-bold">{fmtBaht(effectivePrice(selectedCourse))}</span>{' '}
+                      แล้วอัปโหลดสลิป
+                    </div>
+                  </div>
+                  <input ref={slipRef} type="file" accept="image/*" className="hidden" onChange={handleSlipUpload} />
+                  {form.paymentSlip ? (
+                    <div className="flex items-center gap-3">
+                      <img src={form.paymentSlip} alt="slip" className="h-20 w-20 rounded-lg object-cover border border-emerald-300" />
+                      <div>
+                        <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">อัปโหลดสลิปแล้ว ✓</div>
+                        <button
+                          type="button"
+                          onClick={() => slipRef.current?.click()}
+                          className="mt-1 text-xs text-indigo underline"
+                        >
+                          เปลี่ยนสลิป
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => slipRef.current?.click()}
+                      className="flex items-center gap-2 rounded-lg border border-dashed border-emerald-400 dark:border-emerald-600 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition"
+                    >
+                      📎 อัปโหลดสลิปการโอนเงิน
+                      <span className="text-xs text-navy/40 dark:text-slate-500">(ไม่จำเป็น)</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Cash: confirmation message */}
+              {form.paymentMethod === 'cash' && (
+                <div className="rounded-xl border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-4">
+                  <div className="text-sm font-bold text-amber-800 dark:text-amber-300">💵 ชำระเงินสด</div>
+                  <div className="mt-1 text-sm text-navy/70 dark:text-slate-300">
+                    กรุณาเตรียมเงินสด{' '}
+                    <span className="font-mono font-bold">{fmtBaht(effectivePrice(selectedCourse))}</span>{' '}
+                    มาชำระ ณ วันเรียนครั้งแรก
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1644,6 +1726,7 @@ const emptyCourseDraft = {
   teacher: '',
   slots: 10,
   enrolled: 0,
+  timeSlot: '',
   bundleCourseIds: [],
   startDate: '',
   endDate: '',
@@ -1871,6 +1954,9 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
           </Field>
           <Field label="ผู้ลงทะเบียนเดิม">
             <input type="number" className="input font-mono" value={draft.enrolled} onChange={(e) => upd('enrolled', e.target.value)} />
+          </Field>
+          <Field label="เวลาเรียน (timeSlot)">
+            <input className="input font-mono" placeholder="เช่น ส. 09:00–12:00" value={draft.timeSlot || ''} onChange={(e) => upd('timeSlot', e.target.value)} />
           </Field>
         </div>
 
@@ -2305,6 +2391,8 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
   const [viewMode, setViewMode] = useState('by-student');
   const [expandedCourseId, setExpandedCourseId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
+  const [slipModal, setSlipModal] = useState(null);
 
   const approve = (id) =>
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
@@ -2328,12 +2416,44 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
     [courses, byCourse],
   );
 
+  const matchesPayment = (r) => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'transfer') return r.paymentMethod === 'transfer';
+    if (paymentFilter === 'cash') return r.paymentMethod === 'cash';
+    if (paymentFilter === 'none') return !r.paymentMethod;
+    return true;
+  };
+
   const filteredRegsFor = (courseId) => {
     const regs = byCourse[courseId] || [];
-    return statusFilter === 'all' ? regs : regs.filter((r) => r.status === statusFilter);
+    return regs.filter((r) => {
+      const statusOk = statusFilter === 'all' || r.status === statusFilter;
+      return statusOk && matchesPayment(r);
+    });
   };
 
   const statusColor = { pending: 'gold', approved: 'green', rejected: 'red' };
+
+  const PaymentBadge = ({ r }) => {
+    if (!r.paymentMethod) {
+      return <Badge color="red">ยังไม่ชำระ</Badge>;
+    }
+    return (
+      <div className="flex items-center gap-1.5">
+        <Badge color={r.paymentMethod === 'transfer' ? 'green' : 'gold'}>
+          {r.paymentMethod === 'transfer' ? 'โอนเงิน' : 'จ่ายสด'}
+        </Badge>
+        {r.paymentSlip && (
+          <button
+            onClick={() => setSlipModal(r.paymentSlip)}
+            className="rounded-md bg-indigo/10 px-2 py-0.5 text-xs font-semibold text-indigo hover:bg-indigo/20 transition"
+          >
+            ดูสลิป
+          </button>
+        )}
+      </div>
+    );
+  };
 
   const ActionBtns = ({ r }) => (
     <div className="flex justify-end gap-1">
@@ -2351,6 +2471,11 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
       </button>
     </div>
   );
+
+  const filteredFlat = registrations.filter((r) => {
+    const statusOk = statusFilter === 'all' || r.status === statusFilter;
+    return statusOk && matchesPayment(r);
+  });
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
@@ -2377,79 +2502,105 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
         ))}
       </div>
 
+      {/* Shared filter chips */}
+      <div className="mt-4 flex flex-wrap gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-navy/50 dark:text-slate-500">สถานะ:</span>
+          {[
+            { key: 'all',      label: 'ทั้งหมด' },
+            { key: 'approved', label: 'อนุมัติแล้ว' },
+            { key: 'pending',  label: 'รอดำเนินการ' },
+            { key: 'rejected', label: 'ปฏิเสธ' },
+          ].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setStatusFilter(f.key)}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                statusFilter === f.key
+                  ? 'border-indigo bg-indigo text-white'
+                  : 'border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-navy/50 dark:text-slate-500">การชำระ:</span>
+          {[
+            { key: 'all',      label: 'ทั้งหมด' },
+            { key: 'transfer', label: 'โอนเงิน' },
+            { key: 'cash',     label: 'จ่ายสด' },
+            { key: 'none',     label: 'ยังไม่ชำระ' },
+          ].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setPaymentFilter(f.key)}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                paymentFilter === f.key
+                  ? 'border-indigo bg-indigo text-white'
+                  : 'border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ── รายบุคคล ── */}
       {viewMode === 'by-student' && (
-        <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-          {registrations.length === 0 ? (
+        <div className="mt-6 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+          {filteredFlat.length === 0 ? (
             <div className="p-16 text-center">
               <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
               <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีการลงทะเบียน</div>
             </div>
           ) : (
-            <table className="w-full text-left text-sm">
-              <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">นักเรียน</th>
-                  <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
-                  <th className="px-4 py-3 font-semibold">ระดับ</th>
-                  <th className="px-4 py-3 font-semibold">คอร์ส</th>
-                  <th className="px-4 py-3 font-semibold">เวลา</th>
-                  <th className="px-4 py-3 font-semibold">สถานะ</th>
-                  <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
-                {registrations.map((r) => {
-                  const course = courses.find((c) => c.id === r.courseId);
-                  return (
-                    <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
-                      <td className="px-4 py-3 font-semibold text-navy dark:text-white">
-                        {r.firstName} {r.lastName}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
-                      <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
-                      <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{course?.title || '—'}</td>
-                      <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.slot}</td>
-                      <td className="px-4 py-3">
-                        <Badge color={r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : 'gold'}>
-                          {statusLabel[r.status] || statusLabel.pending}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3"><ActionBtns r={r} /></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="thin-scroll overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">นักเรียน</th>
+                    <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
+                    <th className="px-4 py-3 font-semibold">ระดับ</th>
+                    <th className="px-4 py-3 font-semibold">คอร์ส</th>
+                    <th className="px-4 py-3 font-semibold">การชำระ</th>
+                    <th className="px-4 py-3 font-semibold">สถานะ</th>
+                    <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
+                  {filteredFlat.map((r) => {
+                    const course = courses.find((c) => c.id === r.courseId);
+                    return (
+                      <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                        <td className="px-4 py-3 font-semibold text-navy dark:text-white">
+                          {r.firstName} {r.lastName}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
+                        <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
+                        <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{course?.title || '—'}</td>
+                        <td className="px-4 py-3"><PaymentBadge r={r} /></td>
+                        <td className="px-4 py-3">
+                          <Badge color={r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : 'gold'}>
+                            {statusLabel[r.status] || statusLabel.pending}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3"><ActionBtns r={r} /></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
 
       {/* ── รายคอร์ส ── */}
       {viewMode === 'by-course' && (
-        <div className="mt-8 space-y-3">
-          {/* Status filter chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { key: 'all',      label: 'ทั้งหมด' },
-              { key: 'approved', label: 'อนุมัติแล้ว' },
-              { key: 'pending',  label: 'รอดำเนินการ' },
-              { key: 'rejected', label: 'ปฏิเสธ' },
-            ].map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setStatusFilter(f.key)}
-                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
-                  statusFilter === f.key
-                    ? 'border-indigo bg-indigo text-white'
-                    : 'border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-
+        <div className="mt-6 space-y-3">
           {coursesWithRegs.length === 0 ? (
             <div className="rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-16 text-center shadow-sm">
               <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
@@ -2463,7 +2614,7 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
               const pendingCount  = allRegs.filter((r) => r.status === 'pending').length;
               const isExpanded = expandedCourseId === course.id;
 
-              if (statusFilter !== 'all' && filtered.length === 0) return null;
+              if ((statusFilter !== 'all' || paymentFilter !== 'all') && filtered.length === 0) return null;
 
               return (
                 <div key={course.id} className="overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
@@ -2480,6 +2631,7 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
                         <div className="font-semibold text-navy dark:text-white">{course.title}</div>
                         <div className="mt-0.5 text-xs text-navy/50 dark:text-slate-400">
                           {course.level} · {course.teacher}
+                          {course.timeSlot && <span className="ml-2 font-mono">{course.timeSlot}</span>}
                         </div>
                       </div>
                     </div>
@@ -2504,41 +2656,43 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
                           ไม่มีข้อมูลตามตัวกรองที่เลือก
                         </div>
                       ) : (
-                        <table className="w-full text-left text-sm">
-                          <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-xs text-navy/60 dark:text-slate-400">
-                            <tr>
-                              <th className="px-6 py-2.5 font-semibold">นักเรียน</th>
-                              <th className="px-4 py-2.5 font-semibold">เบอร์โทร</th>
-                              <th className="px-4 py-2.5 font-semibold">ระดับ</th>
-                              <th className="px-4 py-2.5 font-semibold">เวลา</th>
-                              <th className="px-4 py-2.5 font-semibold">วันที่สมัคร</th>
-                              <th className="px-4 py-2.5 font-semibold">สถานะ</th>
-                              <th className="px-4 py-2.5 font-semibold text-right">จัดการ</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
-                            {filtered.map((r) => (
-                              <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
-                                <td className="px-6 py-3">
-                                  <div className="font-semibold text-navy dark:text-white">
-                                    {r.firstName} {r.lastName}
-                                  </div>
-                                  <div className="text-xs text-navy/50 dark:text-slate-400">{r.studentEmail}</div>
-                                </td>
-                                <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
-                                <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
-                                <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.slot}</td>
-                                <td className="px-4 py-3 text-navy/60 dark:text-slate-400">{fmtThaiDate(r.submittedAt)}</td>
-                                <td className="px-4 py-3">
-                                  <Badge color={statusColor[r.status] || 'gold'}>
-                                    {statusLabel[r.status] || statusLabel.pending}
-                                  </Badge>
-                                </td>
-                                <td className="px-4 py-3"><ActionBtns r={r} /></td>
+                        <div className="thin-scroll overflow-x-auto">
+                          <table className="w-full text-left text-sm">
+                            <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-xs text-navy/60 dark:text-slate-400">
+                              <tr>
+                                <th className="px-6 py-2.5 font-semibold">นักเรียน</th>
+                                <th className="px-4 py-2.5 font-semibold">เบอร์โทร</th>
+                                <th className="px-4 py-2.5 font-semibold">ระดับ</th>
+                                <th className="px-4 py-2.5 font-semibold">วันที่สมัคร</th>
+                                <th className="px-4 py-2.5 font-semibold">การชำระ</th>
+                                <th className="px-4 py-2.5 font-semibold">สถานะ</th>
+                                <th className="px-4 py-2.5 font-semibold text-right">จัดการ</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
+                              {filtered.map((r) => (
+                                <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                                  <td className="px-6 py-3">
+                                    <div className="font-semibold text-navy dark:text-white">
+                                      {r.firstName} {r.lastName}
+                                    </div>
+                                    <div className="text-xs text-navy/50 dark:text-slate-400">{r.studentEmail}</div>
+                                  </td>
+                                  <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
+                                  <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
+                                  <td className="px-4 py-3 text-navy/60 dark:text-slate-400">{fmtThaiDate(r.submittedAt)}</td>
+                                  <td className="px-4 py-3"><PaymentBadge r={r} /></td>
+                                  <td className="px-4 py-3">
+                                    <Badge color={statusColor[r.status] || 'gold'}>
+                                      {statusLabel[r.status] || statusLabel.pending}
+                                    </Badge>
+                                  </td>
+                                  <td className="px-4 py-3"><ActionBtns r={r} /></td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                     </div>
                   )}
@@ -2546,6 +2700,30 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
               );
             })
           )}
+        </div>
+      )}
+
+      {/* Slip preview modal */}
+      {slipModal && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-navy/60 backdrop-blur-sm"
+          onClick={() => setSlipModal(null)}
+        >
+          <div
+            className="relative max-h-[90vh] max-w-sm rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div className="font-semibold text-navy dark:text-white">สลิปการโอนเงิน</div>
+              <button
+                onClick={() => setSlipModal(null)}
+                className="rounded-lg p-1.5 text-navy/60 hover:bg-navy/5 dark:text-slate-400 dark:hover:bg-slate-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <img src={slipModal} alt="payment slip" className="w-full rounded-xl object-contain" />
+          </div>
         </div>
       )}
     </div>
