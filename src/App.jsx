@@ -1802,9 +1802,10 @@ const emptyCourseDraft = {
 const isBundleCourse = (course) =>
   Array.isArray(course?.bundleCourseIds) && course.bundleCourseIds.length > 0;
 
-const AdminDashboard = ({ courses, setCourses, registrations }) => {
+const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
   const [editing, setEditing] = useState(null);
   const [expandedCourseId, setExpandedCourseId] = useState(null);
+  const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
 
   const totalEnrolled = registrations.length + courses.reduce((s, c) => s + c.enrolled, 0);
 
@@ -1964,6 +1965,11 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
                                 <div>
                                   <div className="font-semibold text-navy dark:text-white">
                                     {r.firstName} {r.lastName}
+                                    {getNickname(r.studentEmail) && (
+                                      <span className="ml-1 rounded-full bg-indigo/10 dark:bg-indigo/20 px-1.5 py-0.5 text-[10px] font-medium text-indigo">
+                                        {getNickname(r.studentEmail)}
+                                      </span>
+                                    )}
                                   </div>
                                   <div className="text-navy/50 dark:text-slate-400 font-mono">{r.phone}</div>
                                 </div>
@@ -2502,7 +2508,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
  * ───────────────────────────────────────────────────────────────────── */
 const statusLabel = { pending: 'รอดำเนินการ', approved: 'อนุมัติแล้ว', rejected: 'ปฏิเสธ' };
 
-const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
+const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }) => {
   const [viewMode, setViewMode] = useState('by-student');
   const [expandedCourseId, setExpandedCourseId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -2510,6 +2516,8 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
   const [slipModal, setSlipModal] = useState(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set());
+
+  const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
 
   const approve = (id) =>
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
@@ -2769,8 +2777,16 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
                             className="accent-indigo"
                           />
                         </td>
-                        <td className="px-4 py-3 font-semibold text-navy dark:text-white">
-                          {r.firstName} {r.lastName}
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-navy dark:text-white">
+                            {r.firstName} {r.lastName}
+                            {getNickname(r.studentEmail) && (
+                              <span className="ml-1.5 rounded-full bg-indigo/10 dark:bg-indigo/20 px-2 py-0.5 text-xs font-medium text-indigo">
+                                {getNickname(r.studentEmail)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-navy/40 dark:text-slate-500">{r.studentEmail}</div>
                         </td>
                         <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{r.phone}</td>
                         <td className="px-4 py-3"><Badge>{r.level}</Badge></td>
@@ -2869,6 +2885,11 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
                                   <td className="px-6 py-3">
                                     <div className="font-semibold text-navy dark:text-white">
                                       {r.firstName} {r.lastName}
+                                      {getNickname(r.studentEmail) && (
+                                        <span className="ml-1.5 rounded-full bg-indigo/10 dark:bg-indigo/20 px-2 py-0.5 text-xs font-medium text-indigo">
+                                          {getNickname(r.studentEmail)}
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="text-xs text-navy/50 dark:text-slate-400">{r.studentEmail}</div>
                                   </td>
@@ -3037,6 +3058,7 @@ export default function App() {
                   courses={courses}
                   setCourses={setCourses}
                   registrations={registrations}
+                  users={users}
                 />
               )}
               {activePage === 'admin-users' && currentUser.role === 'admin' && (
@@ -3044,6 +3066,7 @@ export default function App() {
                   registrations={registrations}
                   courses={courses}
                   setRegistrations={setRegistrations}
+                  users={users}
                 />
               )}
               {activePage === 'admin-accounts' && currentUser.role === 'admin' && (
