@@ -803,9 +803,10 @@ const HeroBanner = () => (
 /* ─────────────────────────────────────────────────────────────────────
  * Courses Page (Student-facing list)
  * ───────────────────────────────────────────────────────────────────── */
-const CourseCard = ({ course, allCourses = [], onRegister }) => {
-  const full = course.enrolled >= course.slots;
-  const pct = Math.min(100, Math.round((course.enrolled / course.slots) * 100));
+const CourseCard = ({ course, allCourses = [], onRegister, liveEnrolled = 0 }) => {
+  const totalEnrolled = course.enrolled + liveEnrolled;
+  const full = totalEnrolled >= course.slots;
+  const pct = Math.min(100, Math.round((totalEnrolled / course.slots) * 100));
   const bundle = isBundleCourse(course);
   const bundleChildren = bundle
     ? course.bundleCourseIds.map((id) => allCourses.find((c) => c.id === id)).filter(Boolean)
@@ -904,7 +905,7 @@ const CourseCard = ({ course, allCourses = [], onRegister }) => {
         <div className="flex items-center gap-1.5">
           <Users size={14} className="text-indigo" />
           <span className="font-mono">
-            {course.enrolled}/{course.slots}
+            {totalEnrolled}/{course.slots}
           </span>
         </div>
         <div className="col-span-2 text-xs text-navy/50 dark:text-slate-500">
@@ -945,7 +946,7 @@ const CourseCard = ({ course, allCourses = [], onRegister }) => {
 
 const GRADE_ORDER = ['ป.1','ป.2','ป.3','ป.4','ป.5','ป.6','ม.1','ม.2','ม.3','ม.4','ม.5','ม.6'];
 
-const CoursesPage = ({ courses, onRegister }) => {
+const CoursesPage = ({ courses, onRegister, registrations = [] }) => {
   const [grade, setGrade] = useState('ทั้งหมด');
   const [query, setQuery] = useState('');
 
@@ -958,6 +959,14 @@ const CoursesPage = ({ courses, onRegister }) => {
     }
     return ['ทั้งหมด', ...GRADE_ORDER.filter((g) => found.has(g))];
   }, [courses]);
+
+  const enrolledByCourse = useMemo(() => {
+    const map = {};
+    for (const r of registrations) {
+      map[r.courseId] = (map[r.courseId] || 0) + 1;
+    }
+    return map;
+  }, [registrations]);
 
   const filtered = courses.filter(
     (c) =>
@@ -1013,7 +1022,7 @@ const CoursesPage = ({ courses, onRegister }) => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((c) => (
-              <CourseCard key={c.id} course={c} allCourses={courses} onRegister={onRegister} />
+              <CourseCard key={c.id} course={c} allCourses={courses} onRegister={onRegister} liveEnrolled={enrolledByCourse[c.id] || 0} />
             ))}
           </div>
         )}
@@ -1053,7 +1062,7 @@ const Confetti = () => {
 /* ─────────────────────────────────────────────────────────────────────
  * Register Page (3-step wizard)
  * ───────────────────────────────────────────────────────────────────── */
-const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => {
+const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage, currentUser, registrations = [] }) => {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     firstName: '',
@@ -1074,10 +1083,24 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
     }
   }, [preselectCourse]);
 
+  const enrolledByCourse = useMemo(() => {
+    const map = {};
+    for (const r of registrations) {
+      map[r.courseId] = (map[r.courseId] || 0) + 1;
+    }
+    return map;
+  }, [registrations]);
+
   const selectedCourse = courses.find((c) => c.id === Number(form.courseId));
   const selectedBundleChildren = selectedCourse && isBundleCourse(selectedCourse)
     ? selectedCourse.bundleCourseIds.map((id) => courses.find((c) => c.id === id)).filter(Boolean)
     : [];
+
+  const alreadyRegistered = selectedCourse && registrations.some(
+    (r) => r.studentEmail === currentUser?.email &&
+           r.courseId === selectedCourse.id &&
+           r.status !== 'rejected',
+  );
 
   const validateStep = (s) => {
     const e = {};
@@ -1089,6 +1112,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
     }
     if (s === 2) {
       if (!form.courseId) e.courseId = 'กรุณาเลือกคอร์ส';
+      else if (alreadyRegistered) e.courseId = 'คุณลงทะเบียนคอร์สนี้แล้ว';
     }
     if (s === 3) {
       if (!form.paymentMethod) e.paymentMethod = 'กรุณาเลือกวิธีชำระเงิน';
@@ -1202,15 +1226,24 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage }) => 
                   onChange={(e) => update('courseId', e.target.value)}
                 >
                   <option value="">เลือกคอร์ส...</option>
-                  {courses.map((c) => (
-                    <option key={c.id} value={c.id} disabled={c.enrolled >= c.slots}>
-                      {c.title} — {fmtBaht(c.price)}{c.enrolled >= c.slots ? ' (เต็มแล้ว)' : ''}
-                    </option>
-                  ))}
+                  {courses.map((c) => {
+                    const live = c.enrolled + (enrolledByCourse[c.id] || 0);
+                    const isFull = live >= c.slots;
+                    return (
+                      <option key={c.id} value={c.id} disabled={isFull}>
+                        {c.title} — {fmtBaht(c.price)}{isFull ? ' (เต็มแล้ว)' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </Field>
 
-              {selectedCourse && (
+              {alreadyRegistered && (
+                <div className="rounded-xl border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm font-semibold text-amber-800 dark:text-amber-300">
+                  ⚠️ คุณลงทะเบียนคอร์สนี้ไปแล้ว กรุณาเลือกคอร์สอื่น
+                </div>
+              )}
+              {selectedCourse && !alreadyRegistered && (
                 <div className="rounded-xl border border-indigo/20 dark:border-indigo/30 bg-indigo/5 dark:bg-indigo/10 p-4 space-y-1">
                   <div className="flex items-center gap-2 text-sm font-semibold text-navy dark:text-white">
                     <Calendar size={14} className="text-indigo" />
@@ -1581,6 +1614,38 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Student: my registrations status panel */}
+      {!isAdmin && myRegs.length > 0 && (
+        <div className="mt-8 rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+          <h2 className="font-display text-xl font-bold text-navy dark:text-white">การลงทะเบียนของฉัน</h2>
+          <p className="mt-0.5 text-sm text-navy/60 dark:text-slate-400">สถานะและการชำระเงินของแต่ละคอร์ส</p>
+          <div className="mt-4 space-y-3">
+            {myRegs.map((r) => {
+              const course = courses.find((c) => c.id === r.courseId);
+              const statusClr = r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : 'gold';
+              const statusTh = { approved: 'อนุมัติแล้ว', rejected: 'ปฏิเสธ', pending: 'รอดำเนินการ' }[r.status] || 'รอดำเนินการ';
+              const payTh = r.paymentMethod === 'transfer' ? '💳 โอนเงิน' : r.paymentMethod === 'cash' ? '💵 จ่ายสด' : '⏳ ยังไม่ชำระ';
+              const payClr = r.paymentMethod === 'transfer' ? 'text-emerald-600 dark:text-emerald-400' : r.paymentMethod === 'cash' ? 'text-amber-600 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400';
+              return (
+                <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-navy/10 dark:border-slate-700 bg-navy/[0.02] dark:bg-slate-700/30 px-4 py-3">
+                  <div>
+                    <div className="font-semibold text-navy dark:text-white">{course?.title || r.courseTitle}</div>
+                    <div className="mt-0.5 flex items-center gap-1 text-xs text-navy/50 dark:text-slate-400">
+                      {course?.timeSlot && <><Calendar size={10} className="text-indigo" /><span className="font-mono">{course.timeSlot}</span><span className="mx-1">·</span></>}
+                      <span className="font-mono">{fmtThaiDate(r.submittedAt)}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-semibold ${payClr}`}>{payTh}</span>
+                    <Badge color={statusClr}>{statusTh}</Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -2443,6 +2508,8 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [slipModal, setSlipModal] = useState(null);
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState(new Set());
 
   const approve = (id) =>
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
@@ -2524,16 +2591,53 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
 
   const filteredFlat = registrations.filter((r) => {
     const statusOk = statusFilter === 'all' || r.status === statusFilter;
-    return statusOk && matchesPayment(r);
+    const searchOk = search.trim() === '' ||
+      `${r.firstName} ${r.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+      r.phone?.includes(search) ||
+      r.studentEmail?.toLowerCase().includes(search.toLowerCase());
+    return statusOk && matchesPayment(r) && searchOk;
   });
+
+  const bulkApprove = () => {
+    setRegistrations((rs) => rs.map((r) => selected.has(r.id) ? { ...r, status: 'approved' } : r));
+    setSelected(new Set());
+  };
+  const bulkReject = () => {
+    setRegistrations((rs) => rs.map((r) => selected.has(r.id) ? { ...r, status: 'rejected' } : r));
+    setSelected(new Set());
+  };
+  const toggleSelect = (id) => setSelected((s) => {
+    const n = new Set(s);
+    n.has(id) ? n.delete(id) : n.add(id);
+    return n;
+  });
+  const toggleSelectAll = () => {
+    if (selected.size === filteredFlat.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filteredFlat.map((r) => r.id)));
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
       <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
       <p className="mt-1 text-navy/60 dark:text-slate-400">ตรวจสอบและอนุมัติการลงทะเบียน</p>
 
+      {/* Search bar */}
+      <div className="mt-6 relative w-full max-w-sm">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy/40 dark:text-slate-500" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="ค้นหาชื่อ, เบอร์, อีเมล..."
+          className="w-full rounded-xl border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-100 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
+        />
+      </div>
+
       {/* View tabs */}
-      <div className="mt-6 flex w-fit gap-1 rounded-xl border border-navy/10 dark:border-slate-700 bg-navy/5 dark:bg-slate-800 p-1">
+      <div className="mt-4 flex w-fit gap-1 rounded-xl border border-navy/10 dark:border-slate-700 bg-navy/5 dark:bg-slate-800 p-1">
         {[
           { key: 'by-student', label: 'รายบุคคล' },
           { key: 'by-course',  label: 'รายคอร์ส' },
@@ -2601,6 +2705,30 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
       {/* ── รายบุคคล ── */}
       {viewMode === 'by-student' && (
         <div className="mt-6 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+          {/* Bulk action toolbar */}
+          {selected.size > 0 && (
+            <div className="flex items-center gap-3 border-b border-navy/10 dark:border-slate-700 bg-indigo/5 dark:bg-indigo/10 px-4 py-2.5">
+              <span className="text-sm font-semibold text-indigo">เลือก {selected.size} รายการ</span>
+              <button
+                onClick={bulkApprove}
+                className="rounded-lg border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
+              >
+                อนุมัติทั้งหมด
+              </button>
+              <button
+                onClick={bulkReject}
+                className="rounded-lg border border-rose-200 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100"
+              >
+                ปฏิเสธทั้งหมด
+              </button>
+              <button
+                onClick={() => setSelected(new Set())}
+                className="ml-auto text-xs text-navy/50 dark:text-slate-500 hover:text-navy dark:hover:text-white"
+              >
+                ล้างการเลือก
+              </button>
+            </div>
+          )}
           {filteredFlat.length === 0 ? (
             <div className="p-16 text-center">
               <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
@@ -2611,6 +2739,14 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
               <table className="w-full text-left text-sm">
                 <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
                   <tr>
+                    <th className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.size === filteredFlat.length && filteredFlat.length > 0}
+                        onChange={toggleSelectAll}
+                        className="accent-indigo"
+                      />
+                    </th>
                     <th className="px-4 py-3 font-semibold">นักเรียน</th>
                     <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
                     <th className="px-4 py-3 font-semibold">ระดับ</th>
@@ -2624,7 +2760,15 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations }) => {
                   {filteredFlat.map((r) => {
                     const course = courses.find((c) => c.id === r.courseId);
                     return (
-                      <tr key={r.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                      <tr key={r.id} className={`hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30 ${selected.has(r.id) ? 'bg-indigo/5 dark:bg-indigo/10' : ''}`}>
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={selected.has(r.id)}
+                            onChange={() => toggleSelect(r.id)}
+                            className="accent-indigo"
+                          />
+                        </td>
                         <td className="px-4 py-3 font-semibold text-navy dark:text-white">
                           {r.firstName} {r.lastName}
                         </td>
@@ -2867,7 +3011,7 @@ export default function App() {
           ) : (
             <main>
               {activePage === 'courses' && (
-                <CoursesPage courses={courses} onRegister={handleRegisterClick} />
+                <CoursesPage courses={courses} onRegister={handleRegisterClick} registrations={registrations} />
               )}
               {activePage === 'register' && (
                 <RegisterPage
@@ -2875,6 +3019,8 @@ export default function App() {
                   preselectCourse={preselectCourse}
                   onSubmit={submitRegistration}
                   setActivePage={changePage}
+                  currentUser={currentUser}
+                  registrations={registrations}
                 />
               )}
               {activePage === 'schedule' && (
