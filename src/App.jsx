@@ -1739,6 +1739,7 @@ const isBundleCourse = (course) =>
 
 const AdminDashboard = ({ courses, setCourses, registrations }) => {
   const [editing, setEditing] = useState(null);
+  const [expandedCourseId, setExpandedCourseId] = useState(null);
 
   const totalEnrolled = registrations.length + courses.reduce((s, c) => s + c.enrolled, 0);
 
@@ -1820,52 +1821,103 @@ const AdminDashboard = ({ courses, setCourses, registrations }) => {
             </thead>
             <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
               {courses.map((c) => {
-                const live = c.enrolled + registrations.filter((r) => r.courseId === c.id).length;
+                const courseRegs = registrations.filter((r) => r.courseId === c.id);
+                const live = c.enrolled + courseRegs.length;
+                const isExpanded = expandedCourseId === c.id;
                 return (
-                  <tr key={c.id} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-semibold text-navy dark:text-white">{c.title}</span>
-                        {isBundleCourse(c) && (
-                          <span className="rounded-md bg-gold/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
-                            📦 รวม {c.bundleCourseIds.length} วิชา
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-0.5 flex flex-wrap gap-1">
-                        {c.tags.map((t) => (
-                          <span key={t} className="text-[10px] font-medium text-indigo">#{t}</span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3"><Badge>{c.level}</Badge></td>
-                    <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{c.teacher}</td>
-                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{c.hours} ชม.</td>
-                    <td className="px-4 py-3 font-mono font-semibold text-navy dark:text-white">{fmtBaht(c.price)}</td>
-                    <td className="px-4 py-3 font-mono">
-                      <span className={live >= c.slots ? 'text-rose-600' : 'text-navy dark:text-white'}>
-                        {live}/{c.slots}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
+                  <React.Fragment key={c.id}>
+                    <tr className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-navy dark:text-white">{c.title}</span>
+                          {isBundleCourse(c) && (
+                            <span className="rounded-md bg-gold/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                              📦 รวม {c.bundleCourseIds.length} วิชา
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap gap-1">
+                          {c.tags.map((t) => (
+                            <span key={t} className="text-[10px] font-medium text-indigo">#{t}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3"><Badge>{c.level}</Badge></td>
+                      <td className="px-4 py-3 text-navy/80 dark:text-slate-300">{c.teacher}</td>
+                      <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{c.hours} ชม.</td>
+                      <td className="px-4 py-3 font-mono font-semibold text-navy dark:text-white">{fmtBaht(c.price)}</td>
+                      <td className="px-4 py-3 font-mono">
                         <button
-                          onClick={() => setEditing({ ...c, tags: c.tags.join(', ') })}
-                          className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-indigo hover:text-indigo"
-                          title="แก้ไข"
+                          onClick={() => setExpandedCourseId(isExpanded ? null : c.id)}
+                          className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition ${
+                            live > 0
+                              ? live >= c.slots
+                                ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 hover:bg-rose-100'
+                                : 'bg-indigo/10 dark:bg-indigo/20 text-indigo hover:bg-indigo/20'
+                              : 'text-navy/50 dark:text-slate-500 cursor-default'
+                          }`}
+                          disabled={live === 0}
                         >
-                          <Pencil size={14} />
+                          <Users size={11} />
+                          {live}/{c.slots}
+                          {live > 0 && (
+                            <ChevronRight size={11} className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          )}
                         </button>
-                        <button
-                          onClick={() => remove(c.id)}
-                          className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-rose-300 hover:text-rose-600"
-                          title="ลบ"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() => setEditing({ ...c, tags: c.tags.join(', ') })}
+                            className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-indigo hover:text-indigo"
+                            title="แก้ไข"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            onClick={() => remove(c.id)}
+                            className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-rose-300 hover:text-rose-600"
+                            title="ลบ"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {isExpanded && courseRegs.length > 0 && (
+                      <tr className="bg-indigo/[0.02] dark:bg-slate-700/20">
+                        <td colSpan={7} className="px-4 py-3">
+                          <div className="text-[11px] font-bold uppercase tracking-wider text-navy/50 dark:text-slate-400 mb-2">
+                            นักเรียนที่ลงทะเบียน ({courseRegs.length} คน)
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {courseRegs.map((r) => (
+                              <div
+                                key={r.id}
+                                className="flex items-center gap-1.5 rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs"
+                              >
+                                <div>
+                                  <div className="font-semibold text-navy dark:text-white">
+                                    {r.firstName} {r.lastName}
+                                  </div>
+                                  <div className="text-navy/50 dark:text-slate-400 font-mono">{r.phone}</div>
+                                </div>
+                                <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                                  r.status === 'approved'
+                                    ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                                    : r.status === 'rejected'
+                                    ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300'
+                                    : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
+                                }`}>
+                                  {r.status === 'approved' ? 'อนุมัติ' : r.status === 'rejected' ? 'ปฏิเสธ' : 'รอ'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </tbody>
@@ -1913,9 +1965,8 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy/40 backdrop-blur-sm">
-      <div className="flex min-h-full items-center justify-center p-4">
-      <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
             {isNew ? 'เพิ่มคอร์สใหม่' : 'แก้ไขคอร์ส'}
@@ -2054,7 +2105,6 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
             บันทึก
           </button>
         </div>
-      </div>
       </div>
     </div>
   );
