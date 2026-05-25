@@ -1702,8 +1702,9 @@ const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+        {/* sticky header */}
+        <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-navy/10 dark:border-slate-700">
           <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
             {isNew ? 'เพิ่มรายการตารางสอน' : 'แก้ไขรายการตารางสอน'}
           </h3>
@@ -1712,7 +1713,8 @@ const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
           </button>
         </div>
 
-        <div className="space-y-4">
+        {/* scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           <Field label="คอร์ส">
             <select
               className="input"
@@ -1759,7 +1761,8 @@ const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
           </Field>
         </div>
 
-        <div className="mt-6 flex justify-end gap-2">
+        {/* sticky footer */}
+        <div className="flex-shrink-0 flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-navy/10 dark:border-slate-700">
           <button
             onClick={onClose}
             className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:border-slate-400 dark:hover:text-white"
@@ -2037,8 +2040,9 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+        {/* sticky header */}
+        <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-navy/10 dark:border-slate-700">
           <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
             {isNew ? 'เพิ่มคอร์สใหม่' : 'แก้ไขคอร์ส'}
           </h3>
@@ -2046,6 +2050,8 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
             <X size={18} />
           </button>
         </div>
+        {/* scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="ชื่อคอร์ส">
             <input className="input" value={draft.title} onChange={(e) => upd('title', e.target.value)} />
@@ -2165,7 +2171,9 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
           )}
         </div>
 
-        <div className="mt-6 flex justify-end gap-2">
+        </div>{/* end scrollable body */}
+        {/* sticky footer */}
+        <div className="flex-shrink-0 flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-navy/10 dark:border-slate-700">
           <button onClick={onClose} className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:text-white">
             ยกเลิก
           </button>
