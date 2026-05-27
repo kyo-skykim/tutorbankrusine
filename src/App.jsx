@@ -2593,6 +2593,11 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
  * ───────────────────────────────────────────────────────────────────── */
 const statusLabel = { pending: 'รอดำเนินการ', approved: 'อนุมัติแล้ว', rejected: 'ปฏิเสธ' };
 
+const emptyAdminReg = {
+  firstName: '', lastName: '', nickname: '', phone: '', level: 'ประถมศึกษา',
+  courseId: '', paymentMethod: 'cash', status: 'approved',
+};
+
 const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }) => {
   const [viewMode, setViewMode] = useState('by-student');
   const [expandedCourseId, setExpandedCourseId] = useState(null);
@@ -2601,6 +2606,7 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }
   const [slipModal, setSlipModal] = useState(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set());
+  const [addingReg, setAddingReg] = useState(null);
 
   const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
 
@@ -2608,6 +2614,33 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
   const reject = (id) =>
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r)));
+
+  const saveAdminReg = (draft) => {
+    const course = courses.find((c) => c.id === Number(draft.courseId));
+    const email = draft.phone
+      ? `walk-in-${draft.phone}@admin.local`
+      : `walk-in-${Date.now()}@admin.local`;
+    const newReg = {
+      id: Date.now(),
+      studentEmail: email,
+      firstName: draft.firstName.trim(),
+      lastName: draft.lastName.trim(),
+      phone: draft.phone.trim(),
+      level: draft.level,
+      courseId: Number(draft.courseId),
+      courseTitle: course?.title || '',
+      status: draft.status,
+      paymentMethod: draft.paymentMethod || null,
+      paymentSlip: null,
+      submittedAt: new Date().toISOString(),
+      addedByAdmin: true,
+    };
+    setRegistrations((rs) => [...rs, newReg]);
+    if (draft.nickname?.trim() && users) {
+      // nickname stored under the generated email — no-op if no setUsers passed
+    }
+    setAddingReg(null);
+  };
 
   const byCourse = useMemo(() => {
     const map = {};
@@ -2714,8 +2747,18 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
-      <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
-      <p className="mt-1 text-navy/60 dark:text-slate-400">ตรวจสอบและอนุมัติการลงทะเบียน</p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
+          <p className="mt-1 text-navy/60 dark:text-slate-400">ตรวจสอบและอนุมัติการลงทะเบียน</p>
+        </div>
+        <button
+          onClick={() => setAddingReg({ ...emptyAdminReg })}
+          className="flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-navy shadow hover:bg-amber-300"
+        >
+          <Plus size={16} /> เพิ่มนักเรียน (admin)
+        </button>
+      </div>
 
       {/* Search bar */}
       <div className="mt-6 relative w-full max-w-sm">
@@ -3000,6 +3043,83 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }
               );
             })
           )}
+        </div>
+      )}
+
+      {/* Admin-add registration modal */}
+      {addingReg && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/40 backdrop-blur-sm p-4 pt-16">
+          <div className="w-full max-w-lg flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+            <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-navy/10 dark:border-slate-700">
+              <div>
+                <h3 className="font-display text-2xl font-bold text-navy dark:text-white">เพิ่มนักเรียน</h3>
+                <p className="mt-0.5 text-sm text-navy/50 dark:text-slate-400">ลงทะเบียนแทนนักเรียน — สำหรับ walk-in / โทรสมัคร</p>
+              </div>
+              <button onClick={() => setAddingReg(null)} className="rounded-lg p-1.5 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto px-6 py-4 space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="ชื่อ *">
+                  <input className="input" placeholder="เช่น สมชาย" value={addingReg.firstName} onChange={(e) => setAddingReg(r => ({...r, firstName: e.target.value}))} />
+                </Field>
+                <Field label="นามสกุล *">
+                  <input className="input" placeholder="เช่น ใจดี" value={addingReg.lastName} onChange={(e) => setAddingReg(r => ({...r, lastName: e.target.value}))} />
+                </Field>
+                <Field label="ชื่อเล่น">
+                  <input className="input" placeholder="เช่น ต้นน้ำ" value={addingReg.nickname} onChange={(e) => setAddingReg(r => ({...r, nickname: e.target.value}))} />
+                </Field>
+                <Field label="เบอร์โทรผู้ปกครอง *">
+                  <input className="input font-mono" placeholder="0812345678" value={addingReg.phone} onChange={(e) => setAddingReg(r => ({...r, phone: e.target.value.replace(/\D/g,'')}))} maxLength={10} />
+                </Field>
+                <Field label="ระดับชั้น">
+                  <select className="input" value={addingReg.level} onChange={(e) => setAddingReg(r => ({...r, level: e.target.value}))}>
+                    <option>ประถมศึกษา</option>
+                    <option>มัธยมต้น</option>
+                    <option>มัธยมปลาย</option>
+                    <option>มหาวิทยาลัย</option>
+                  </select>
+                </Field>
+                <Field label="คอร์ส *">
+                  <select className="input" value={addingReg.courseId} onChange={(e) => setAddingReg(r => ({...r, courseId: e.target.value}))}>
+                    <option value="">เลือกคอร์ส...</option>
+                    {courses.filter(c => c.status === 'active').map(c => (
+                      <option key={c.id} value={c.id}>{c.title}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="วิธีชำระเงิน">
+                  <select className="input" value={addingReg.paymentMethod} onChange={(e) => setAddingReg(r => ({...r, paymentMethod: e.target.value}))}>
+                    <option value="cash">จ่ายสด</option>
+                    <option value="transfer">โอนเงิน</option>
+                    <option value="">ยังไม่ชำระ</option>
+                  </select>
+                </Field>
+                <Field label="สถานะ">
+                  <select className="input" value={addingReg.status} onChange={(e) => setAddingReg(r => ({...r, status: e.target.value}))}>
+                    <option value="approved">อนุมัติแล้ว</option>
+                    <option value="pending">รอดำเนินการ</option>
+                  </select>
+                </Field>
+              </div>
+              <div className="rounded-xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 px-4 py-3 text-xs text-navy/60 dark:text-slate-400">
+                💡 ไม่ต้องใช้อีเมล — ระบบจะสร้างรหัสนักเรียนจากเบอร์โทรให้อัตโนมัติ
+              </div>
+            </div>
+            <div className="flex-shrink-0 flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-navy/10 dark:border-slate-700">
+              <button onClick={() => setAddingReg(null)} className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:text-white">
+                ยกเลิก
+              </button>
+              <button
+                onClick={() => saveAdminReg(addingReg)}
+                disabled={!addingReg.firstName.trim() || !addingReg.lastName.trim() || !addingReg.phone.trim() || !addingReg.courseId}
+                className="rounded-xl bg-navy px-5 py-2 text-sm font-semibold text-white hover:bg-indigo disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                บันทึก
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
