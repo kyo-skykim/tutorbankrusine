@@ -684,11 +684,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
 
       if (mode === 'signup') {
         if (!username.trim()) {
-          setError('กรุณากรอกชื่อผู้ใช้');
-          return;
-        }
-        if (username.trim().length < 3) {
-          setError('ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร');
+          setError('กรุณากรอกชื่อ-นามสกุล');
           return;
         }
         if (password.length < 8) {
@@ -854,15 +850,15 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
                 {mode === 'signup' && (
                   <div>
                     <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
-                      ชื่อผู้ใช้ <span className="normal-case text-navy/40 dark:text-slate-500">(3+ ตัวอักษร)</span>
+                      ชื่อ-นามสกุล
                     </label>
                     <input
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="w-full rounded-xl border border-navy/15 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-navy dark:text-slate-100 outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
-                      placeholder="myusername"
-                      autoComplete="username"
+                      placeholder="สมชาย ใจดี"
+                      autoComplete="name"
                       required
                     />
                   </div>
