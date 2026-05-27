@@ -253,10 +253,10 @@ const mockRegistrations = [
  * ───────────────────────────────────────────────────────────────────── */
 const LS_KEYS = {
   user: 'mm.currentUser',
-  regs: 'mm.registrations.v3',
+  regs: 'mm.registrations.v4',
   courses: 'mm.courses.v3',
   schedule: 'mm.schedule.v2',
-  users: 'mm.users',
+  users: 'mm.users.v2',
   theme: 'mm.theme',
   semesters: 'mm.semesters.v1',
   notifs: 'mm.notifications.v1',
@@ -657,7 +657,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -665,7 +665,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
-    setName('');
+    setUsername('');
     setError('');
   };
 
@@ -683,8 +683,12 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
       const cleanEmail = email.trim().toLowerCase();
 
       if (mode === 'signup') {
-        if (!name.trim()) {
-          setError('กรุณากรอกชื่อ-นามสกุล');
+        if (!username.trim()) {
+          setError('กรุณากรอกชื่อผู้ใช้');
+          return;
+        }
+        if (username.trim().length < 3) {
+          setError('ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร');
           return;
         }
         if (password.length < 8) {
@@ -723,7 +727,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
         const newUser = {
           email: cleanEmail,
           passwordHash,
-          name: name.trim(),
+          name: username.trim(),
           role: 'student',
           createdAt: Date.now(),
         };
@@ -850,14 +854,15 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
                 {mode === 'signup' && (
                   <div>
                     <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-navy/60 dark:text-slate-400">
-                      ชื่อ-นามสกุล
+                      ชื่อผู้ใช้ <span className="normal-case text-navy/40 dark:text-slate-500">(3+ ตัวอักษร)</span>
                     </label>
                     <input
                       type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       className="w-full rounded-xl border border-navy/15 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-navy dark:text-slate-100 outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
-                      placeholder="สมชาย ใจดี"
+                      placeholder="myusername"
+                      autoComplete="username"
                       required
                     />
                   </div>
@@ -873,6 +878,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-xl border border-navy/15 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-navy dark:text-slate-100 outline-none transition focus:border-indigo focus:ring-2 focus:ring-indigo/30"
                     placeholder="you@math.com"
+                    autoComplete="email"
                     required
                   />
                 </div>
