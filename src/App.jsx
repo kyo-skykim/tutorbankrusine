@@ -1608,8 +1608,8 @@ const Summary = ({ label, value, mono, highlight }) => (
 /* ─────────────────────────────────────────────────────────────────────
  * Schedule (Student weekly view + Admin master schedule)
  * ───────────────────────────────────────────────────────────────────── */
-const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedule }) => {
-  const isAdmin = currentUser.role === 'admin';
+const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedule, forceStudentView }) => {
+  const isAdmin = currentUser.role === 'admin' && !forceStudentView;
   const [editing, setEditing] = useState(null);
 
   const myRegs = registrations.filter((r) => r.studentEmail === currentUser.email);
@@ -3978,6 +3978,7 @@ export default function App() {
                   registrations={registrations}
                   schedule={schedule}
                   setSchedule={setSchedule}
+                  forceStudentView={previewMode}
                 />
               )}
               {activePage === 'admin-dashboard' && currentUser.role === 'admin' && (
