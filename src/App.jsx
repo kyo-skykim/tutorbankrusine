@@ -34,6 +34,8 @@ import {
   Facebook,
   Eye,
   EyeOff,
+  Bell,
+  CheckCheck,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -255,6 +257,7 @@ const LS_KEYS = {
   users: 'mm.users',
   theme: 'mm.theme',
   semesters: 'mm.semesters.v1',
+  notifs: 'mm.notifications.v1',
 };
 
 const loadLS = (key, fallback) => {
@@ -349,9 +352,97 @@ const FloatingSymbols = () => {
 };
 
 /* ─────────────────────────────────────────────────────────────────────
+ * Notification Bell
+ * ───────────────────────────────────────────────────────────────────── */
+const NOTIF_TYPE = {
+  reg_submitted: { icon: '📋', label: 'ลงทะเบียนใหม่' },
+  reg_approved:  { icon: '✅', label: 'อนุมัติการลงทะเบียน' },
+  reg_rejected:  { icon: '❌', label: 'ปฏิเสธการลงทะเบียน' },
+  reg_received:  { icon: '📨', label: 'ส่งคำขอแล้ว' },
+};
+
+const NotificationBell = ({ notifications, setNotifications, currentUserEmail }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const mine = notifications.filter((n) => n.toEmail === currentUserEmail);
+  const unread = mine.filter((n) => !n.read).length;
+
+  const markRead = (id) => setNotifications((ns) => ns.map((n) => n.id === id ? { ...n, read: true } : n));
+  const markAllRead = () => setNotifications((ns) => ns.map((n) => n.toEmail === currentUserEmail ? { ...n, read: true } : n));
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="relative grid h-9 w-9 place-items-center rounded-lg border border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-300 hover:bg-navy/5 dark:hover:bg-slate-700 transition"
+        title="การแจ้งเตือน"
+      >
+        <Bell size={16} />
+        {unread > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white leading-none">
+            {unread > 9 ? '9+' : unread}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
+          <div className="flex items-center justify-between border-b border-navy/10 dark:border-slate-700 px-4 py-3">
+            <span className="text-sm font-semibold text-navy dark:text-white">การแจ้งเตือน</span>
+            {unread > 0 && (
+              <button onClick={markAllRead} className="flex items-center gap-1 text-xs font-medium text-indigo hover:underline">
+                <CheckCheck size={12} /> อ่านทั้งหมด
+              </button>
+            )}
+          </div>
+          <div className="max-h-80 divide-y divide-navy/5 overflow-y-auto dark:divide-slate-700">
+            {mine.length === 0 ? (
+              <div className="p-8 text-center text-sm text-navy/40 dark:text-slate-500">ยังไม่มีการแจ้งเตือน</div>
+            ) : (
+              mine.slice().reverse().map((n) => {
+                const t = NOTIF_TYPE[n.type] || { icon: '🔔', label: 'แจ้งเตือน' };
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => markRead(n.id)}
+                    className={`w-full px-4 py-3 text-left transition hover:bg-navy/5 dark:hover:bg-slate-700/50 ${!n.read ? 'bg-indigo/5 dark:bg-indigo/10' : ''}`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="mt-0.5 text-base">{t.icon}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-semibold text-navy dark:text-white">{t.label}</div>
+                        <div className="truncate text-xs text-navy/60 dark:text-slate-400">{n.courseTitle}</div>
+                        {n.studentName && (
+                          <div className="text-xs text-navy/50 dark:text-slate-500">{n.studentName}</div>
+                        )}
+                        <div className="mt-1 text-[10px] text-navy/40 dark:text-slate-600">
+                          {new Date(n.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                      {!n.read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-indigo" />}
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────
  * Navbar
  * ───────────────────────────────────────────────────────────────────── */
-const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, toggleDark }) => {
+const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, toggleDark, notifications, setNotifications }) => {
   const studentMenu = [
     { key: 'courses',  label: 'คอร์สทั้งหมด',       icon: BookOpen },
     { key: 'register', label: 'ลงทะเบียน',           icon: ClipboardList },
@@ -408,6 +499,12 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
           >
             {darkMode ? <Sun size={16} /> : <Moon size={16} />}
           </button>
+          {/* Notification bell */}
+          <NotificationBell
+            notifications={notifications}
+            setNotifications={setNotifications}
+            currentUserEmail={currentUser?.email}
+          />
 
           <div className="hidden items-center gap-2 sm:flex">
             <div className="text-right leading-tight">
@@ -2711,7 +2808,7 @@ const emptyAdminReg = {
   courseId: '', paymentMethod: 'cash', status: 'approved',
 };
 
-const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }) => {
+const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], addNotif }) => {
   const [viewMode, setViewMode] = useState('by-student');
   const [expandedCourseId, setExpandedCourseId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -2723,10 +2820,27 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }
 
   const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
 
-  const approve = (id) =>
+  const getCourseTitle = (r) =>
+    r.courseTitle || courses.find((c) => c.id === r.courseId)?.title || 'คอร์สเรียน';
+
+  const approve = (id) => {
+    const reg = registrations.find((r) => r.id === id);
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
-  const reject = (id) =>
+    if (reg && addNotif) addNotif({
+      toEmail: reg.studentEmail,
+      type: 'reg_approved',
+      courseTitle: getCourseTitle(reg),
+    });
+  };
+  const reject = (id) => {
+    const reg = registrations.find((r) => r.id === id);
     setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r)));
+    if (reg && addNotif) addNotif({
+      toEmail: reg.studentEmail,
+      type: 'reg_rejected',
+      courseTitle: getCourseTitle(reg),
+    });
+  };
 
   const saveAdminReg = (draft) => {
     const course = courses.find((c) => c.id === Number(draft.courseId));
@@ -2838,11 +2952,15 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }
   });
 
   const bulkApprove = () => {
+    const toNotify = registrations.filter((r) => selected.has(r.id));
     setRegistrations((rs) => rs.map((r) => selected.has(r.id) ? { ...r, status: 'approved' } : r));
+    if (addNotif) toNotify.forEach((r) => addNotif({ toEmail: r.studentEmail, type: 'reg_approved', courseTitle: getCourseTitle(r) }));
     setSelected(new Set());
   };
   const bulkReject = () => {
+    const toNotify = registrations.filter((r) => selected.has(r.id));
     setRegistrations((rs) => rs.map((r) => selected.has(r.id) ? { ...r, status: 'rejected' } : r));
+    if (addNotif) toNotify.forEach((r) => addNotif({ toEmail: r.studentEmail, type: 'reg_rejected', courseTitle: getCourseTitle(r) }));
     setSelected(new Set());
   };
   const toggleSelect = (id) => setSelected((s) => {
@@ -3674,6 +3792,7 @@ export default function App() {
   const [transitioning, setTransitioning] = useState(false);
   const [darkMode, setDarkMode] = useState(() => loadLS(LS_KEYS.theme, false));
   const [semesters, setSemesters] = useState(() => loadLS(LS_KEYS.semesters, defaultSemesters));
+  const [notifications, setNotifications] = useState(() => loadLS(LS_KEYS.notifs, []));
 
   useEffect(() => saveLS(LS_KEYS.user, currentUser), [currentUser]);
   useEffect(() => saveLS(LS_KEYS.regs, registrations), [registrations]);
@@ -3682,6 +3801,10 @@ export default function App() {
   useEffect(() => saveLS(LS_KEYS.users, users), [users]);
   useEffect(() => saveLS(LS_KEYS.theme, darkMode), [darkMode]);
   useEffect(() => saveLS(LS_KEYS.semesters, semesters), [semesters]);
+  useEffect(() => saveLS(LS_KEYS.notifs, notifications), [notifications]);
+
+  const addNotif = (notif) =>
+    setNotifications((ns) => [...ns, { id: Date.now() + Math.random(), createdAt: new Date().toISOString(), read: false, ...notif }]);
 
   useEffect(() => {
     if (!currentUser && activePage !== 'login') setActivePage('login');
@@ -3715,13 +3838,15 @@ export default function App() {
   const submitRegistration = (data) => {
     setRegistrations((rs) => [
       ...rs,
-      {
-        id: Date.now(),
-        studentEmail: currentUser.email,
-        status: 'pending',
-        ...data,
-      },
+      { id: Date.now(), studentEmail: currentUser.email, status: 'pending', ...data },
     ]);
+    const courseTitle = data.courseTitle || courses.find((c) => c.id === data.courseId)?.title || 'คอร์สเรียน';
+    const studentName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+    // Confirm to the student
+    addNotif({ toEmail: currentUser.email, type: 'reg_received', courseTitle });
+    // Notify all admins
+    const adminEmails = [...new Set([DEMO.admin.email, ...users.filter((u) => u.role === 'admin').map((u) => u.email)])];
+    adminEmails.forEach((email) => addNotif({ toEmail: email, type: 'reg_submitted', courseTitle, studentName }));
   };
 
   return (
@@ -3737,6 +3862,8 @@ export default function App() {
             onLogout={handleLogout}
             darkMode={darkMode}
             toggleDark={toggleDark}
+            notifications={notifications}
+            setNotifications={setNotifications}
           />
 
           {transitioning ? (
@@ -3784,6 +3911,7 @@ export default function App() {
                   courses={courses}
                   setRegistrations={setRegistrations}
                   users={users}
+                  addNotif={addNotif}
                 />
               )}
               {activePage === 'admin-accounts' && currentUser.role === 'admin' && (
