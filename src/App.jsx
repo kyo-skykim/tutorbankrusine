@@ -2034,10 +2034,11 @@ const emptyCourseDraft = {
 const isBundleCourse = (course) =>
   Array.isArray(course?.bundleCourseIds) && course.bundleCourseIds.length > 0;
 
-const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
+const AdminDashboard = ({ courses, setCourses, registrations, users = [], onResetData }) => {
   const [editing, setEditing] = useState(null);
   const [expandedCourseId, setExpandedCourseId] = useState(null);
   const [courseTab, setCourseTab] = useState('active');
+  const [confirmReset, setConfirmReset] = useState(false);
   const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
 
   const activeCourses   = courses.filter((c) => c.status === 'active');
@@ -2277,6 +2278,53 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
           onClose={() => setEditing(null)}
           onSave={saveDraft}
         />
+      )}
+
+      {/* Danger Zone */}
+      <div className="mt-10 rounded-2xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20 p-5">
+        <div className="text-sm font-bold text-rose-700 dark:text-rose-400 mb-1">⚠️ Danger Zone</div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-rose-800 dark:text-rose-300">ล้างข้อมูลนักเรียนและการลงทะเบียน</div>
+            <div className="text-xs text-rose-600/80 dark:text-rose-400/80 mt-0.5">ลบบัญชีนักเรียนทั้งหมด, การลงทะเบียน และการแจ้งเตือน — คอร์สและตารางสอนยังคงอยู่</div>
+          </div>
+          <button
+            onClick={() => setConfirmReset(true)}
+            className="rounded-xl bg-rose-600 hover:bg-rose-700 px-4 py-2 text-sm font-bold text-white transition"
+          >
+            ล้างข้อมูล
+          </button>
+        </div>
+      </div>
+
+      {/* Reset confirmation modal */}
+      {confirmReset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-800 shadow-2xl p-6">
+            <div className="text-lg font-bold text-navy dark:text-white mb-2">ยืนยันการล้างข้อมูล?</div>
+            <div className="text-sm text-navy/70 dark:text-slate-300 mb-1">การดำเนินการนี้จะลบออกทันที และซิงค์ไปทุกอุปกรณ์:</div>
+            <ul className="mt-2 space-y-1 text-sm text-rose-700 dark:text-rose-400 list-disc list-inside">
+              <li>บัญชีนักเรียนทั้งหมด</li>
+              <li>การลงทะเบียนและใบสมัครทั้งหมด</li>
+              <li>การแจ้งเตือนทั้งหมด</li>
+            </ul>
+            <div className="mt-2 text-xs text-navy/50 dark:text-slate-400">คอร์ส, ตารางสอน และภาคเรียน ยังคงอยู่ครบถ้วน</div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmReset(false)}
+                className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:bg-navy/5"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={() => { onResetData(); setConfirmReset(false); }}
+                className="rounded-xl bg-rose-600 hover:bg-rose-700 px-4 py-2 text-sm font-bold text-white"
+              >
+                ยืนยัน ล้างข้อมูล
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -4128,6 +4176,12 @@ export default function App() {
     adminEmails.forEach((email) => addNotif({ toEmail: email, type: 'reg_submitted', courseTitle, studentName }));
   };
 
+  const handleResetData = () => {
+    setRegistrations([]);
+    setUsers([]);
+    setNotifications([]);
+  };
+
   const isStudentView = currentUser?.role !== 'admin' || previewMode;
 
   return (
@@ -4215,6 +4269,7 @@ export default function App() {
                   setCourses={setCourses}
                   registrations={registrations}
                   users={users}
+                  onResetData={handleResetData}
                 />
               )}
               {activePage === 'admin-users' && currentUser.role === 'admin' && (
