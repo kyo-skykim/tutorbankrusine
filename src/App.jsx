@@ -1831,9 +1831,13 @@ const isBundleCourse = (course) =>
 const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
   const [editing, setEditing] = useState(null);
   const [expandedCourseId, setExpandedCourseId] = useState(null);
+  const [courseTab, setCourseTab] = useState('active');
   const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
 
-  const totalEnrolled = registrations.length + courses.reduce((s, c) => s + c.enrolled, 0);
+  const activeCourses   = courses.filter((c) => c.status === 'active');
+  const archivedCourses = courses.filter((c) => c.status === 'archived');
+  const visibleCourses  = courseTab === 'active' ? activeCourses : archivedCourses;
+  const totalEnrolled   = registrations.length + courses.reduce((s, c) => s + c.enrolled, 0);
 
   const remove = (id) => {
     if (!confirm('ต้องการลบคอร์สนี้ใช่ไหม?')) return;
@@ -1884,20 +1888,39 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-4">
-        <Stat label="คอร์สทั้งหมด"   value={courses.length}          icon={BookOpen} />
-        <Stat label="ลงทะเบียนแล้ว"  value={totalEnrolled}           icon={Users} />
-        <Stat label="รอการอนุมัติ"   value={registrations.length}    icon={ClipboardList} />
-        <Stat
-          label="ราคาเฉลี่ย"
-          value={fmtBaht(
-            Math.round(courses.reduce((s, c) => s + c.price, 0) / Math.max(1, courses.length)),
-          )}
-          icon={TagIcon}
-          mono
-        />
+        <Stat label="คอร์สที่ใช้งาน"  value={activeCourses.length}    icon={BookOpen} />
+        <Stat label="คอร์สที่ปิดแล้ว" value={archivedCourses.length}  icon={GraduationCap} />
+        <Stat label="ลงทะเบียนแล้ว"   value={totalEnrolled}           icon={Users} />
+        <Stat label="รอการอนุมัติ"    value={registrations.length}    icon={ClipboardList} />
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+        {/* Tab bar */}
+        <div className="flex border-b border-navy/10 dark:border-slate-700 px-4 pt-3 gap-1">
+          {[
+            { key: 'active',   label: 'คอร์สที่ใช้งาน',  count: activeCourses.length },
+            { key: 'archived', label: 'คอร์สที่ปิดแล้ว', count: archivedCourses.length },
+          ].map(({ key, label, count }) => (
+            <button
+              key={key}
+              onClick={() => { setCourseTab(key); setExpandedCourseId(null); }}
+              className={`flex items-center gap-1.5 rounded-t-lg px-4 py-2 text-sm font-semibold transition border-b-2 -mb-px ${
+                courseTab === key
+                  ? 'border-indigo text-indigo dark:text-indigo'
+                  : 'border-transparent text-navy/50 dark:text-slate-400 hover:text-navy dark:hover:text-white'
+              }`}
+            >
+              {label}
+              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                courseTab === key
+                  ? 'bg-indigo/10 text-indigo'
+                  : 'bg-navy/8 dark:bg-slate-700 text-navy/50 dark:text-slate-400'
+              }`}>
+                {count}
+              </span>
+            </button>
+          ))}
+        </div>
         <div className="thin-scroll overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
@@ -1908,12 +1931,18 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
                 <th className="px-4 py-3 font-semibold">ชั่วโมง</th>
                 <th className="px-4 py-3 font-semibold">ราคา</th>
                 <th className="px-4 py-3 font-semibold">ลงทะเบียน</th>
-                <th className="px-4 py-3 font-semibold">สถานะ</th>
                 <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
-              {courses.map((c) => {
+              {visibleCourses.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-navy/40 dark:text-slate-500">
+                    {courseTab === 'active' ? 'ยังไม่มีคอร์สที่ใช้งาน' : 'ยังไม่มีคอร์สที่ปิดแล้ว'}
+                  </td>
+                </tr>
+              )}
+              {visibleCourses.map((c) => {
                 const courseRegs = registrations.filter((r) => r.courseId === c.id);
                 const live = c.enrolled + courseRegs.length;
                 const isExpanded = expandedCourseId === c.id;
@@ -1959,18 +1988,17 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
                         </button>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge color={c.status === 'active' ? 'green' : 'navy'}>
-                          {c.status === 'active' ? 'ใช้งาน' : 'ปิดแล้ว'}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => setCourses(courses.map(x => x.id === c.id ? {...x, status: x.status === 'active' ? 'archived' : 'active'} : x))}
-                            className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-amber-300 hover:text-amber-600 dark:hover:text-amber-400"
+                            className={`rounded-lg border px-2 py-1 text-xs font-semibold transition ${
+                              c.status === 'active'
+                                ? 'border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                                : 'border-emerald-200 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                            }`}
                             title={c.status === 'active' ? 'ปิดคอร์ส' : 'เปิดอีก'}
                           >
-                            {c.status === 'active' ? '📦' : '↻'}
+                            {c.status === 'active' ? 'ปิดคอร์ส' : 'เปิดอีก'}
                           </button>
                           <button
                             onClick={() => setEditing({ ...c, tags: c.tags.join(', ') })}
@@ -1991,7 +2019,7 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
                     </tr>
                     {isExpanded && courseRegs.length > 0 && (
                       <tr className="bg-indigo/[0.02] dark:bg-slate-700/20">
-                        <td colSpan={8} className="px-4 py-3">
+                        <td colSpan={7} className="px-4 py-3">
                           <div className="text-[11px] font-bold uppercase tracking-wider text-navy/50 dark:text-slate-400 mb-2">
                             นักเรียนที่ลงทะเบียน ({courseRegs.length} คน)
                           </div>
