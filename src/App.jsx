@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useCloudState, fetchRow } from './cloud';
+import { useCloudState, fetchRow, subscribeSync } from './cloud';
 import {
   Sigma,
   Shield,
@@ -4079,6 +4079,9 @@ export default function App() {
   useEffect(() => saveLS(LS_KEYS.user, currentUser), [currentUser]);
   useEffect(() => saveLS(LS_KEYS.theme, darkMode), [darkMode]);
 
+  const [syncState, setSyncState] = useState({ state: 'connecting', error: null });
+  useEffect(() => subscribeSync(setSyncState), []);
+
   const addNotif = (notif) =>
     setNotifications((ns) => [...ns, { id: Date.now() + Math.random(), createdAt: new Date().toISOString(), read: false, ...notif }]);
 
@@ -4129,6 +4132,13 @@ export default function App() {
 
   return (
     <div className={darkMode ? 'dark' : ''}>
+      {syncState.state === 'error' && (
+        <div className="fixed bottom-3 left-1/2 z-[100] w-[92%] max-w-md -translate-x-1/2 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-xs text-rose-700 shadow-lg dark:border-rose-700 dark:bg-rose-900/80 dark:text-rose-200">
+          <div className="font-bold">⚠️ ซิงค์ข้อมูลข้ามอุปกรณ์ไม่สำเร็จ</div>
+          <div className="mt-0.5 break-words opacity-90">{syncState.error || 'ไม่ทราบสาเหตุ'}</div>
+          <div className="mt-0.5 opacity-70">กำลังใช้ข้อมูลในเครื่องนี้ชั่วคราว</div>
+        </div>
+      )}
       {!currentUser ? (
         <LoginPage onLogin={handleLogin} darkMode={darkMode} toggleDark={toggleDark} users={users} setUsers={setUsers} />
       ) : (

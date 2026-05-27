@@ -10,6 +10,23 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   realtime: { params: { eventsPerSecond: 5 } },
 });
 
+/* ── Sync status (so the UI can surface connection problems) ───────────── */
+let syncStatus = { state: 'connecting', error: null };
+const syncListeners = new Set();
+export function getSyncStatus() { return syncStatus; }
+export function subscribeSync(cb) {
+  syncListeners.add(cb);
+  cb(syncStatus);
+  return () => syncListeners.delete(cb);
+}
+function setSync(state, error) {
+  const msg = error ? (error.message || error.error_description || String(error)) : null;
+  syncStatus = { state, error: msg };
+  if (error) console.error('[sync] error:', error);
+  else console.info('[sync]', state);
+  syncListeners.forEach((cb) => cb(syncStatus));
+}
+
 const readLocal = (key, fallback) => {
   try {
     const v = localStorage.getItem(key);
@@ -29,7 +46,8 @@ export async function fetchRow(key) {
     .select('value')
     .eq('key', key)
     .maybeSingle();
-  if (error) throw error;
+  if (error) { setSync('error', error); throw error; }
+  setSync('connected');
   return data ? data.value : undefined;
 }
 
@@ -41,7 +59,8 @@ export async function upsertRow(key, value, { seedOnly = false } = {}) {
       { key, value, updated_at: new Date().toISOString() },
       { onConflict: 'key', ignoreDuplicates: seedOnly },
     );
-  if (error) throw error;
+  if (error) { setSync('error', error); throw error; }
+  setSync('connected');
 }
 
 /*
@@ -115,7 +134,11 @@ export function useCloudState(key, initialValue) {
           writeLocal(key, remote);
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setSync('error', new Error(`realtime ${status}`));
+        }
+      });
     return () => { supabase.removeChannel(channel); };
   }, [key]);
 
