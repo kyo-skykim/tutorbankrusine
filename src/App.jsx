@@ -442,7 +442,7 @@ const NotificationBell = ({ notifications, setNotifications, currentUserEmail })
 /* ─────────────────────────────────────────────────────────────────────
  * Navbar
  * ───────────────────────────────────────────────────────────────────── */
-const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, toggleDark, notifications, setNotifications }) => {
+const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, toggleDark, notifications, setNotifications, previewMode }) => {
   const studentMenu = [
     { key: 'courses',  label: 'คอร์สทั้งหมด',       icon: BookOpen },
     { key: 'register', label: 'ลงทะเบียน',           icon: ClipboardList },
@@ -455,8 +455,9 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
     { key: 'admin-users',      label: 'ผู้ลงทะเบียน',  icon: Users },
     { key: 'admin-accounts',   label: 'จัดการบัญชี',   icon: UserCog },
     { key: 'admin-semesters',  label: 'ภาคเรียน',       icon: GraduationCap },
+    { key: 'profile',          label: 'โปรไฟล์',        icon: User },
   ];
-  const menu = currentUser?.role === 'admin' ? adminMenu : studentMenu;
+  const menu = (currentUser?.role === 'admin' && !previewMode) ? adminMenu : studentMenu;
 
   return (
     <header className="sticky top-0 z-30 border-b border-navy/10 dark:border-slate-700 bg-white/80 dark:bg-slate-900/90 backdrop-blur">
@@ -2403,11 +2404,13 @@ async function fileToCompressedDataURL(file, maxSize = 256) {
   return canvas.toDataURL('image/jpeg', 0.85);
 }
 
-const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
+const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers, onPreviewStudent }) => {
   const initial = users.find((u) => u.email === currentUser.email) || currentUser;
+  const isAdmin = currentUser.role === 'admin';
   const [name, setName] = useState(initial.name || '');
   const [nickname, setNickname] = useState(initial.nickname || '');
   const [gradeLevel, setGradeLevel] = useState(initial.gradeLevel || '');
+  const [phone, setPhone] = useState(initial.phone || '');
   const [avatar, setAvatar] = useState(initial.avatar || '');
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -2453,6 +2456,7 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
       name: name.trim(),
       nickname: nickname.trim(),
       gradeLevel,
+      phone: phone.trim(),
       avatar,
     };
 
@@ -2468,8 +2472,22 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
 
   return (
     <div className="mx-auto max-w-3xl animate-fade-in px-6 py-10">
-      <h1 className="font-display text-4xl font-bold text-navy dark:text-white">โปรไฟล์ของฉัน</h1>
-      <p className="mt-1 text-navy/60 dark:text-slate-400">จัดการข้อมูลส่วนตัวและรูปโปรไฟล์</p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">โปรไฟล์ของฉัน</h1>
+          <p className="mt-1 text-navy/60 dark:text-slate-400">
+            {isAdmin ? 'ข้อมูลส่วนตัวของผู้ดูแลระบบ' : 'จัดการข้อมูลส่วนตัวและรูปโปรไฟล์'}
+          </p>
+        </div>
+        {isAdmin && onPreviewStudent && (
+          <button
+            onClick={onPreviewStudent}
+            className="flex items-center gap-2 rounded-xl border border-indigo/30 bg-indigo/5 dark:bg-indigo/10 px-4 py-2.5 text-sm font-semibold text-indigo hover:bg-indigo/10 dark:hover:bg-indigo/20 transition"
+          >
+            <GraduationCap size={16} /> ดูหน้าเว็บในมุมมองนักเรียน
+          </button>
+        )}
+      </div>
 
       <form onSubmit={save} className="mt-8 rounded-3xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm">
         {/* Avatar uploader */}
@@ -2545,18 +2563,30 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
               placeholder="ชาย"
             />
           </Field>
-          <Field label="ระดับชั้น">
-            <select
-              className="input"
-              value={gradeLevel}
-              onChange={(e) => setGradeLevel(e.target.value)}
-            >
-              <option value="">เลือกระดับชั้น...</option>
-              {GRADE_LEVELS.map((g) => (
-                <option key={g}>{g}</option>
-              ))}
-            </select>
+          <Field label="เบอร์โทรติดต่อ">
+            <input
+              className="input font-mono"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+              placeholder="0812345678"
+              maxLength={10}
+              inputMode="tel"
+            />
           </Field>
+          {!isAdmin && (
+            <Field label="ระดับชั้น">
+              <select
+                className="input"
+                value={gradeLevel}
+                onChange={(e) => setGradeLevel(e.target.value)}
+              >
+                <option value="">เลือกระดับชั้น...</option>
+                {GRADE_LEVELS.map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
+              </select>
+            </Field>
+          )}
           <Field label="อีเมล">
             <input
               className="input font-mono"
@@ -2564,6 +2594,11 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
               disabled
             />
           </Field>
+          {isAdmin && (
+            <Field label="บทบาท">
+              <input className="input font-mono opacity-60 cursor-not-allowed" value="ผู้ดูแลระบบ (Admin)" disabled />
+            </Field>
+          )}
         </div>
 
         {error && (
@@ -2624,6 +2659,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
       name: draft.name.trim(),
       nickname: draft.nickname.trim(),
       gradeLevel: draft.gradeLevel,
+      phone: draft.phone?.trim() || '',
     } : u));
     if (currentUser.email === draft.email) {
       setCurrentUser((u) => ({
@@ -2631,6 +2667,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
         name: draft.name.trim(),
         nickname: draft.nickname.trim(),
         gradeLevel: draft.gradeLevel,
+        phone: draft.phone?.trim() || '',
       }));
     }
     setEditing(null);
@@ -2661,6 +2698,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
               <th className="px-4 py-3 font-semibold">ชื่อ-นามสกุล</th>
               <th className="px-4 py-3 font-semibold">อีเมล</th>
               <th className="px-4 py-3 font-semibold">บทบาท</th>
+              <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
               <th className="px-4 py-3 font-semibold">วันที่สมัคร</th>
               <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
             </tr>
@@ -2692,6 +2730,9 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
                       {isAdmin ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
                     </Badge>
                   </td>
+                  <td className="px-4 py-3 font-mono text-xs text-navy/70 dark:text-slate-400">
+                    {u.phone || <span className="text-navy/30 dark:text-slate-600">—</span>}
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs text-navy/50 dark:text-slate-500">
                     {isDemo ? 'บัญชีระบบ' : u.createdAt
                       ? new Date(u.createdAt).toLocaleDateString('th-TH', {
@@ -2707,7 +2748,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
                     ) : (
                       <div className="flex justify-end gap-1">
                         <button
-                          onClick={() => setEditing({ email: u.email, name: u.name || '', nickname: u.nickname || '', gradeLevel: u.gradeLevel || '' })}
+                          onClick={() => setEditing({ email: u.email, name: u.name || '', nickname: u.nickname || '', gradeLevel: u.gradeLevel || '', phone: u.phone || '' })}
                           className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-indigo hover:text-indigo"
                           title="แก้ไขข้อมูล"
                         >
@@ -2769,6 +2810,9 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
               </Field>
               <Field label="ชื่อเล่น">
                 <input className="input" placeholder="เช่น ต้นน้ำ" value={editing.nickname} onChange={(e) => setEditing(d => ({...d, nickname: e.target.value}))} />
+              </Field>
+              <Field label="เบอร์โทรติดต่อ">
+                <input className="input font-mono" placeholder="0812345678" value={editing.phone || ''} onChange={(e) => setEditing(d => ({...d, phone: e.target.value.replace(/\D/g, '').slice(0, 10)}))} inputMode="tel" maxLength={10} />
               </Field>
               <Field label="ระดับชั้น">
                 <select className="input" value={editing.gradeLevel} onChange={(e) => setEditing(d => ({...d, gradeLevel: e.target.value}))}>
@@ -3793,6 +3837,7 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(() => loadLS(LS_KEYS.theme, false));
   const [semesters, setSemesters] = useState(() => loadLS(LS_KEYS.semesters, defaultSemesters));
   const [notifications, setNotifications] = useState(() => loadLS(LS_KEYS.notifs, []));
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => saveLS(LS_KEYS.user, currentUser), [currentUser]);
   useEffect(() => saveLS(LS_KEYS.regs, registrations), [registrations]);
@@ -3849,6 +3894,8 @@ export default function App() {
     adminEmails.forEach((email) => addNotif({ toEmail: email, type: 'reg_submitted', courseTitle, studentName }));
   };
 
+  const isStudentView = currentUser?.role !== 'admin' || previewMode;
+
   return (
     <div className={darkMode ? 'dark' : ''}>
       {!currentUser ? (
@@ -3864,7 +3911,21 @@ export default function App() {
             toggleDark={toggleDark}
             notifications={notifications}
             setNotifications={setNotifications}
+            previewMode={previewMode}
           />
+
+          {/* Student-preview banner */}
+          {previewMode && (
+            <div className="sticky top-[57px] z-20 flex items-center justify-between bg-indigo px-6 py-2 text-sm font-semibold text-white shadow-md">
+              <span>👁 กำลังดูในมุมมองนักเรียน — การกระทำในหน้านี้ไม่กระทบข้อมูลจริง</span>
+              <button
+                onClick={() => { setPreviewMode(false); changePage('admin-dashboard'); }}
+                className="ml-4 rounded-lg bg-white/20 px-3 py-1 text-xs hover:bg-white/30 transition"
+              >
+                ← กลับแดชบอร์ด Admin
+              </button>
+            </div>
+          )}
 
           {transitioning ? (
             <div className="grid place-items-center py-32">
@@ -3928,6 +3989,7 @@ export default function App() {
                   setCurrentUser={setCurrentUser}
                   users={users}
                   setUsers={setUsers}
+                  onPreviewStudent={currentUser.role === 'admin' ? () => { setPreviewMode(true); changePage('courses'); } : null}
                 />
               )}
               {activePage === 'admin-semesters' && currentUser.role === 'admin' && (
