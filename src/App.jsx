@@ -798,14 +798,14 @@ const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
               </span>
             </div>
             <h1 className="font-display text-5xl font-bold leading-tight text-navy dark:text-white">
-              ที่ซึ่งตัวเลข <span className="text-indigo">กลายเป็น</span>
+              เปิดมุมมองใหม่ <span className="text-indigo">ให้ทุกวิชา</span>
               <br />
-              <span className="italic">ศิลปะ</span>
+              <span className="italic">เป็นเรื่องสนุกและเข้าใจง่าย</span>
             </h1>
             <p className="mt-6 max-w-md text-navy/70 dark:text-slate-300">
-              สถาบันติวคณิตศาสตร์ระดับพรีเมียม สำหรับนักเรียนที่มุ่งมั่นสู่ความเป็นเลิศ
-              จากเลขคณิตพื้นฐานถึงแคลคูลัสขั้นสูง ครูผู้เชี่ยวชาญของเราพร้อมสร้างความชัดเจน
-              ความลึกซึ้ง และความมั่นใจให้คุณ
+              สถาบันเสริมทักษะวิชาการที่พร้อมดูแลนักเรียนทุกคนแบบครบวงจร ตั้งแต่คณิตศาสตร์ วิทยาศาสตร์
+              ไปจนถึงภาษาอังกฤษและภาษาไทย ทีมติวเตอร์ของเราพร้อมปูพื้นฐานให้แน่น ต่อยอดความคิด
+              และสร้างความมั่นใจให้คุณพร้อมสำหรับทุกเป้าหมาย
             </p>
             <div className="mt-8 flex items-center gap-3 font-mono text-sm text-indigo/80">
               <span className="animate-equation">f(x) = ax² + bx + c</span>
