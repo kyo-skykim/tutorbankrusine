@@ -38,6 +38,7 @@ import {
   Bell,
   CheckCheck,
   Menu,
+  HelpCircle,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -449,6 +450,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
     { key: 'courses',  label: 'คอร์สทั้งหมด',       icon: BookOpen },
     { key: 'register', label: 'ลงทะเบียน',           icon: ClipboardList },
     { key: 'schedule', label: 'ตารางเรียนของฉัน',    icon: Calendar },
+    { key: 'help',     label: 'วิธีใช้งาน',          icon: HelpCircle },
     { key: 'profile',  label: 'โปรไฟล์',             icon: User },
   ];
   const adminMenu = [
@@ -4104,6 +4106,100 @@ const AdminSemestersPage = ({ semesters, setSemesters, registrations, setRegistr
 };
 
 /* ─────────────────────────────────────────────────────────────────────
+ * Help / How-to page
+ * ───────────────────────────────────────────────────────────────────── */
+const HelpPage = ({ setActivePage }) => {
+  const steps = [
+    {
+      icon: User,
+      title: '1. สมัครสมาชิก',
+      body: 'กดปุ่ม "สมัครสมาชิก" ที่หน้าเข้าสู่ระบบ แล้วกรอกชื่อ-นามสกุล อีเมล และตั้งรหัสผ่าน (อย่างน้อย 8 ตัว มีตัวอักษร a-z และตัวเลข 0-9) จากนั้นยืนยันรหัสผ่านอีกครั้ง',
+    },
+    {
+      icon: LogOut,
+      title: '2. เข้าสู่ระบบ',
+      body: 'ครั้งต่อไปเพียงกรอกอีเมลและรหัสผ่านที่สมัครไว้ เพื่อเข้าใช้งาน ระบบจะจำข้อมูลของคุณไว้ในทุกอุปกรณ์',
+    },
+    {
+      icon: BookOpen,
+      title: '3. ดูคอร์สทั้งหมด',
+      body: 'ไปที่เมนู "คอร์สทั้งหมด" เพื่อดูคอร์สที่เปิดสอน ทั้งคณิตศาสตร์ วิทยาศาสตร์ อังกฤษ และไทย สามารถกรองตามระดับชั้นหรือค้นหาชื่อคอร์สได้',
+    },
+    {
+      icon: ClipboardList,
+      title: '4. ลงทะเบียนเรียน',
+      body: 'เลือกคอร์สที่ต้องการแล้วกด "ลงทะเบียน" กรอกข้อมูล เลือกวิธีชำระเงิน หากโอนเงินให้แนบสลิปการโอน แล้วกดยืนยัน',
+    },
+    {
+      icon: CheckCheck,
+      title: '5. รอการอนุมัติ',
+      body: 'หลังลงทะเบียน แอดมินจะตรวจสอบและอนุมัติ คุณจะได้รับการแจ้งเตือน (ไอคอนกระดิ่ง 🔔 ด้านบน) เมื่อสถานะเปลี่ยนแปลง',
+    },
+    {
+      icon: Calendar,
+      title: '6. ดูตารางเรียน',
+      body: 'เมื่อได้รับอนุมัติแล้ว ดูวันและเวลาเรียนของคุณได้ที่เมนู "ตารางเรียนของฉัน"',
+    },
+    {
+      icon: UserCog,
+      title: '7. แก้ไขโปรไฟล์',
+      body: 'ไปที่เมนู "โปรไฟล์" เพื่อแก้ไขชื่อเล่น เบอร์โทร ระดับชั้น หรือรูปโปรไฟล์ของคุณ',
+    },
+  ];
+
+  return (
+    <div className="mx-auto max-w-3xl animate-fade-in px-4 sm:px-6 py-10">
+      <div className="flex items-center gap-3">
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-navy text-gold shadow">
+          <HelpCircle size={22} />
+        </span>
+        <div>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">วิธีใช้งาน</h1>
+          <p className="text-navy/60 dark:text-slate-400">เริ่มต้นใช้งานเว็บไซต์บ้านครูทรายใน 7 ขั้นตอน</p>
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-4">
+        {steps.map(({ icon: Icon, title, body }) => (
+          <div
+            key={title}
+            className="flex gap-4 rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm"
+          >
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo/10 dark:bg-indigo/20 text-indigo">
+              <Icon size={20} />
+            </span>
+            <div>
+              <div className="font-display text-lg font-bold text-navy dark:text-white">{title}</div>
+              <p className="mt-1 text-sm leading-relaxed text-navy/70 dark:text-slate-300">{body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 dark:border-indigo/20 p-5 text-center">
+        <div className="text-sm font-semibold text-navy dark:text-white">พร้อมเริ่มต้นแล้วใช่ไหม?</div>
+        <p className="mt-1 text-sm text-navy/60 dark:text-slate-400">เลือกคอร์สที่คุณสนใจแล้วลงทะเบียนได้เลย</p>
+        <button
+          onClick={() => setActivePage('courses')}
+          className="mt-3 inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-2.5 text-sm font-bold text-white hover:bg-navy/90 dark:bg-indigo dark:hover:bg-indigo/90 transition"
+        >
+          <BookOpen size={16} /> ดูคอร์สทั้งหมด
+        </button>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+        <div className="flex items-center gap-2 font-semibold text-navy dark:text-white">
+          <Phone size={16} className="text-indigo" /> ต้องการความช่วยเหลือ?
+        </div>
+        <p className="mt-1 text-sm text-navy/70 dark:text-slate-300">
+          ติดต่อสอบถามเพิ่มเติมได้ที่ โทร. 063 229 2822 หรือ Facebook: bankrusine
+        </p>
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────
  * Root App with state-based routing
  * ───────────────────────────────────────────────────────────────────── */
 export default function App() {
@@ -4246,6 +4342,9 @@ export default function App() {
             <main>
               {activePage === 'courses' && (
                 <CoursesPage courses={courses} onRegister={handleRegisterClick} registrations={registrations} />
+              )}
+              {activePage === 'help' && (
+                <HelpPage setActivePage={changePage} />
               )}
               {activePage === 'register' && (
                 <RegisterPage
