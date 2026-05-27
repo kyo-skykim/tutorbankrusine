@@ -2965,7 +2965,7 @@ const emptyAdminReg = {
 const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], addNotif }) => {
   const [viewMode, setViewMode] = useState('by-student');
   const [expandedCourseId, setExpandedCourseId] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('pending');
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [slipModal, setSlipModal] = useState(null);
   const [search, setSearch] = useState('');
