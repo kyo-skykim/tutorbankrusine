@@ -459,47 +459,64 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
   ];
   const menu = (currentUser?.role === 'admin' && !previewMode) ? adminMenu : studentMenu;
 
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+  useEffect(() => {
+    const handler = (e) => { if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const isAdmin = currentUser?.role === 'admin';
+  const displayName = currentUser?.nickname || currentUser?.name || (isAdmin ? 'ผู้ดูแลระบบ' : 'นักเรียน');
+  const initials = (currentUser?.name || displayName).slice(0, 1).toUpperCase();
+
   return (
-    <header className="sticky top-0 z-30 border-b border-navy/10 dark:border-slate-700 bg-white/80 dark:bg-slate-900/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+    <header className="sticky top-0 z-30 border-b border-navy/10 dark:border-slate-700 bg-white/90 dark:bg-slate-900/95 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
+
+        {/* Logo */}
         <button
-          onClick={() => setActivePage(currentUser?.role === 'admin' ? 'admin-dashboard' : 'courses')}
-          className="flex items-center gap-2"
+          onClick={() => setActivePage(isAdmin && !previewMode ? 'admin-dashboard' : 'courses')}
+          className="flex items-center gap-2 shrink-0"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-navy text-gold shadow-sm">
-            <Sigma size={20} strokeWidth={2.4} />
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-navy text-gold shadow-sm">
+            <Sigma size={17} strokeWidth={2.5} />
           </span>
-          <span className="font-display text-xl font-bold tracking-tight text-navy dark:text-white">
+          <span className="font-display text-base font-bold tracking-tight text-navy dark:text-white hidden sm:block">
             บ้านครูทราย
           </span>
         </button>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        {/* Nav */}
+        <nav className="hidden items-center gap-0.5 md:flex">
           {menu.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActivePage(key)}
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
                 activePage === key
-                  ? 'bg-navy text-white shadow dark:bg-indigo'
-                  : 'text-navy/70 hover:bg-navy/5 hover:text-navy dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
+                  ? 'bg-navy text-white shadow-sm dark:bg-indigo'
+                  : 'text-navy/60 hover:bg-navy/5 hover:text-navy dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-white'
               }`}
             >
-              <Icon size={16} />
+              <Icon size={13} />
               {label}
             </button>
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          {/* Day/night toggle */}
+        {/* Right controls */}
+        <div className="flex items-center gap-1.5">
+          {/* Theme toggle */}
           <button
             onClick={toggleDark}
             title={darkMode ? 'โหมดกลางวัน' : 'โหมดกลางคืน'}
-            className="grid h-9 w-9 place-items-center rounded-lg border border-navy/10 dark:border-slate-600 text-navy/60 dark:text-slate-300 hover:bg-navy/5 dark:hover:bg-slate-700 transition"
+            className="grid h-8 w-8 place-items-center rounded-lg text-navy/50 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700 transition"
           >
-            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+            {darkMode ? <Sun size={15} /> : <Moon size={15} />}
           </button>
+
           {/* Notification bell */}
           <NotificationBell
             notifications={notifications}
@@ -507,36 +524,63 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
             currentUserEmail={currentUser?.email}
           />
 
-          <div className="hidden items-center gap-2 sm:flex">
-            <div className="text-right leading-tight">
-              <div className="text-sm font-semibold text-navy dark:text-white flex items-center gap-1 justify-end">
-                {currentUser?.role === 'admin' && (
-                  <Shield size={14} className="text-gold" fill="#FBBF24" />
-                )}
-                {currentUser?.nickname || currentUser?.name || (currentUser?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน')}
+          {/* User menu */}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen((o) => !o)}
+              className={`flex items-center gap-2 rounded-lg px-2 py-1 transition hover:bg-navy/5 dark:hover:bg-slate-700 ${userMenuOpen ? 'bg-navy/5 dark:bg-slate-700' : ''}`}
+            >
+              {currentUser?.avatar ? (
+                <img src={currentUser.avatar} alt="avatar" className="h-7 w-7 rounded-full border border-indigo/30 object-cover" />
+              ) : (
+                <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${isAdmin ? 'bg-gold text-navy' : 'bg-indigo/10 text-indigo dark:bg-indigo/20'}`}>
+                  {initials}
+                </span>
+              )}
+              <span className="hidden max-w-[96px] truncate text-xs font-semibold text-navy dark:text-white sm:block">
+                {displayName}
+              </span>
+              <ChevronDown size={12} className={`hidden text-navy/40 dark:text-slate-500 transition-transform sm:block ${userMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {userMenuOpen && (
+              <div className="absolute right-0 top-10 z-50 w-52 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
+                {/* User info */}
+                <div className="border-b border-navy/8 dark:border-slate-700 px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    {currentUser?.avatar ? (
+                      <img src={currentUser.avatar} alt="avatar" className="h-9 w-9 rounded-full border border-indigo/20 object-cover" />
+                    ) : (
+                      <span className={`grid h-9 w-9 place-items-center rounded-full text-sm font-bold ${isAdmin ? 'bg-gold text-navy' : 'bg-indigo/10 text-indigo dark:bg-indigo/20'}`}>
+                        {initials}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-navy dark:text-white">{currentUser?.name || displayName}</div>
+                      <div className="flex items-center gap-1 text-[11px] text-navy/50 dark:text-slate-400">
+                        {isAdmin ? <><Shield size={10} className="text-gold" fill="#FBBF24" /> ผู้ดูแลระบบ</> : <><GraduationCap size={10} /> นักเรียน</>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Actions */}
+                <div className="p-1.5">
+                  <button
+                    onClick={() => { setActivePage('profile'); setUserMenuOpen(false); }}
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-navy/70 dark:text-slate-300 hover:bg-navy/5 dark:hover:bg-slate-700/50 transition"
+                  >
+                    <User size={14} /> โปรไฟล์
+                  </button>
+                  <button
+                    onClick={() => { onLogout(); setUserMenuOpen(false); }}
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition"
+                  >
+                    <LogOut size={14} /> ออกจากระบบ
+                  </button>
+                </div>
               </div>
-              <div className="text-[11px] uppercase tracking-wider text-navy/50 dark:text-slate-500">
-                {currentUser?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน'}
-              </div>
-            </div>
-            {currentUser?.avatar ? (
-              <img
-                src={currentUser.avatar}
-                alt="avatar"
-                className="h-9 w-9 rounded-full border-2 border-indigo/30 object-cover"
-              />
-            ) : (
-              <Badge color={currentUser?.role === 'admin' ? 'gold' : 'indigo'}>
-                {currentUser?.role === 'admin' ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
-              </Badge>
             )}
           </div>
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-1.5 rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-navy/80 dark:text-slate-300 transition hover:border-rose-300 hover:text-rose-600"
-          >
-            <LogOut size={16} /> ออกจากระบบ
-          </button>
         </div>
       </div>
     </header>
