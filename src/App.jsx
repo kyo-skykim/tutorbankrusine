@@ -1212,11 +1212,12 @@ const Confetti = () => {
  * ───────────────────────────────────────────────────────────────────── */
 const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage, currentUser, registrations = [] }) => {
   const [step, setStep] = useState(1);
+  const nameParts = (currentUser?.name || '').trim().split(/\s+/);
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    level: '',
+    firstName: nameParts[0] || '',
+    lastName: nameParts.slice(1).join(' ') || '',
+    phone: currentUser?.phone || '',
+    level: gradeLevelToRegLevel(currentUser?.gradeLevel) || '',
     courseId: preselectCourse?.id || '',
     paymentMethod: '',
     paymentSlip: null,
@@ -2396,6 +2397,97 @@ const GRADE_LEVELS = [
   'ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6',
   'ปวช.', 'ปวส.', 'ปริญญาตรี', 'อื่นๆ',
 ];
+
+const gradeLevelToRegLevel = (g) => {
+  if (!g) return '';
+  if (['ป.1','ป.2','ป.3','ป.4','ป.5','ป.6'].includes(g)) return 'ประถมศึกษา';
+  if (['ม.1','ม.2','ม.3'].includes(g)) return 'มัธยมต้น';
+  if (['ม.4','ม.5','ม.6'].includes(g)) return 'มัธยมปลาย';
+  if (['ปวช.','ปวส.'].includes(g)) return 'มัธยมศึกษา';
+  if (g === 'ปริญญาตรี') return 'มหาวิทยาลัย';
+  return '';
+};
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Complete Profile Modal — shown once after first login for students
+ * ───────────────────────────────────────────────────────────────────── */
+const CompleteProfileModal = ({ currentUser, setCurrentUser, users, setUsers }) => {
+  const [nickname, setNickname] = useState(currentUser.nickname || '');
+  const [phone, setPhone] = useState(currentUser.phone || '');
+  const [gradeLevel, setGradeLevel] = useState(currentUser.gradeLevel || '');
+
+  const markDone = (extra = {}) => {
+    const updates = { profileSetupDone: true, ...extra };
+    setCurrentUser((u) => ({ ...u, ...updates }));
+    setUsers((us) => us.map((u) => u.email === currentUser.email ? { ...u, ...updates } : u));
+  };
+
+  const save = () => {
+    const updates = {
+      nickname: nickname.trim(),
+      phone: phone.trim(),
+      gradeLevel,
+      profileSetupDone: true,
+    };
+    setCurrentUser((u) => ({ ...u, ...updates }));
+    setUsers((us) => us.map((u) => u.email === currentUser.email ? { ...u, ...updates } : u));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-3xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
+        <div className="px-7 pt-7 pb-5 border-b border-navy/8 dark:border-slate-700">
+          <div className="mb-1 text-2xl">👋</div>
+          <h2 className="font-display text-2xl font-bold text-navy dark:text-white">ยินดีต้อนรับ!</h2>
+          <p className="mt-1 text-sm text-navy/60 dark:text-slate-400">กรอกข้อมูลเพิ่มเติมเพื่อให้ระบบช่วยคุณได้ดียิ่งขึ้น</p>
+        </div>
+        <div className="px-7 py-5 space-y-4">
+          <Field label="ชื่อ-นามสกุล (แก้ไขไม่ได้)">
+            <input className="input opacity-60 cursor-not-allowed" value={currentUser.name || ''} disabled />
+          </Field>
+          <Field label="ชื่อเล่น">
+            <input
+              className="input"
+              placeholder="เช่น ต้นน้ำ"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              autoFocus
+            />
+          </Field>
+          <Field label="เบอร์โทรติดต่อ">
+            <input
+              className="input font-mono"
+              placeholder="0812345678"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+              inputMode="tel"
+            />
+          </Field>
+          <Field label="ระดับชั้น">
+            <select className="input" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)}>
+              <option value="">เลือกระดับชั้น...</option>
+              {GRADE_LEVELS.map((g) => <option key={g}>{g}</option>)}
+            </select>
+          </Field>
+        </div>
+        <div className="flex items-center justify-between px-7 pb-7 pt-3">
+          <button
+            onClick={() => markDone()}
+            className="text-sm text-navy/40 dark:text-slate-500 hover:text-navy dark:hover:text-slate-300 transition"
+          >
+            ข้ามก่อน
+          </button>
+          <button
+            onClick={save}
+            className="rounded-xl bg-navy px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo transition"
+          >
+            บันทึกและเริ่มใช้งาน
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Compress an image file to a base64 data URL (max 256px, JPEG quality 0.85)
 async function fileToCompressedDataURL(file, maxSize = 256) {
@@ -3924,6 +4016,15 @@ export default function App() {
         <LoginPage onLogin={handleLogin} darkMode={darkMode} toggleDark={toggleDark} />
       ) : (
         <div className="min-h-screen bg-offwhite dark:bg-slate-900">
+          {/* First-login profile setup prompt */}
+          {currentUser.role === 'student' && !currentUser.profileSetupDone && (
+            <CompleteProfileModal
+              currentUser={currentUser}
+              setCurrentUser={setCurrentUser}
+              users={users}
+              setUsers={setUsers}
+            />
+          )}
           <Navbar
             currentUser={currentUser}
             activePage={activePage}
