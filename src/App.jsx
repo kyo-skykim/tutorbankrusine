@@ -2285,8 +2285,8 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [], onRese
         <div className="text-sm font-bold text-rose-700 dark:text-rose-400 mb-1">⚠️ Danger Zone</div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-sm font-semibold text-rose-800 dark:text-rose-300">ล้างข้อมูลนักเรียนและการลงทะเบียน</div>
-            <div className="text-xs text-rose-600/80 dark:text-rose-400/80 mt-0.5">ลบบัญชีนักเรียนทั้งหมด, การลงทะเบียน และการแจ้งเตือน — คอร์สและตารางสอนยังคงอยู่</div>
+            <div className="text-sm font-semibold text-rose-800 dark:text-rose-300">รีเซ็ตข้อมูลทั้งหมด</div>
+            <div className="text-xs text-rose-600/80 dark:text-rose-400/80 mt-0.5">คืนค่าระบบกลับสู่ค่าเริ่มต้น — ลบบัญชี, การลงทะเบียน, การแจ้งเตือน และคืนคอร์ส/ตาราง/ภาคเรียนเป็นค่าเดิม</div>
           </div>
           <button
             onClick={() => setConfirmReset(true)}
@@ -2302,13 +2302,13 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [], onRese
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 backdrop-blur-sm p-4">
           <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-800 shadow-2xl p-6">
             <div className="text-lg font-bold text-navy dark:text-white mb-2">ยืนยันการล้างข้อมูล?</div>
-            <div className="text-sm text-navy/70 dark:text-slate-300 mb-1">การดำเนินการนี้จะลบออกทันที และซิงค์ไปทุกอุปกรณ์:</div>
+            <div className="text-sm text-navy/70 dark:text-slate-300 mb-1">การดำเนินการนี้จะซิงค์ไปทุกอุปกรณ์ทันที:</div>
             <ul className="mt-2 space-y-1 text-sm text-rose-700 dark:text-rose-400 list-disc list-inside">
-              <li>บัญชีนักเรียนทั้งหมด</li>
-              <li>การลงทะเบียนและใบสมัครทั้งหมด</li>
-              <li>การแจ้งเตือนทั้งหมด</li>
+              <li>บัญชีนักเรียนทั้งหมด → ลบออก</li>
+              <li>การลงทะเบียนและใบสมัครทั้งหมด → ลบออก</li>
+              <li>การแจ้งเตือนทั้งหมด → ลบออก</li>
+              <li>คอร์ส, ตารางสอน, ภาคเรียน → คืนค่าเริ่มต้น</li>
             </ul>
-            <div className="mt-2 text-xs text-navy/50 dark:text-slate-400">คอร์ส, ตารางสอน และภาคเรียน ยังคงอยู่ครบถ้วน</div>
             <div className="mt-5 flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmReset(false)}
@@ -4177,6 +4177,9 @@ export default function App() {
   };
 
   const handleResetData = () => {
+    setCourses(mockCourses);
+    setSchedule(defaultSchedule);
+    setSemesters(defaultSemesters);
     setRegistrations([]);
     setUsers([]);
     setNotifications([]);
