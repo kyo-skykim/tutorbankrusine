@@ -36,6 +36,7 @@ import {
   EyeOff,
   Bell,
   CheckCheck,
+  Menu,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -460,6 +461,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
   const menu = (currentUser?.role === 'admin' && !previewMode) ? adminMenu : studentMenu;
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const userMenuRef = useRef(null);
   useEffect(() => {
     const handler = (e) => { if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false); };
@@ -581,8 +583,37 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
               </div>
             )}
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen((o) => !o)}
+            className="grid h-8 w-8 place-items-center rounded-lg text-navy/60 dark:text-slate-300 hover:bg-navy/5 dark:hover:bg-slate-700 transition md:hidden"
+            aria-label="เมนู"
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile nav panel */}
+      {mobileOpen && (
+        <nav className="border-t border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 md:hidden">
+          {menu.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => { setActivePage(key); setMobileOpen(false); }}
+              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+                activePage === key
+                  ? 'bg-navy text-white dark:bg-indigo'
+                  : 'text-navy/70 hover:bg-navy/5 dark:text-slate-300 dark:hover:bg-slate-700/60'
+              }`}
+            >
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
+        </nav>
+      )}
     </header>
   );
 };
@@ -714,7 +745,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
         {darkMode ? <Sun size={16} /> : <Moon size={16} />}
       </button>
 
-      <div className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 py-12">
+      <div className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 sm:px-6 py-12">
         <div className="grid w-full gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Brand panel */}
           <div className="hidden flex-col justify-center lg:flex">
@@ -905,7 +936,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
 const HeroBanner = () => (
   <section className="relative overflow-hidden">
     <div className="graph-paper-dark relative">
-      <div className="mx-auto max-w-7xl px-6 py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
         <div className="animate-fade-in flex flex-col items-center text-center">
           {/* Cover image */}
           <div className="w-full overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
@@ -1126,7 +1157,7 @@ const CoursesPage = ({ courses, onRegister, registrations = [] }) => {
     <div className="animate-fade-in">
       <HeroBanner />
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
         {/* Filter bar */}
         <div className="mb-8 rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-4">
@@ -1314,8 +1345,8 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage, curre
 
   return (
     <div className="animate-fade-in">
-      <div className="mx-auto max-w-3xl px-6 py-12">
-        <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ลงทะเบียนเรียน</h1>
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">ลงทะเบียนเรียน</h1>
         <p className="mt-2 text-navy/60 dark:text-slate-400">เพียง 3 ขั้นตอนง่ายๆ แล้วคุณก็พร้อมเรียน</p>
 
         {/* Progress */}
@@ -1676,10 +1707,10 @@ const SchedulePage = ({ currentUser, courses, registrations, schedule, setSchedu
   };
 
   return (
-    <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
+    <div className="mx-auto max-w-7xl animate-fade-in px-4 sm:px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">
             {isAdmin ? 'ตารางสอนรวม' : 'ตารางเรียนรายสัปดาห์'}
           </h1>
           <p className="mt-1 text-navy/60 dark:text-slate-400">
@@ -2008,10 +2039,10 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
+    <div className="mx-auto max-w-7xl animate-fade-in px-4 sm:px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">แผงควบคุมผู้ดูแล</h1>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">แผงควบคุมผู้ดูแล</h1>
           <p className="mt-1 text-navy/60 dark:text-slate-400">จัดการรายการคอร์สของสถาบัน</p>
         </div>
         <button
@@ -2057,7 +2088,7 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [] }) => {
           ))}
         </div>
         <div className="thin-scroll overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-semibold">คอร์ส</th>
@@ -2590,10 +2621,10 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers, onPreviewSt
   };
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-in px-6 py-10">
+    <div className="mx-auto max-w-3xl animate-fade-in px-4 sm:px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">โปรไฟล์ของฉัน</h1>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">โปรไฟล์ของฉัน</h1>
           <p className="mt-1 text-navy/60 dark:text-slate-400">
             {isAdmin ? 'ข้อมูลส่วนตัวของผู้ดูแลระบบ' : 'จัดการข้อมูลส่วนตัวและรูปโปรไฟล์'}
           </p>
@@ -2806,12 +2837,13 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
   };
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-in px-6 py-10">
-      <h1 className="font-display text-4xl font-bold text-navy dark:text-white">จัดการบัญชีผู้ใช้</h1>
+    <div className="mx-auto max-w-5xl animate-fade-in px-4 sm:px-6 py-10">
+      <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">จัดการบัญชีผู้ใช้</h1>
       <p className="mt-1 text-navy/60 dark:text-slate-400">แก้ไขข้อมูล เลื่อนตำแหน่ง หรือลบบัญชีสมาชิกในระบบ</p>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-        <table className="w-full text-left text-sm">
+        <div className="thin-scroll overflow-x-auto">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
             <tr>
               <th className="px-4 py-3 font-semibold">ชื่อ-นามสกุล</th>
@@ -2904,6 +2936,7 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="mt-4 rounded-xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 dark:border-indigo/20 px-4 py-3 text-sm text-navy/70 dark:text-slate-300">
@@ -3159,10 +3192,10 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
   };
 
   return (
-    <div className="mx-auto max-w-7xl animate-fade-in px-6 py-10">
+    <div className="mx-auto max-w-7xl animate-fade-in px-4 sm:px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
           <p className="mt-1 text-navy/60 dark:text-slate-400">ตรวจสอบและอนุมัติการลงทะเบียน</p>
         </div>
         <button
@@ -3285,7 +3318,7 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
             </div>
           ) : (
             <div className="thin-scroll overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[820px] text-left text-sm">
                 <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
                   <tr>
                     <th className="px-4 py-3">
@@ -3408,7 +3441,7 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
                         </div>
                       ) : (
                         <div className="thin-scroll overflow-x-auto">
-                          <table className="w-full text-left text-sm">
+                          <table className="w-full min-w-[720px] text-left text-sm">
                             <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-xs text-navy/60 dark:text-slate-400">
                               <tr>
                                 <th className="px-6 py-2.5 font-semibold">นักเรียน</th>
