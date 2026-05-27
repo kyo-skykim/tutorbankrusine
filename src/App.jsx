@@ -27,6 +27,9 @@ import {
   Camera,
   Sun,
   Moon,
+  ArrowLeftRight,
+  UserMinus,
+  ChevronDown,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -187,6 +190,23 @@ const defaultSchedule = [
   { id: 38, courseId: 32, day: 'อาทิตย์', time: '12:00–14:00', room: 'E-101' },
 ];
 
+const defaultSemesters = [
+  {
+    id: 1,
+    name: 'ภาคเรียนที่ 1/2567',
+    startDate: '2024-05-01',
+    endDate: '2024-09-30',
+    courseIds: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,33,34,35,36],
+  },
+  {
+    id: 2,
+    name: 'คอร์สพิเศษ มหิดล/จุฬาภรณ์/วมว. 2567',
+    startDate: '2026-05-24',
+    endDate: '2026-07-26',
+    courseIds: [31, 32],
+  },
+];
+
 const DEMO = {
   student: { email: 'student@math.com', password: '1234' },
   admin:   { email: 'admin@math.com',   password: 'admin' },
@@ -230,6 +250,7 @@ const LS_KEYS = {
   schedule: 'mm.schedule.v2',
   users: 'mm.users',
   theme: 'mm.theme',
+  semesters: 'mm.semesters.v1',
 };
 
 const loadLS = (key, fallback) => {
@@ -338,6 +359,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
     { key: 'schedule',         label: 'ตารางสอนรวม',   icon: Calendar },
     { key: 'admin-users',      label: 'ผู้ลงทะเบียน',  icon: Users },
     { key: 'admin-accounts',   label: 'จัดการบัญชี',   icon: UserCog },
+    { key: 'admin-semesters',  label: 'ภาคเรียน',       icon: GraduationCap },
   ];
   const menu = currentUser?.role === 'admin' ? adminMenu : studentMenu;
 
@@ -2954,6 +2976,403 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [] }
 };
 
 /* ─────────────────────────────────────────────────────────────────────
+ * SemesterEditor modal
+ * ───────────────────────────────────────────────────────────────────── */
+const SemesterEditor = ({ draft, courses, onChange, onClose, onSave }) => {
+  const upd = (k, v) => onChange({ ...draft, [k]: v });
+  const isNew = !draft.id;
+  const courseIds = Array.isArray(draft.courseIds) ? draft.courseIds.map(Number) : [];
+  const toggleCourse = (id) => {
+    const has = courseIds.includes(id);
+    upd('courseIds', has ? courseIds.filter((x) => x !== id) : [...courseIds, id]);
+  };
+  const valid = draft.name && draft.name.trim().length > 0;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/40 backdrop-blur-sm p-4 pt-16">
+      <div className="w-full max-w-2xl flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+        {/* sticky header */}
+        <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-navy/10 dark:border-slate-700">
+          <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
+            {isNew ? 'เพิ่มภาคเรียนใหม่' : 'แก้ไขภาคเรียน'}
+          </h3>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* scrollable body */}
+        <div className="max-h-[60vh] overflow-y-auto px-6 py-4 space-y-4">
+          <Field label="ชื่อภาคเรียน">
+            <input
+              className="input"
+              value={draft.name || ''}
+              onChange={(e) => upd('name', e.target.value)}
+              placeholder="เช่น ภาคเรียนที่ 1/2567"
+            />
+          </Field>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="วันเริ่มต้น">
+              <input
+                type="date"
+                className="input font-mono"
+                value={draft.startDate || ''}
+                onChange={(e) => upd('startDate', e.target.value)}
+              />
+            </Field>
+            <Field label="วันสิ้นสุด">
+              <input
+                type="date"
+                className="input font-mono"
+                value={draft.endDate || ''}
+                onChange={(e) => upd('endDate', e.target.value)}
+              />
+            </Field>
+          </div>
+
+          {/* Course checkboxes */}
+          <div>
+            <div className="mb-2 text-sm font-semibold text-navy dark:text-white flex items-center gap-2">
+              คอร์สในภาคเรียน
+              {courseIds.length > 0 && (
+                <Badge color="indigo">{courseIds.length} คอร์ส</Badge>
+              )}
+            </div>
+            {courses.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-navy/15 dark:border-slate-600 p-3 text-center text-xs text-navy/50 dark:text-slate-500">
+                ยังไม่มีคอร์สในระบบ
+              </div>
+            ) : (
+              <div className="grid gap-1.5 md:grid-cols-2">
+                {courses.map((c) => {
+                  const checked = courseIds.includes(c.id);
+                  return (
+                    <label
+                      key={c.id}
+                      className={`flex cursor-pointer items-start gap-2 rounded-lg border p-2 text-xs transition ${
+                        checked
+                          ? 'border-indigo bg-indigo/10 dark:bg-indigo/20'
+                          : 'border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-indigo'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleCourse(c.id)}
+                        className="mt-0.5 accent-indigo"
+                      />
+                      <div className="flex-1">
+                        <div className="font-semibold text-navy dark:text-white">{c.title}</div>
+                        <div className="font-mono text-[10px] text-navy/50 dark:text-slate-400">
+                          {c.teacher} · {fmtBaht(c.price)}
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* sticky footer */}
+        <div className="flex-shrink-0 flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-navy/10 dark:border-slate-700">
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:text-white"
+          >
+            ยกเลิก
+          </button>
+          <button
+            onClick={() => onSave(draft)}
+            disabled={!valid}
+            className="rounded-xl bg-navy px-5 py-2 text-sm font-semibold text-white hover:bg-indigo disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────
+ * AdminSemestersPage
+ * ───────────────────────────────────────────────────────────────────── */
+const AdminSemestersPage = ({ semesters, setSemesters, registrations, setRegistrations, courses, schedule, setSchedule, users }) => {
+  const [expandedId, setExpandedId] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [movingEntry, setMovingEntry] = useState(null);
+  const [confirmRemove, setConfirmRemove] = useState(null);
+
+  const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
+
+  const saveSemester = (draft) => {
+    const normalized = {
+      ...draft,
+      courseIds: Array.isArray(draft.courseIds) ? draft.courseIds.map(Number) : [],
+    };
+    setSemesters((ss) => {
+      if (normalized.id) return ss.map((s) => (s.id === normalized.id ? normalized : s));
+      return [...ss, { ...normalized, id: Date.now() }];
+    });
+    setEditing(null);
+  };
+
+  const deleteSemester = (id) => {
+    if (!confirm('ต้องการลบภาคเรียนนี้ใช่ไหม?')) return;
+    setSemesters((ss) => ss.filter((s) => s.id !== id));
+    if (expandedId === id) setExpandedId(null);
+  };
+
+  const removeStudent = (regId) => {
+    setRegistrations((rs) => rs.filter((r) => r.id !== regId));
+    setConfirmRemove(null);
+  };
+
+  const saveScheduleEntry = (entry) => {
+    setSchedule((sch) => sch.map((e) => (e.id === entry.id ? entry : e)));
+    setMovingEntry(null);
+  };
+
+  const statusLabel = { approved: 'อนุมัติแล้ว', pending: 'รออนุมัติ', rejected: 'ปฏิเสธ' };
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-8">
+      {/* Page header */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <GraduationCap size={32} className="text-indigo" />
+          <h1 className="font-display text-3xl font-bold text-navy dark:text-white">ภาคเรียน</h1>
+        </div>
+        <button
+          onClick={() => setEditing({ name: '', startDate: '', endDate: '', courseIds: [] })}
+          className="rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-indigo"
+        >
+          + เพิ่มภาคเรียน
+        </button>
+      </div>
+
+      {/* Empty state */}
+      {semesters.length === 0 && (
+        <div className="rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm p-16 text-center">
+          <GraduationCap size={48} className="mx-auto text-navy/20 dark:text-slate-600 mb-4" />
+          <div className="font-display text-xl text-navy/50 dark:text-slate-500">ยังไม่มีภาคเรียน</div>
+        </div>
+      )}
+
+      {/* Semester cards */}
+      <div className="space-y-4">
+        {semesters.map((sem) => {
+          const isExpanded = expandedId === sem.id;
+          const semCourses = courses.filter((c) => sem.courseIds?.includes(c.id));
+          const semRegs = registrations.filter((r) => sem.courseIds?.includes(r.courseId) && r.status !== 'rejected');
+
+          return (
+            <div
+              key={sem.id}
+              className="rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm"
+            >
+              {/* Card header */}
+              <div className="flex items-center gap-3 px-5 py-4">
+                <button
+                  className="flex flex-1 items-center gap-3 text-left min-w-0"
+                  onClick={() => setExpandedId(isExpanded ? null : sem.id)}
+                >
+                  <GraduationCap size={20} className="flex-shrink-0 text-indigo" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-display text-lg font-bold text-navy dark:text-white truncate">
+                      {sem.name}
+                    </div>
+                    {(sem.startDate || sem.endDate) && (
+                      <div className="text-xs text-navy/50 dark:text-slate-400 font-mono">
+                        {sem.startDate || '—'} → {sem.endDate || '—'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge color="indigo">{semCourses.length} คอร์ส</Badge>
+                    <Badge color="green">{semRegs.length} นักเรียน</Badge>
+                  </div>
+                  <ChevronRight
+                    size={18}
+                    className={`flex-shrink-0 text-navy/40 dark:text-slate-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                  />
+                </button>
+                <button
+                  onClick={() => setEditing({ ...sem })}
+                  className="rounded-lg p-1.5 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700"
+                  title="แก้ไข"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={() => deleteSemester(sem.id)}
+                  className="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30"
+                  title="ลบ"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+
+              {/* Expanded section */}
+              {isExpanded && (
+                <div className="border-t border-navy/10 dark:border-slate-700 px-5 py-4">
+                  {semCourses.length === 0 ? (
+                    <div className="text-sm text-navy/50 dark:text-slate-500">ไม่มีคอร์สในภาคเรียนนี้</div>
+                  ) : (
+                    <div className="space-y-5">
+                      {semCourses.map((course) => {
+                        const scheduleEntries = schedule.filter((e) => e.courseId === course.id);
+                        const courseRegs = semRegs.filter((r) => r.courseId === course.id);
+
+                        return (
+                          <div
+                            key={course.id}
+                            className="rounded-xl border border-navy/10 dark:border-slate-700 bg-navy/[0.02] dark:bg-slate-700/20 p-4"
+                          >
+                            {/* Course header */}
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-semibold text-navy dark:text-white">{course.title}</span>
+                                {course.timeSlot && (
+                                  <span className="text-xs bg-navy/5 dark:bg-slate-700 px-2 py-0.5 rounded-full font-mono text-navy/60 dark:text-slate-400">
+                                    {course.timeSlot}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Schedule entries */}
+                            {scheduleEntries.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {scheduleEntries.map((entry) => (
+                                  <div
+                                    key={entry.id}
+                                    className="flex items-center gap-1.5 rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs"
+                                  >
+                                    <span className="font-mono text-navy/70 dark:text-slate-300">
+                                      {entry.day} {entry.time}
+                                    </span>
+                                    {entry.room && (
+                                      <span className="text-navy/40 dark:text-slate-500">· {entry.room}</span>
+                                    )}
+                                    <button
+                                      onClick={() => setMovingEntry({ ...entry })}
+                                      className="ml-1 flex items-center gap-1 rounded-lg border border-indigo/30 px-2 py-1 text-xs text-indigo hover:bg-indigo/5"
+                                    >
+                                      <ArrowLeftRight size={13} />
+                                      ย้าย
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Student list */}
+                            {courseRegs.length === 0 ? (
+                              <div className="text-xs text-navy/40 dark:text-slate-500">ยังไม่มีนักเรียนลงทะเบียน</div>
+                            ) : (
+                              <div className="flex flex-wrap gap-2">
+                                {courseRegs.map((r) => {
+                                  const nick = getNickname(r.studentEmail);
+                                  return (
+                                    <div
+                                      key={r.id}
+                                      className="flex items-center gap-2 rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs"
+                                    >
+                                      <div className="font-semibold text-navy dark:text-white">
+                                        {r.firstName} {r.lastName}
+                                        {nick && (
+                                          <span className="ml-1 rounded-full bg-indigo/10 dark:bg-indigo/20 px-1.5 py-0.5 text-[10px] font-medium text-indigo">
+                                            {nick}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <Badge color={r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : 'gold'}>
+                                        {statusLabel[r.status] || statusLabel.pending}
+                                      </Badge>
+                                      <button
+                                        onClick={() => setConfirmRemove({ reg: r, courseName: course.title })}
+                                        className="rounded p-1 text-rose-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30 ml-1"
+                                        title="ลบออกจากคอร์ส"
+                                      >
+                                        <UserMinus size={13} />
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* SemesterEditor modal */}
+      {editing && (
+        <SemesterEditor
+          draft={editing}
+          courses={courses}
+          onChange={setEditing}
+          onClose={() => setEditing(null)}
+          onSave={saveSemester}
+        />
+      )}
+
+      {/* ScheduleEntryEditor modal (move schedule) */}
+      {movingEntry && (
+        <ScheduleEntryEditor
+          draft={movingEntry}
+          courses={courses}
+          onChange={setMovingEntry}
+          onClose={() => setMovingEntry(null)}
+          onSave={saveScheduleEntry}
+        />
+      )}
+
+      {/* Confirm remove student dialog */}
+      {confirmRemove && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-navy/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-800 shadow-2xl p-6">
+            <div className="mb-4">
+              <div className="font-display text-lg font-bold text-navy dark:text-white mb-1">
+                ลบนักเรียนออกจากคอร์ส?
+              </div>
+              <div className="font-semibold text-navy dark:text-slate-200">
+                {confirmRemove.reg.firstName} {confirmRemove.reg.lastName}
+              </div>
+              <div className="text-xs text-navy/50 dark:text-slate-400 mt-1">{confirmRemove.courseName}</div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmRemove(null)}
+                className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:text-white"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={() => removeStudent(confirmRemove.reg.id)}
+                className="rounded-xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600"
+              >
+                ลบออก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────
  * Root App with state-based routing
  * ───────────────────────────────────────────────────────────────────── */
 export default function App() {
@@ -2966,6 +3385,7 @@ export default function App() {
   const [preselectCourse, setPreselectCourse] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
   const [darkMode, setDarkMode] = useState(() => loadLS(LS_KEYS.theme, false));
+  const [semesters, setSemesters] = useState(() => loadLS(LS_KEYS.semesters, defaultSemesters));
 
   useEffect(() => saveLS(LS_KEYS.user, currentUser), [currentUser]);
   useEffect(() => saveLS(LS_KEYS.regs, registrations), [registrations]);
@@ -2973,6 +3393,7 @@ export default function App() {
   useEffect(() => saveLS(LS_KEYS.schedule, schedule), [schedule]);
   useEffect(() => saveLS(LS_KEYS.users, users), [users]);
   useEffect(() => saveLS(LS_KEYS.theme, darkMode), [darkMode]);
+  useEffect(() => saveLS(LS_KEYS.semesters, semesters), [semesters]);
 
   useEffect(() => {
     if (!currentUser && activePage !== 'login') setActivePage('login');
@@ -3091,6 +3512,18 @@ export default function App() {
                   setCurrentUser={setCurrentUser}
                   users={users}
                   setUsers={setUsers}
+                />
+              )}
+              {activePage === 'admin-semesters' && currentUser.role === 'admin' && (
+                <AdminSemestersPage
+                  semesters={semesters}
+                  setSemesters={setSemesters}
+                  registrations={registrations}
+                  setRegistrations={setRegistrations}
+                  courses={courses}
+                  schedule={schedule}
+                  setSchedule={setSchedule}
+                  users={users}
                 />
               )}
             </main>
