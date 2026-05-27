@@ -1265,6 +1265,8 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage, curre
     }
     if (s === 3) {
       if (!form.paymentMethod) e.paymentMethod = 'กรุณาเลือกวิธีชำระเงิน';
+      else if (form.paymentMethod === 'transfer' && !form.paymentSlip)
+        e.paymentSlip = 'กรุณาอัปโหลดสลิปการโอนเงิน';
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -1279,6 +1281,7 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage, curre
       ...form,
       courseId: Number(form.courseId),
       courseTitle: selectedCourse?.title,
+      slipStatus: form.paymentMethod === 'transfer' ? 'pending' : null,
       submittedAt: new Date().toISOString(),
     });
     setShowSuccess(true);
@@ -1505,11 +1508,17 @@ const RegisterPage = ({ courses, preselectCourse, onSubmit, setActivePage, curre
                     <button
                       type="button"
                       onClick={() => slipRef.current?.click()}
-                      className="flex items-center gap-2 rounded-lg border border-dashed border-emerald-400 dark:border-emerald-600 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition"
+                      className={`flex items-center gap-2 rounded-lg border border-dashed bg-white dark:bg-slate-800 px-4 py-3 text-sm transition ${
+                        errors.paymentSlip
+                          ? 'border-rose-400 text-rose-600 dark:text-rose-400'
+                          : 'border-emerald-400 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                      }`}
                     >
                       📎 อัปโหลดสลิปการโอนเงิน
-                      <span className="text-xs text-navy/40 dark:text-slate-500">(ไม่จำเป็น)</span>
                     </button>
+                  )}
+                  {errors.paymentSlip && (
+                    <div className="text-xs font-semibold text-rose-600">{errors.paymentSlip}</div>
                   )}
                 </div>
               )}
@@ -2996,6 +3005,11 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
     });
   };
 
+  const setSlipStatus = (id, slipStatus) => {
+    setRegistrations((rs) => rs.map((r) => (r.id === id ? { ...r, slipStatus } : r)));
+    setSlipModal((m) => (m && m.id === id ? { ...m, slipStatus } : m));
+  };
+
   const saveAdminReg = (draft) => {
     const course = courses.find((c) => c.id === Number(draft.courseId));
     const email = draft.phone
@@ -3062,23 +3076,31 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
 
   const statusColor = { pending: 'gold', approved: 'green', rejected: 'red' };
 
+  const slipBadge = {
+    verified: { color: 'green', label: 'สลิปถูกต้อง ✓' },
+    rejected: { color: 'red', label: 'สลิปไม่ถูกต้อง' },
+    pending: { color: 'gold', label: 'รอตรวจสลิป' },
+  };
+
   const PaymentBadge = ({ r }) => {
     if (!r.paymentMethod) {
       return <Badge color="red">ยังไม่ชำระ</Badge>;
     }
+    const sb = r.paymentMethod === 'transfer' && r.paymentSlip ? slipBadge[r.slipStatus || 'pending'] : null;
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         <Badge color={r.paymentMethod === 'transfer' ? 'green' : 'gold'}>
           {r.paymentMethod === 'transfer' ? 'โอนเงิน' : 'จ่ายสด'}
         </Badge>
         {r.paymentSlip && (
           <button
-            onClick={() => setSlipModal(r.paymentSlip)}
+            onClick={() => setSlipModal(r)}
             className="rounded-md bg-indigo/10 px-2 py-0.5 text-xs font-semibold text-indigo hover:bg-indigo/20 transition"
           >
             ดูสลิป
           </button>
         )}
+        {sb && <Badge color={sb.color}>{sb.label}</Badge>}
       </div>
     );
   };
@@ -3533,7 +3555,26 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
                 <X size={18} />
               </button>
             </div>
-            <img src={slipModal} alt="payment slip" className="w-full rounded-xl object-contain" />
+            <img src={slipModal.paymentSlip} alt="payment slip" className="w-full rounded-xl object-contain" />
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <Badge color={slipBadge[slipModal.slipStatus || 'pending'].color}>
+                {slipBadge[slipModal.slipStatus || 'pending'].label}
+              </Badge>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSlipStatus(slipModal.id, 'rejected')}
+                  className="rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-900/30 dark:border-rose-700 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100"
+                >
+                  ปฏิเสธสลิป
+                </button>
+                <button
+                  onClick={() => setSlipStatus(slipModal.id, 'verified')}
+                  className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/30 dark:border-emerald-700 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
+                >
+                  ยืนยันสลิปถูกต้อง
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
