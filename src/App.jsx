@@ -1701,8 +1701,8 @@ const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
   const valid = draft.courseId && draft.day && draft.time.trim() && draft.room.trim();
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/40 backdrop-blur-sm p-4 pt-16">
+      <div className="w-full max-w-lg flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
         {/* sticky header */}
         <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-navy/10 dark:border-slate-700">
           <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
@@ -1714,7 +1714,7 @@ const ScheduleEntryEditor = ({ draft, courses, onChange, onClose, onSave }) => {
         </div>
 
         {/* scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="max-h-[55vh] overflow-y-auto px-6 py-4 space-y-4">
           <Field label="คอร์ส">
             <select
               className="input"
@@ -2039,8 +2039,8 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-navy/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/40 backdrop-blur-sm p-4 pt-16">
+      <div className="w-full max-w-2xl flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
         {/* sticky header */}
         <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-navy/10 dark:border-slate-700">
           <h3 className="font-display text-2xl font-bold text-navy dark:text-white">
@@ -2051,7 +2051,7 @@ const CourseEditor = ({ draft, allCourses = [], onChange, onClose, onSave }) => 
           </button>
         </div>
         {/* scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="ชื่อคอร์ส">
             <input className="input" value={draft.title} onChange={(e) => upd('title', e.target.value)} />
