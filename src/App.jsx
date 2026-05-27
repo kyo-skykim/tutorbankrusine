@@ -2518,6 +2518,7 @@ const ProfilePage = ({ currentUser, setCurrentUser, users, setUsers }) => {
  * ───────────────────────────────────────────────────────────────────── */
 const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => {
   const adminCount = users.filter((u) => u.role === 'admin').length;
+  const [editing, setEditing] = useState(null);
 
   const promote = (email) => {
     setUsers((us) => us.map((u) => u.email === email ? { ...u, role: 'admin' } : u));
@@ -2533,10 +2534,41 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
     if (currentUser.email === email) setCurrentUser((u) => ({ ...u, role: 'student' }));
   };
 
+  const saveEdit = (draft) => {
+    setUsers((us) => us.map((u) => u.email === draft.email ? {
+      ...u,
+      name: draft.name.trim(),
+      nickname: draft.nickname.trim(),
+      gradeLevel: draft.gradeLevel,
+    } : u));
+    if (currentUser.email === draft.email) {
+      setCurrentUser((u) => ({
+        ...u,
+        name: draft.name.trim(),
+        nickname: draft.nickname.trim(),
+        gradeLevel: draft.gradeLevel,
+      }));
+    }
+    setEditing(null);
+  };
+
+  const deleteUser = (email) => {
+    if (users.find((u) => u.email === email)?.role === 'admin' && adminCount <= 1) {
+      alert('ไม่สามารถลบได้ — ต้องมีผู้ดูแลอย่างน้อย 1 คน');
+      return;
+    }
+    if (email === currentUser.email) {
+      alert('ไม่สามารถลบบัญชีของตัวเองได้');
+      return;
+    }
+    if (!confirm('ต้องการลบบัญชีนี้ใช่ไหม? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+    setUsers((us) => us.filter((u) => u.email !== email));
+  };
+
   return (
     <div className="mx-auto max-w-5xl animate-fade-in px-6 py-10">
       <h1 className="font-display text-4xl font-bold text-navy dark:text-white">จัดการบัญชีผู้ใช้</h1>
-      <p className="mt-1 text-navy/60 dark:text-slate-400">เลื่อนตำแหน่งหรือลดตำแหน่งบัญชีสมาชิกในระบบ</p>
+      <p className="mt-1 text-navy/60 dark:text-slate-400">แก้ไขข้อมูล เลื่อนตำแหน่ง หรือลบบัญชีสมาชิกในระบบ</p>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
         {users.length === 0 ? (
@@ -2564,6 +2596,11 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
                   <tr key={u.email} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
                     <td className="px-4 py-3 font-semibold text-navy dark:text-white">
                       {u.name}
+                      {u.nickname && (
+                        <span className="ml-1.5 rounded-full bg-indigo/10 dark:bg-indigo/20 px-1.5 py-0.5 text-[10px] font-medium text-indigo">
+                          {u.nickname}
+                        </span>
+                      )}
                       {isMe && (
                         <span className="ml-2 text-[11px] font-normal text-navy/40 dark:text-slate-500">(คุณ)</span>
                       )}
@@ -2581,22 +2618,39 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
                           })
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      {isAdmin ? (
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-1">
                         <button
-                          onClick={() => demote(u.email)}
-                          className="rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1 text-xs font-semibold text-navy/70 dark:text-slate-300 hover:border-rose-300 hover:text-rose-600"
+                          onClick={() => setEditing({ email: u.email, name: u.name || '', nickname: u.nickname || '', gradeLevel: u.gradeLevel || '' })}
+                          className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-indigo hover:text-indigo"
+                          title="แก้ไขข้อมูล"
                         >
-                          ลดเป็นนักเรียน
+                          <Pencil size={14} />
                         </button>
-                      ) : (
+                        {isAdmin ? (
+                          <button
+                            onClick={() => demote(u.email)}
+                            className="rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1 text-xs font-semibold text-navy/70 dark:text-slate-300 hover:border-rose-300 hover:text-rose-600"
+                          >
+                            ลดเป็นนักเรียน
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => promote(u.email)}
+                            className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-gold/20"
+                          >
+                            🛡 เลื่อนเป็น Admin
+                          </button>
+                        )}
                         <button
-                          onClick={() => promote(u.email)}
-                          className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-gold/20"
+                          onClick={() => deleteUser(u.email)}
+                          className="rounded-lg border border-navy/10 dark:border-slate-600 p-1.5 text-navy/70 dark:text-slate-400 hover:border-rose-300 hover:text-rose-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="ลบบัญชี"
+                          disabled={isMe}
                         >
-                          🛡 เลื่อนเป็น Admin
+                          <Trash2 size={14} />
                         </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -2609,6 +2663,51 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
       <div className="mt-4 rounded-xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 dark:border-indigo/20 px-4 py-3 text-sm text-navy/70 dark:text-slate-300">
         💡 บัญชีทดสอบ <span className="font-mono">admin@math.com</span> และ <span className="font-mono">student@math.com</span> ไม่ปรากฏในรายการนี้ — จัดการได้เฉพาะบัญชีที่สมัครผ่านหน้าเว็บ
       </div>
+
+      {/* Edit user modal */}
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/40 backdrop-blur-sm p-4 pt-16">
+          <div className="w-full max-w-md flex flex-col rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+            <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-navy/10 dark:border-slate-700">
+              <h3 className="font-display text-2xl font-bold text-navy dark:text-white">แก้ไขข้อมูลสมาชิก</h3>
+              <button onClick={() => setEditing(null)} className="rounded-lg p-1.5 text-navy/60 dark:text-slate-400 hover:bg-navy/5 dark:hover:bg-slate-700">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto px-6 py-4 space-y-4">
+              <Field label="อีเมล (แก้ไขไม่ได้)">
+                <input className="input font-mono opacity-60 cursor-not-allowed" value={editing.email} disabled />
+              </Field>
+              <Field label="ชื่อ-นามสกุล">
+                <input className="input" value={editing.name} onChange={(e) => setEditing(d => ({...d, name: e.target.value}))} />
+              </Field>
+              <Field label="ชื่อเล่น">
+                <input className="input" placeholder="เช่น ต้นน้ำ" value={editing.nickname} onChange={(e) => setEditing(d => ({...d, nickname: e.target.value}))} />
+              </Field>
+              <Field label="ระดับชั้น">
+                <select className="input" value={editing.gradeLevel} onChange={(e) => setEditing(d => ({...d, gradeLevel: e.target.value}))}>
+                  <option value="">— ไม่ระบุ —</option>
+                  {GRADE_LEVELS.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+            <div className="flex-shrink-0 flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-navy/10 dark:border-slate-700">
+              <button onClick={() => setEditing(null)} className="rounded-xl border border-navy/10 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-navy/70 dark:text-slate-300 hover:border-navy hover:text-navy dark:hover:text-white">
+                ยกเลิก
+              </button>
+              <button
+                onClick={() => saveEdit(editing)}
+                disabled={!editing.name.trim()}
+                className="rounded-xl bg-navy px-5 py-2 text-sm font-semibold text-white hover:bg-indigo disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                บันทึก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
