@@ -3040,6 +3040,8 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
     [courses, byCourse],
   );
 
+  const regTime = (r) => (r.submittedAt ? new Date(r.submittedAt).getTime() : 0) || r.id || 0;
+
   const matchesPayment = (r) => {
     if (paymentFilter === 'all') return true;
     if (paymentFilter === 'transfer') return r.paymentMethod === 'transfer';
@@ -3050,10 +3052,12 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
 
   const filteredRegsFor = (courseId) => {
     const regs = byCourse[courseId] || [];
-    return regs.filter((r) => {
-      const statusOk = statusFilter === 'all' || r.status === statusFilter;
-      return statusOk && matchesPayment(r);
-    });
+    return regs
+      .filter((r) => {
+        const statusOk = statusFilter === 'all' || r.status === statusFilter;
+        return statusOk && matchesPayment(r);
+      })
+      .sort((a, b) => regTime(b) - regTime(a));
   };
 
   const statusColor = { pending: 'gold', approved: 'green', rejected: 'red' };
@@ -3096,14 +3100,16 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
     </div>
   );
 
-  const filteredFlat = registrations.filter((r) => {
-    const statusOk = statusFilter === 'all' || r.status === statusFilter;
-    const searchOk = search.trim() === '' ||
-      `${r.firstName} ${r.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-      r.phone?.includes(search) ||
-      r.studentEmail?.toLowerCase().includes(search.toLowerCase());
-    return statusOk && matchesPayment(r) && searchOk;
-  });
+  const filteredFlat = registrations
+    .filter((r) => {
+      const statusOk = statusFilter === 'all' || r.status === statusFilter;
+      const searchOk = search.trim() === '' ||
+        `${r.firstName} ${r.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+        r.phone?.includes(search) ||
+        r.studentEmail?.toLowerCase().includes(search.toLowerCase());
+      return statusOk && matchesPayment(r) && searchOk;
+    })
+    .sort((a, b) => regTime(b) - regTime(a));
 
   const bulkApprove = () => {
     const toNotify = registrations.filter((r) => selected.has(r.id));
@@ -3182,10 +3188,10 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-navy/50 dark:text-slate-500">สถานะ:</span>
           {[
-            { key: 'all',      label: 'ทั้งหมด' },
-            { key: 'approved', label: 'อนุมัติแล้ว' },
             { key: 'pending',  label: 'รอดำเนินการ' },
+            { key: 'approved', label: 'อนุมัติแล้ว' },
             { key: 'rejected', label: 'ปฏิเสธ' },
+            { key: 'all',      label: 'ทั้งหมด' },
           ].map((f) => (
             <button
               key={f.key}
@@ -3203,10 +3209,10 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-navy/50 dark:text-slate-500">การชำระ:</span>
           {[
-            { key: 'all',      label: 'ทั้งหมด' },
             { key: 'transfer', label: 'โอนเงิน' },
             { key: 'cash',     label: 'จ่ายสด' },
             { key: 'none',     label: 'ยังไม่ชำระ' },
+            { key: 'all',      label: 'ทั้งหมด' },
           ].map((f) => (
             <button
               key={f.key}
