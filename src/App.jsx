@@ -770,26 +770,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
                 </button>
               </form>
 
-              {mode === 'login' ? (
-                <div className="mt-6 rounded-xl border border-dashed border-indigo/30 bg-indigo/5 dark:bg-indigo/10 p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="text-xs font-bold uppercase tracking-wider text-indigo">
-                      บัญชีทดสอบ
-                    </div>
-                    <button
-                      type="button"
-                      onClick={fillDemo}
-                      className="text-xs font-semibold text-indigo hover:underline"
-                    >
-                      กรอกอัตโนมัติ
-                    </button>
-                  </div>
-                  <ul className="space-y-1 font-mono text-xs text-navy/70 dark:text-slate-400">
-                    <li>👤 student@math.com / 1234</li>
-                    <li>🛡 admin@math.com / admin</li>
-                  </ul>
-                </div>
-              ) : (
+              {mode !== 'login' && (
                 <p className="mt-6 text-center text-xs text-navy/50 dark:text-slate-500">
                   เมื่อสมัครสมาชิก คุณยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัวของ บ้านครูทราย
                 </p>
