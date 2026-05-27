@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useCloudState, fetchRow } from './cloud';
 import {
   Sigma,
   Shield,
@@ -621,7 +622,7 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
 /* ─────────────────────────────────────────────────────────────────────
  * Login Page
  * ───────────────────────────────────────────────────────────────────── */
-const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
+const LoginPage = ({ onLogin, darkMode, toggleDark, users = [], setUsers }) => {
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -674,8 +675,13 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
           return;
         }
 
-        const users = loadLS(LS_KEYS.users, []);
-        if (users.find((u) => u.email === cleanEmail)) {
+        // Use the freshest account list from the cloud to guard against dups.
+        let existing = users;
+        try {
+          const fresh = await fetchRow(LS_KEYS.users);
+          if (Array.isArray(fresh)) existing = fresh;
+        } catch {}
+        if (existing.find((u) => u.email === cleanEmail)) {
           setError('อีเมลนี้ถูกใช้แล้ว กรุณาเข้าสู่ระบบหรือใช้อีเมลอื่น');
           return;
         }
@@ -692,14 +698,19 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
           role: 'student',
           createdAt: Date.now(),
         };
-        saveLS(LS_KEYS.users, [...users, newUser]);
+        setUsers((prev) => [...prev, newUser]);
         onLogin({ role: 'student', email: cleanEmail, name: newUser.name });
         return;
       }
 
-      // Login flow — registered users first, then demo accounts
-      const users = loadLS(LS_KEYS.users, []);
-      const found = users.find((u) => u.email === cleanEmail);
+      // Login flow — registered users first, then demo accounts.
+      // Refetch from the cloud so accounts created on other devices work here.
+      let accountList = users;
+      try {
+        const fresh = await fetchRow(LS_KEYS.users);
+        if (Array.isArray(fresh)) accountList = fresh;
+      } catch {}
+      const found = accountList.find((u) => u.email === cleanEmail);
       if (found) {
         const passwordHash = await hashPassword(password);
         if (passwordHash === found.passwordHash) {
@@ -4018,10 +4029,10 @@ const AdminSemestersPage = ({ semesters, setSemesters, registrations, setRegistr
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => loadLS(LS_KEYS.user, null));
   const [activePage, setActivePage] = useState(currentUser ? (currentUser.role === 'admin' ? 'admin-dashboard' : 'courses') : 'login');
-  const [courses, setCourses] = useState(() => loadLS(LS_KEYS.courses, mockCourses));
-  const [registrations, setRegistrations] = useState(() => loadLS(LS_KEYS.regs, mockRegistrations));
-  const [schedule, setSchedule] = useState(() => loadLS(LS_KEYS.schedule, defaultSchedule));
-  const [users, setUsers] = useState(() => loadLS(LS_KEYS.users, []));
+  const [courses, setCourses] = useCloudState(LS_KEYS.courses, mockCourses);
+  const [registrations, setRegistrations] = useCloudState(LS_KEYS.regs, mockRegistrations);
+  const [schedule, setSchedule] = useCloudState(LS_KEYS.schedule, defaultSchedule);
+  const [users, setUsers] = useCloudState(LS_KEYS.users, []);
   const [preselectCourse, setPreselectCourse] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
@@ -4029,18 +4040,15 @@ export default function App() {
     if (saved !== null) return JSON.parse(saved);
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
   });
-  const [semesters, setSemesters] = useState(() => loadLS(LS_KEYS.semesters, defaultSemesters));
-  const [notifications, setNotifications] = useState(() => loadLS(LS_KEYS.notifs, []));
+  const [semesters, setSemesters] = useCloudState(LS_KEYS.semesters, defaultSemesters);
+  const [notifications, setNotifications] = useCloudState(LS_KEYS.notifs, []);
   const [previewMode, setPreviewMode] = useState(false);
 
+  // currentUser (session) and darkMode (device preference) stay local per device.
+  // Shared data (courses/registrations/schedule/users/semesters/notifications)
+  // is persisted + synced across devices by useCloudState.
   useEffect(() => saveLS(LS_KEYS.user, currentUser), [currentUser]);
-  useEffect(() => saveLS(LS_KEYS.regs, registrations), [registrations]);
-  useEffect(() => saveLS(LS_KEYS.courses, courses), [courses]);
-  useEffect(() => saveLS(LS_KEYS.schedule, schedule), [schedule]);
-  useEffect(() => saveLS(LS_KEYS.users, users), [users]);
   useEffect(() => saveLS(LS_KEYS.theme, darkMode), [darkMode]);
-  useEffect(() => saveLS(LS_KEYS.semesters, semesters), [semesters]);
-  useEffect(() => saveLS(LS_KEYS.notifs, notifications), [notifications]);
 
   const addNotif = (notif) =>
     setNotifications((ns) => [...ns, { id: Date.now() + Math.random(), createdAt: new Date().toISOString(), read: false, ...notif }]);
@@ -4093,7 +4101,7 @@ export default function App() {
   return (
     <div className={darkMode ? 'dark' : ''}>
       {!currentUser ? (
-        <LoginPage onLogin={handleLogin} darkMode={darkMode} toggleDark={toggleDark} />
+        <LoginPage onLogin={handleLogin} darkMode={darkMode} toggleDark={toggleDark} users={users} setUsers={setUsers} />
       ) : (
         <div className="min-h-screen bg-offwhite dark:bg-slate-900">
           {/* First-login profile setup prompt */}
