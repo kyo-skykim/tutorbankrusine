@@ -30,6 +30,8 @@ import {
   ArrowLeftRight,
   UserMinus,
   ChevronDown,
+  Phone,
+  Facebook,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -781,40 +783,41 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
 const HeroBanner = () => (
   <section className="relative overflow-hidden">
     <div className="graph-paper-dark relative">
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid items-center gap-10 md:grid-cols-2">
-          <div className="animate-fade-in">
-            <Badge color="gold">★ การศึกษาระดับพรีเมียม</Badge>
-            <h1 className="mt-4 font-display text-5xl font-bold leading-tight text-white">
-              เชี่ยวชาญ <span className="text-gold italic">ภาษา</span>
-              <br />
-              แห่งจักรวาล
-            </h1>
-            <p className="mt-4 max-w-lg text-white/70">
-              คอร์สที่คัดสรรมาเป็นพิเศษ สอนโดยนักคณิตศาสตร์ที่ดีที่สุดในประเทศ
-              เลือกระดับที่เหมาะกับคุณ จองเวลาเรียน และเริ่มต้นการเดินทางวันนี้
-            </p>
-            <div className="mt-6 inline-block rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-mono text-lg text-gold animate-equation">
-              f(x) = ax² + bx + c
-            </div>
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="animate-fade-in flex flex-col items-center text-center">
+          {/* Cover image */}
+          <div className="w-full overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+            <img
+              src="/cover.jpg"
+              alt="บ้านครูทราย — คุณครูของเรา"
+              className="w-full object-cover"
+            />
           </div>
-          <div className="relative hidden md:block">
-            <div className="absolute inset-0 grid grid-cols-3 gap-3 opacity-70">
-              {['∑', '∫', 'π', '√', '∞', '∂', 'θ', 'λ', 'Δ'].map((s, i) => (
-                <div
-                  key={i}
-                  className="grid aspect-square place-items-center rounded-2xl border border-white/10 bg-white/[0.03] font-display text-4xl text-white/80 animate-float-y"
-                  style={{ animationDelay: `${(i % 5) * 0.5}s` }}
-                >
-                  {s}
-                </div>
-              ))}
-            </div>
-            <div className="invisible grid grid-cols-3 gap-3">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="aspect-square" />
-              ))}
-            </div>
+
+          {/* Quote */}
+          <p className="mt-8 max-w-3xl text-lg leading-relaxed text-white/80 md:text-xl">
+            คอร์สคุณภาพ สอนโดยทีมครูผู้เชี่ยวชาญ เลือกระดับที่เหมาะกับคุณ
+            จองเวลาเรียน แล้วมาเริ่มต้นพัฒนาทักษะไปด้วยกันวันนี้
+          </p>
+
+          {/* Contact info */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="tel:0632292822"
+              className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-white transition hover:bg-white/10"
+            >
+              <Phone size={18} className="text-gold" />
+              <span className="font-mono text-base">063 229 2822</span>
+            </a>
+            <a
+              href="https://www.facebook.com/bankrusine"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-white transition hover:bg-white/10"
+            >
+              <Facebook size={18} className="text-gold" />
+              <span className="text-base">bankrusine</span>
+            </a>
           </div>
         </div>
       </div>
@@ -3582,10 +3585,25 @@ export default function App() {
           )}
 
           <footer className="mt-16 border-t border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-900">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-xs text-navy/50 dark:text-slate-500">
+            <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-6 text-xs text-navy/50 dark:text-slate-500">
               <div className="flex items-center gap-2">
                 <Sigma size={14} className="text-indigo" />
                 <span className="font-display text-sm font-bold text-navy dark:text-white">บ้านครูทราย</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-4">
+                <a href="tel:0632292822" className="flex items-center gap-1.5 transition hover:text-indigo">
+                  <Phone size={13} />
+                  <span className="font-mono">063 229 2822</span>
+                </a>
+                <a
+                  href="https://www.facebook.com/bankrusine"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 transition hover:text-indigo"
+                >
+                  <Facebook size={13} />
+                  <span>bankrusine</span>
+                </a>
               </div>
               <div className="font-mono">© {new Date().getFullYear()} — แก้สมการสู่ความชัดเจน</div>
             </div>
