@@ -2520,6 +2520,12 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
   const adminCount = users.filter((u) => u.role === 'admin').length;
   const [editing, setEditing] = useState(null);
 
+  const demoAccounts = [
+    { email: DEMO.admin.email,   name: 'ผู้ดูแลระบบ (Demo)', role: 'admin',   _isDemo: true },
+    { email: DEMO.student.email, name: 'นักเรียน (Demo)',    role: 'student', _isDemo: true },
+  ];
+  const allUsers = [...demoAccounts, ...users];
+
   const promote = (email) => {
     setUsers((us) => us.map((u) => u.email === email ? { ...u, role: 'admin' } : u));
     if (currentUser.email === email) setCurrentUser((u) => ({ ...u, role: 'admin' }));
@@ -2571,54 +2577,56 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
       <p className="mt-1 text-navy/60 dark:text-slate-400">แก้ไขข้อมูล เลื่อนตำแหน่ง หรือลบบัญชีสมาชิกในระบบ</p>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-        {users.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="font-mono text-5xl text-navy/30 dark:text-slate-600">∅</div>
-            <div className="mt-3 font-display text-2xl text-navy dark:text-white">ยังไม่มีสมาชิกในระบบ</div>
-            <div className="mt-1 text-sm text-navy/50 dark:text-slate-500">เมื่อมีผู้สมัครสมาชิกจะปรากฏที่นี่</div>
-          </div>
-        ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
-              <tr>
-                <th className="px-4 py-3 font-semibold">ชื่อ-นามสกุล</th>
-                <th className="px-4 py-3 font-semibold">อีเมล</th>
-                <th className="px-4 py-3 font-semibold">บทบาท</th>
-                <th className="px-4 py-3 font-semibold">วันที่สมัคร</th>
-                <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
-              {users.map((u) => {
-                const isMe = u.email === currentUser.email;
-                const isAdmin = u.role === 'admin';
-                return (
-                  <tr key={u.email} className="hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30">
-                    <td className="px-4 py-3 font-semibold text-navy dark:text-white">
-                      {u.name}
-                      {u.nickname && (
-                        <span className="ml-1.5 rounded-full bg-indigo/10 dark:bg-indigo/20 px-1.5 py-0.5 text-[10px] font-medium text-indigo">
-                          {u.nickname}
-                        </span>
-                      )}
-                      {isMe && (
-                        <span className="ml-2 text-[11px] font-normal text-navy/40 dark:text-slate-500">(คุณ)</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <Badge color={isAdmin ? 'gold' : 'indigo'}>
-                        {isAdmin ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-navy/50 dark:text-slate-500">
-                      {u.createdAt
-                        ? new Date(u.createdAt).toLocaleDateString('th-TH', {
-                            day: 'numeric', month: 'short', year: 'numeric',
-                          })
-                        : '—'}
-                    </td>
-                    <td className="px-4 py-3">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-navy/[0.03] dark:bg-slate-700/50 text-navy/60 dark:text-slate-400">
+            <tr>
+              <th className="px-4 py-3 font-semibold">ชื่อ-นามสกุล</th>
+              <th className="px-4 py-3 font-semibold">อีเมล</th>
+              <th className="px-4 py-3 font-semibold">บทบาท</th>
+              <th className="px-4 py-3 font-semibold">วันที่สมัคร</th>
+              <th className="px-4 py-3 font-semibold text-right">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-navy/5 dark:divide-slate-700">
+            {allUsers.map((u) => {
+              const isMe = u.email === currentUser.email;
+              const isAdmin = u.role === 'admin';
+              const isDemo = u._isDemo === true;
+              return (
+                <tr key={u.email} className={`hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30 ${isDemo ? 'opacity-70' : ''}`}>
+                  <td className="px-4 py-3 font-semibold text-navy dark:text-white">
+                    {u.name}
+                    {u.nickname && (
+                      <span className="ml-1.5 rounded-full bg-indigo/10 dark:bg-indigo/20 px-1.5 py-0.5 text-[10px] font-medium text-indigo">
+                        {u.nickname}
+                      </span>
+                    )}
+                    {isDemo && (
+                      <span className="ml-2 rounded-full bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">demo</span>
+                    )}
+                    {isMe && (
+                      <span className="ml-2 text-[11px] font-normal text-navy/40 dark:text-slate-500">(คุณ)</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-navy/70 dark:text-slate-400">{u.email}</td>
+                  <td className="px-4 py-3">
+                    <Badge color={isAdmin ? 'gold' : 'indigo'}>
+                      {isAdmin ? '🛡 ผู้ดูแล' : '🎓 นักเรียน'}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-navy/50 dark:text-slate-500">
+                    {isDemo ? 'บัญชีระบบ' : u.createdAt
+                      ? new Date(u.createdAt).toLocaleDateString('th-TH', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                        })
+                      : '—'}
+                  </td>
+                  <td className="px-4 py-3">
+                    {isDemo ? (
+                      <div className="flex justify-end">
+                        <span className="text-xs text-navy/30 dark:text-slate-600 italic">แก้ไขไม่ได้</span>
+                      </div>
+                    ) : (
                       <div className="flex justify-end gap-1">
                         <button
                           onClick={() => setEditing({ email: u.email, name: u.name || '', nickname: u.nickname || '', gradeLevel: u.gradeLevel || '' })}
@@ -2651,17 +2659,17 @@ const AdminAccountsPage = ({ users, setUsers, currentUser, setCurrentUser }) => 
                           <Trash2 size={14} />
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       <div className="mt-4 rounded-xl border border-indigo/20 bg-indigo/5 dark:bg-indigo/10 dark:border-indigo/20 px-4 py-3 text-sm text-navy/70 dark:text-slate-300">
-        💡 บัญชีทดสอบ <span className="font-mono">admin@math.com</span> และ <span className="font-mono">student@math.com</span> ไม่ปรากฏในรายการนี้ — จัดการได้เฉพาะบัญชีที่สมัครผ่านหน้าเว็บ
+        💡 บัญชีที่มีป้าย <span className="rounded-full bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">demo</span> คือบัญชีระบบในตัว ไม่สามารถแก้ไขหรือลบได้
       </div>
 
       {/* Edit user modal */}
