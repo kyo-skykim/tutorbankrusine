@@ -592,7 +592,6 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
  * ───────────────────────────────────────────────────────────────────── */
 const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
-  const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -687,25 +686,20 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
         return;
       }
 
-      const expected = DEMO[role];
-      if (cleanEmail === expected.email && password === expected.password) {
-        onLogin({
-          role,
-          email: expected.email,
-          name: role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียนทดสอบ',
-        });
-        return;
+      for (const [demoRole, d] of Object.entries(DEMO)) {
+        if (cleanEmail === d.email && password === d.password) {
+          onLogin({
+            role: demoRole,
+            email: d.email,
+            name: demoRole === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียนทดสอบ',
+          });
+          return;
+        }
       }
       setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const fillDemo = () => {
-    const d = DEMO[role];
-    setEmail(d.email);
-    setPassword(d.password);
   };
 
   return (
@@ -780,26 +774,6 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
                 </div>
               </div>
 
-              {/* Role toggle — login mode only */}
-              {mode === 'login' && (
-                <div className="mb-5 flex rounded-xl border border-navy/10 dark:border-slate-600 bg-navy/5 dark:bg-slate-700/50 p-1">
-                  {['student', 'admin'].map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setRole(r)}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-                        role === r
-                          ? 'bg-navy text-white shadow'
-                          : 'text-navy/60 hover:text-navy dark:text-slate-400 dark:hover:text-white'
-                      }`}
-                    >
-                      {r === 'admin' ? <Shield size={16} /> : <GraduationCap size={16} />}
-                      {r === 'admin' ? 'ผู้ดูแล' : 'นักเรียน'}
-                    </button>
-                  ))}
-                </div>
-              )}
 
               <form onSubmit={submit} className="space-y-4">
                 {mode === 'signup' && (
@@ -900,7 +874,7 @@ const LoginPage = ({ onLogin, darkMode, toggleDark }) => {
                     'กำลังดำเนินการ...'
                   ) : mode === 'login' ? (
                     <>
-                      เข้าสู่ระบบในฐานะ{role === 'admin' ? 'ผู้ดูแล' : 'นักเรียน'}
+                      เข้าสู่ระบบ
                       <ChevronRight size={18} className="transition group-hover:translate-x-0.5" />
                     </>
                   ) : (
@@ -3878,7 +3852,11 @@ export default function App() {
   const [users, setUsers] = useState(() => loadLS(LS_KEYS.users, []));
   const [preselectCourse, setPreselectCourse] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => loadLS(LS_KEYS.theme, false));
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem(LS_KEYS.theme);
+    if (saved !== null) return JSON.parse(saved);
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+  });
   const [semesters, setSemesters] = useState(() => loadLS(LS_KEYS.semesters, defaultSemesters));
   const [notifications, setNotifications] = useState(() => loadLS(LS_KEYS.notifs, []));
   const [previewMode, setPreviewMode] = useState(false);
