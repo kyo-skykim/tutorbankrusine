@@ -527,8 +527,8 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
             currentUserEmail={currentUser?.email}
           />
 
-          {/* User menu */}
-          <div className="relative" ref={userMenuRef}>
+          {/* User menu (desktop) */}
+          <div className="relative hidden md:block" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen((o) => !o)}
               className={`flex items-center gap-2 rounded-lg px-2 py-1 transition hover:bg-navy/5 dark:hover:bg-slate-700 ${userMenuOpen ? 'bg-navy/5 dark:bg-slate-700' : ''}`}
@@ -596,9 +596,28 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
         </div>
       </div>
 
-      {/* Mobile nav panel */}
+      {/* Mobile menu panel — nav + profile + logout in one place */}
       {mobileOpen && (
         <nav className="border-t border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 md:hidden">
+          {/* User info */}
+          <div className="flex items-center gap-2.5 px-3 py-3">
+            {currentUser?.avatar ? (
+              <img src={currentUser.avatar} alt="avatar" className="h-9 w-9 rounded-full border border-indigo/20 object-cover" />
+            ) : (
+              <span className={`grid h-9 w-9 place-items-center rounded-full text-sm font-bold ${isAdmin ? 'bg-gold text-navy' : 'bg-indigo/10 text-indigo dark:bg-indigo/20'}`}>
+                {initials}
+              </span>
+            )}
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-navy dark:text-white">{currentUser?.name || displayName}</div>
+              <div className="flex items-center gap-1 text-[11px] text-navy/50 dark:text-slate-400">
+                {isAdmin ? <><Shield size={10} className="text-gold" fill="#FBBF24" /> ผู้ดูแลระบบ</> : <><GraduationCap size={10} /> นักเรียน</>}
+              </div>
+            </div>
+          </div>
+          <div className="my-1 border-t border-navy/8 dark:border-slate-700" />
+
+          {/* Nav items */}
           {menu.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -613,6 +632,16 @@ const Navbar = ({ currentUser, activePage, setActivePage, onLogout, darkMode, to
               {label}
             </button>
           ))}
+
+          <div className="my-1 border-t border-navy/8 dark:border-slate-700" />
+
+          {/* Logout */}
+          <button
+            onClick={() => { onLogout(); setMobileOpen(false); }}
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition"
+          >
+            <LogOut size={16} /> ออกจากระบบ
+          </button>
         </nav>
       )}
     </header>
