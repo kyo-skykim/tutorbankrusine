@@ -2307,8 +2307,9 @@ const AdminDashboard = ({ courses, setCourses, registrations, users = [], onRese
               <li>บัญชีนักเรียนทั้งหมด → ลบออก</li>
               <li>การลงทะเบียนและใบสมัครทั้งหมด → ลบออก</li>
               <li>การแจ้งเตือนทั้งหมด → ลบออก</li>
-              <li>คอร์ส, ตารางสอน, ภาคเรียน → คืนค่าเริ่มต้น</li>
+              <li>ภาคเรียนทั้งหมด → ลบออก</li>
             </ul>
+            <div className="mt-2 text-xs text-navy/50 dark:text-slate-400">คอร์สและตารางสอน ยังคงอยู่ครบถ้วน</div>
             <div className="mt-5 flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmReset(false)}
@@ -4177,12 +4178,10 @@ export default function App() {
   };
 
   const handleResetData = () => {
-    setCourses(mockCourses);
-    setSchedule(defaultSchedule);
-    setSemesters(defaultSemesters);
     setRegistrations([]);
     setUsers([]);
     setNotifications([]);
+    setSemesters([]);
   };
 
   const isStudentView = currentUser?.role !== 'admin' || previewMode;
