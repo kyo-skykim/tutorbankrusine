@@ -39,6 +39,7 @@ import {
   CheckCheck,
   Menu,
   HelpCircle,
+  Download,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -3107,6 +3108,57 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
   const [selected, setSelected] = useState(new Set());
   const [addingReg, setAddingReg] = useState(null);
 
+  // ── CSV export ─────────────────────────────────────────────────────────
+  const statusThai = { approved: 'อนุมัติแล้ว', pending: 'รอดำเนินการ', rejected: 'ปฏิเสธ' };
+  const payThai = (r) =>
+    !r.paymentMethod ? 'ยังไม่ชำระ' : r.paymentMethod === 'transfer' ? 'โอนเงิน' : 'จ่ายสด';
+  const slipThai = (r) => {
+    if (r.paymentMethod !== 'transfer' || !r.paymentSlip) return '';
+    if (r.slipStatus === 'verified') return 'สลิปถูกต้อง';
+    if (r.slipStatus === 'rejected') return 'สลิปไม่ถูกต้อง';
+    return 'รอตรวจสลิป';
+  };
+  const csvCell = (v) => {
+    const s = v == null ? '' : String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const downloadCSV = (filename, rows) => {
+    const headers = ['ลำดับ', 'ชื่อ', 'นามสกุล', 'ชื่อเล่น', 'เบอร์โทร', 'อีเมล', 'ระดับชั้น', 'คอร์ส', 'วันที่สมัคร', 'วิธีชำระเงิน', 'สถานะสลิป', 'สถานะ'];
+    const body = rows.map((r, i) => [
+      i + 1,
+      r.firstName,
+      r.lastName,
+      getNickname(r.studentEmail),
+      r.phone,
+      r.studentEmail,
+      r.level,
+      getCourseTitle(r),
+      r.submittedAt ? new Date(r.submittedAt).toLocaleString('th-TH') : '',
+      payThai(r),
+      slipThai(r),
+      statusThai[r.status] || r.status,
+    ].map(csvCell).join(','));
+    // Prefix with UTF-8 BOM so Excel opens Thai correctly.
+    const csv = '﻿' + [headers.map(csvCell).join(','), ...body].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  const exportCourseCSV = (course) => {
+    const regs = (byCourse[course.id] || []).slice().sort((a, b) => regTime(b) - regTime(a));
+    const safe = (course.title || `course-${course.id}`).replace(/[\\/:*?"<>|]/g, '_').slice(0, 80);
+    downloadCSV(`registrations-${safe}.csv`, regs);
+  };
+  const exportAllCSV = () => {
+    downloadCSV(`registrations-all-${new Date().toISOString().slice(0, 10)}.csv`, filteredFlat);
+  };
+
   const getNickname = (email) => users.find((u) => u.email === email)?.nickname || '';
 
   const getCourseTitle = (r) =>
@@ -3291,12 +3343,22 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-navy dark:text-white">ผู้ลงทะเบียน</h1>
           <p className="mt-1 text-navy/60 dark:text-slate-400">ตรวจสอบและอนุมัติการลงทะเบียน</p>
         </div>
-        <button
-          onClick={() => setAddingReg({ ...emptyAdminReg })}
-          className="flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-navy shadow hover:bg-amber-300"
-        >
-          <Plus size={16} /> เพิ่มนักเรียน (admin)
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={exportAllCSV}
+            disabled={filteredFlat.length === 0}
+            className="flex items-center gap-2 rounded-xl border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-navy dark:text-slate-200 hover:bg-navy/5 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            title="ดาวน์โหลด CSV รายการตามตัวกรอง"
+          >
+            <Download size={16} /> ดาวน์โหลด CSV
+          </button>
+          <button
+            onClick={() => setAddingReg({ ...emptyAdminReg })}
+            className="flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-navy shadow hover:bg-amber-300"
+          >
+            <Plus size={16} /> เพิ่มนักเรียน (admin)
+          </button>
+        </div>
       </div>
 
       {/* Search bar */}
@@ -3496,34 +3558,45 @@ const AdminUsersPage = ({ registrations, courses, setRegistrations, users = [], 
               return (
                 <div key={course.id} className="overflow-hidden rounded-2xl border border-navy/10 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
                   {/* Course header — click to expand */}
-                  <button
+                  <div
                     onClick={() => setExpandedCourseId(isExpanded ? null : course.id)}
-                    className="flex w-full items-center justify-between px-6 py-4 transition hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpandedCourseId(isExpanded ? null : course.id); }}
+                    className="flex w-full cursor-pointer items-center justify-between gap-3 px-6 py-4 transition hover:bg-indigo/[0.03] dark:hover:bg-slate-700/30"
                   >
-                    <div className="flex items-center gap-4 text-left">
+                    <div className="flex min-w-0 items-center gap-4 text-left">
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-navy/5 dark:bg-slate-700">
                         <GraduationCap size={20} className="text-indigo" />
                       </div>
-                      <div>
-                        <div className="font-semibold text-navy dark:text-white">{course.title}</div>
+                      <div className="min-w-0">
+                        <div className="truncate font-semibold text-navy dark:text-white">{course.title}</div>
                         <div className="mt-0.5 text-xs text-navy/50 dark:text-slate-400">
                           {course.level} · {course.teacher}
                           {course.timeSlot && <span className="ml-2 font-mono">{course.timeSlot}</span>}
                         </div>
                       </div>
                     </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                      <div className="hidden sm:flex items-center gap-2">
                         <Badge color="green">{approvedCount} อนุมัติ</Badge>
                         {pendingCount > 0 && <Badge color="gold">{pendingCount} รอ</Badge>}
                         <Badge color="navy">{allRegs.length} คน</Badge>
                       </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); exportCourseCSV(course); }}
+                        disabled={allRegs.length === 0}
+                        title="ดาวน์โหลด CSV ของคอร์สนี้"
+                        className="flex items-center gap-1.5 rounded-lg border border-navy/10 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-navy dark:text-slate-200 hover:bg-navy/5 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                      >
+                        <Download size={13} /> CSV
+                      </button>
                       <ChevronRight
                         size={18}
                         className={`text-navy/40 dark:text-slate-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                       />
                     </div>
-                  </button>
+                  </div>
 
                   {/* Expanded student list */}
                   {isExpanded && (
